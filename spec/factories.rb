@@ -83,7 +83,7 @@ Factory.define :activity do |a|
   a.subject             { raise "Please specify :subject for the activity" }
   a.action              nil
   a.info                nil
-  a.private             false
+  a.sub_rosa             false
   a.updated_at          { Factory.next(:time) }
   a.created_at          { Factory.next(:time) }
 end
@@ -143,7 +143,7 @@ Factory.define :comment do |c|
   c.user                { |a| a.association(:user) }
   c.commentable         { raise "Please specify :commentable for the comment" }
   c.title               { Factory.next(:title) }
-  c.private             false
+  c.sub_rosa             false
   c.comment             { Faker::Lorem::paragraph }
   c.updated_at          { Factory.next(:time) }
   c.created_at          { Factory.next(:time) }

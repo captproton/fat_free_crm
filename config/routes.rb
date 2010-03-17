@@ -1,4 +1,18 @@
 ActionController::Routing::Routes.draw do |map|
+  map.resources :preferences
+
+  map.resources :contact_opportunities
+
+  map.resources :account_contacts
+
+  map.resources :permissions
+
+  map.resources :avatars
+
+  map.resources :activities
+
+  map.resources :account_opportunities
+
 
   # The priority is based upon order of creation: first created -> highest priority.
   map.root      :controller => "home", :action => "index"

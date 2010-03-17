@@ -10,7 +10,7 @@ package fatfreecrm.controllers {
   public class ApplicationController extends RxApplicationController {
     private static var controller:ApplicationController;
     
-    public static var models:Array = []; /* Models */
+    public static var models:Array = [Account, AccountContact, AccountOpportunity, Activity, Avatar, Campaign, Comment, Contact, ContactOpportunity, Lead, Opportunity, Permission, Preference, Task]; /* Models */
     
     public static var commands:Array = []; /* Commands */
     

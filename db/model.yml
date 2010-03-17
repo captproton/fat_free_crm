@@ -35,7 +35,9 @@ contact_opportunity:
 
 comment:
  - commentable_type: string
- - private: boolean
+ # Use sub_rosa since private is a reserved word
+ # - private: boolean
+ - sub_rosa: boolean
  - title: string
  - comment: text
  - polymorphic: [commentable]
@@ -45,7 +47,9 @@ activity:
  - subject_type: string
  - action: string
  - info: string
- - private: boolean
+ # Use sub_rosa since private is a reserved word
+ # - private: boolean
+ - sub_rosa: boolean
  - polymorphic: [subject]
  - belongs_to: [user]
 
