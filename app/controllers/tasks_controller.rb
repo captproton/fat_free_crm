@@ -27,7 +27,7 @@ class TasksController < ApplicationController
     @view = params[:view] || "pending"
     @flashyView = "assigned"
     @tasks = Task.find_all_grouped(@current_user, @view)
-    @flashyTasks = Task.all
+    @flashyTasks = Task.my(@current_user)
 
     respond_to do |format|
       format.html # index.html.haml
