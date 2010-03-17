@@ -2,6 +2,8 @@ ActionController::Routing::Routes.draw do |map|
 
   # The priority is based upon order of creation: first created -> highest priority.
   map.root      :controller => "home", :action => "index"
+  # Map application root to default RestfulX controller
+  ## map.root :controller => "flex"
   map.resource  :authentication
   map.resources :users, :member => { :avatar => :get, :upload_avatar => :put, :password => :get, :change_password => :put }
   map.resources :passwords
