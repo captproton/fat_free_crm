@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" label="Lead"
+  xmlns:rx="org.restfulx.components.rx.*">
+  <mx:Script><![CDATA[
+    import org.restfulx.Rx;
+    import org.restfulx.utils.RxUtils;
+    import fatfreecrm.models.Lead;
+    import fatfreecrm.models.User;
+    import fatfreecrm.models.Campaign;
+
+    [Bindable]
+    private var lead:Lead = new Lead();
+
+    private function newLead():void {
+      lead = new Lead();
+      leadsList.selectedIndex = -1;
+    }
+
+    private function saveLead():void {
+      updateModelProperties();
+      if (lead.id) {
+        lead.update({onSuccess: onLeadUpdate});
+      } else {
+        lead.create({onSuccess: onLeadCreate});
+      }
+    }
+  
+    private function updateModelProperties():void {
+      lead.assignedTo = int(assignedToTextInput.text);
+      lead.firstName = firstNameTextInput.text;
+      lead.lastName = lastNameTextInput.text;
+      lead.access = accessTextInput.text;
+      lead.title = titleTextInput.text;
+      lead.company = companyTextInput.text;
+      lead.source = sourceTextInput.text;
+      lead.status = statusTextInput.text;
+      lead.referredBy = referredByTextInput.text;
+      lead.email = emailTextInput.text;
+      lead.altEmail = altEmailTextInput.text;
+      lead.phone = phoneTextInput.text;
+      lead.mobile = mobileTextInput.text;
+      lead.blog = blogTextInput.text;
+      lead.linkedin = linkedinTextInput.text;
+      lead.facebook = facebookTextInput.text;
+      lead.twitter = twitterTextInput.text;
+      lead.rating = int(ratingTextInput.text);
+      lead.doNotCall = doNotCallCheckBox.selected;
+      lead.deletedAt = deletedAtDateTimeTextInput.date;
+      lead.backgroundInfo = backgroundInfoTextInput.text;
+  
+      lead.user = User(userComboBox.selectedItem);
+      lead.campaign = Campaign(campaignComboBox.selectedItem);
+    }
+   
+    private function destroyLead():void {
+      lead.destroy({onSuccess: onLeadDestroy});
+    }
+    
+    private function onLeadSelect():void {
+      lead = RxUtils.clone(leadsList.selectedItem) as Lead;
+    }
+    
+    private function onLeadCreate(result:Lead):void {
+      lead = new Lead;
+    }
+    
+    private function onLeadUpdate(result:Lead):void {
+      leadsList.selectedItem = result;
+      onLeadSelect();
+    }
+    
+    private function onLeadDestroy(result:Lead):void {
+      onLeadCreate(result);
+    }    
+  ]]></mx:Script>
+  <mx:Panel id="leadsPanel"
+    title="Leads" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="25%" height="100%">
+    <mx:List id="leadsList"
+      width="100%" height="100%"
+      dataProvider="{Rx.models.index(Lead)}"
+      change="onLeadSelect()"/>
+    <mx:ControlBar width="100%">
+      <mx:Button label="New Lead" width="100%" height="30"
+        click="newLead()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+  <mx:Panel title="Edit Lead" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="75%" height="100%">
+    <mx:Form width="100%" height="100%">
+      <mx:FormItem label="AssignedTo" width="100%">
+        <mx:TextInput id="assignedToTextInput" width="100%" text="{lead.assignedTo}"/>
+      </mx:FormItem>
+      <mx:FormItem label="FirstName" width="100%">
+        <mx:TextInput id="firstNameTextInput" width="100%" text="{lead.firstName}"/>
+      </mx:FormItem>
+      <mx:FormItem label="LastName" width="100%">
+        <mx:TextInput id="lastNameTextInput" width="100%" text="{lead.lastName}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Access" width="100%">
+        <mx:TextInput id="accessTextInput" width="100%" text="{lead.access}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Title" width="100%">
+        <mx:TextInput id="titleTextInput" width="100%" text="{lead.title}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Company" width="100%">
+        <mx:TextInput id="companyTextInput" width="100%" text="{lead.company}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Source" width="100%">
+        <mx:TextInput id="sourceTextInput" width="100%" text="{lead.source}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Status" width="100%">
+        <mx:TextInput id="statusTextInput" width="100%" text="{lead.status}"/>
+      </mx:FormItem>
+      <mx:FormItem label="ReferredBy" width="100%">
+        <mx:TextInput id="referredByTextInput" width="100%" text="{lead.referredBy}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Email" width="100%">
+        <mx:TextInput id="emailTextInput" width="100%" text="{lead.email}"/>
+      </mx:FormItem>
+      <mx:FormItem label="AltEmail" width="100%">
+        <mx:TextInput id="altEmailTextInput" width="100%" text="{lead.altEmail}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Phone" width="100%">
+        <mx:TextInput id="phoneTextInput" width="100%" text="{lead.phone}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Mobile" width="100%">
+        <mx:TextInput id="mobileTextInput" width="100%" text="{lead.mobile}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Blog" width="100%">
+        <mx:TextInput id="blogTextInput" width="100%" text="{lead.blog}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Linkedin" width="100%">
+        <mx:TextInput id="linkedinTextInput" width="100%" text="{lead.linkedin}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Facebook" width="100%">
+        <mx:TextInput id="facebookTextInput" width="100%" text="{lead.facebook}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Twitter" width="100%">
+        <mx:TextInput id="twitterTextInput" width="100%" text="{lead.twitter}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Rating" width="100%">
+        <mx:TextInput id="ratingTextInput" width="100%" text="{lead.rating}"/>
+      </mx:FormItem>
+      <mx:FormItem label="DoNotCall" width="100%">
+        <mx:CheckBox id="doNotCallCheckBox" selected="{lead.doNotCall}"/>
+      </mx:FormItem>
+      <mx:FormItem label="DeletedAt" width="100%">
+        <rx:DateTimeTextInput id="deletedAtDateTimeTextInput" width="200" date="{lead.deletedAt}"/>
+      </mx:FormItem>
+      <mx:FormItem label="BackgroundInfo" width="100%">
+        <mx:TextInput id="backgroundInfoTextInput" width="100%" text="{lead.backgroundInfo}"/>
+      </mx:FormItem>
+      <mx:FormItem label="User" width="100%">
+        <mx:ComboBox id="userComboBox" width="200"
+          labelField="{User.LABEL}"
+          dataProvider="{Rx.models.index(User)}" prompt="User ..."
+          selectedItem="{lead.user}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Campaign" width="100%">
+        <mx:ComboBox id="campaignComboBox" width="200"
+          labelField="{Campaign.LABEL}"
+          dataProvider="{Rx.models.index(Campaign)}" prompt="Campaign ..."
+          selectedItem="{lead.campaign}"/>
+      </mx:FormItem>
+    </mx:Form>
+    <mx:ControlBar width="100%">
+      <mx:Button label="Save Lead" width="50%" height="30"
+        click="saveLead()"/>
+      <mx:Button label="Delete Lead" width="50%" height="30"
+        enabled="{RxUtils.canDeleteModel(lead)}"
+        click="destroyLead()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+</mx:HBox>

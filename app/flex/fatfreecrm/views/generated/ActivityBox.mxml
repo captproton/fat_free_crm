@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" label="Activity"
+  xmlns:rx="org.restfulx.components.rx.*">
+  <mx:Script><![CDATA[
+    import org.restfulx.Rx;
+    import org.restfulx.utils.RxUtils;
+    import fatfreecrm.models.Activity;
+    import fatfreecrm.models.User;
+
+    [Bindable]
+    private var activity:Activity = new Activity();
+
+    private function newActivity():void {
+      activity = new Activity();
+      activitiesList.selectedIndex = -1;
+    }
+
+    private function saveActivity():void {
+      updateModelProperties();
+      if (activity.id) {
+        activity.update({onSuccess: onActivityUpdate});
+      } else {
+        activity.create({onSuccess: onActivityCreate});
+      }
+    }
+  
+    private function updateModelProperties():void {
+      activity.subjectType = subjectTypeTextInput.text;
+      activity.action = actionTextInput.text;
+      activity.info = infoTextInput.text;
+      activity.sub_rosa = privateCheckBox.selected;
+  
+      activity.user = User(userComboBox.selectedItem);
+    }
+   
+    private function destroyActivity():void {
+      activity.destroy({onSuccess: onActivityDestroy});
+    }
+    
+    private function onActivitySelect():void {
+      activity = RxUtils.clone(activitiesList.selectedItem) as Activity;
+    }
+    
+    private function onActivityCreate(result:Activity):void {
+      activity = new Activity;
+    }
+    
+    private function onActivityUpdate(result:Activity):void {
+      activitiesList.selectedItem = result;
+      onActivitySelect();
+    }
+    
+    private function onActivityDestroy(result:Activity):void {
+      onActivityCreate(result);
+    }    
+  ]]></mx:Script>
+  <mx:Panel id="activitiesPanel"
+    title="Activities" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="25%" height="100%">
+    <mx:List id="activitiesList"
+      width="100%" height="100%"
+      dataProvider="{Rx.models.index(Activity)}"
+      change="onActivitySelect()"/>
+    <mx:ControlBar width="100%">
+      <mx:Button label="New Activity" width="100%" height="30"
+        click="newActivity()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+  <mx:Panel title="Edit Activity" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="75%" height="100%">
+    <mx:Form width="100%" height="100%">
+      <mx:FormItem label="SubjectType" width="100%">
+        <mx:TextInput id="subjectTypeTextInput" width="100%" text="{activity.subjectType}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Action" width="100%">
+        <mx:TextInput id="actionTextInput" width="100%" text="{activity.action}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Info" width="100%">
+        <mx:TextInput id="infoTextInput" width="100%" text="{activity.info}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Private" width="100%">
+        <mx:CheckBox id="privateCheckBox" selected="{activity.sub_rosa}"/>
+      </mx:FormItem>
+      <mx:FormItem label="User" width="100%">
+        <mx:ComboBox id="userComboBox" width="200"
+          labelField="{User.LABEL}"
+          dataProvider="{Rx.models.index(User)}" prompt="User ..."
+          selectedItem="{activity.user}"/>
+      </mx:FormItem>
+    </mx:Form>
+    <mx:ControlBar width="100%">
+      <mx:Button label="Save Activity" width="50%" height="30"
+        click="saveActivity()"/>
+      <mx:Button label="Delete Activity" width="50%" height="30"
+        enabled="{RxUtils.canDeleteModel(activity)}"
+        click="destroyActivity()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+</mx:HBox>

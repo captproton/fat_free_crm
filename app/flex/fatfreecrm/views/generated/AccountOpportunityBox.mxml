@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" label="AccountOpportunity"
+  xmlns:rx="org.restfulx.components.rx.*">
+  <mx:Script><![CDATA[
+    import org.restfulx.Rx;
+    import org.restfulx.utils.RxUtils;
+    import fatfreecrm.models.AccountOpportunity;
+    import fatfreecrm.models.Account;
+    import fatfreecrm.models.Opportunity;
+
+    [Bindable]
+    private var accountOpportunity:AccountOpportunity = new AccountOpportunity();
+
+    private function newAccountOpportunity():void {
+      accountOpportunity = new AccountOpportunity();
+      accountOpportunitiesList.selectedIndex = -1;
+    }
+
+    private function saveAccountOpportunity():void {
+      updateModelProperties();
+      if (accountOpportunity.id) {
+        accountOpportunity.update({onSuccess: onAccountOpportunityUpdate});
+      } else {
+        accountOpportunity.create({onSuccess: onAccountOpportunityCreate});
+      }
+    }
+  
+    private function updateModelProperties():void {
+      accountOpportunity.deletedAt = deletedAtDateTimeTextInput.date;
+  
+      accountOpportunity.account = Account(accountComboBox.selectedItem);
+      accountOpportunity.opportunity = Opportunity(opportunityComboBox.selectedItem);
+    }
+   
+    private function destroyAccountOpportunity():void {
+      accountOpportunity.destroy({onSuccess: onAccountOpportunityDestroy});
+    }
+    
+    private function onAccountOpportunitySelect():void {
+      accountOpportunity = RxUtils.clone(accountOpportunitiesList.selectedItem) as AccountOpportunity;
+    }
+    
+    private function onAccountOpportunityCreate(result:AccountOpportunity):void {
+      accountOpportunity = new AccountOpportunity;
+    }
+    
+    private function onAccountOpportunityUpdate(result:AccountOpportunity):void {
+      accountOpportunitiesList.selectedItem = result;
+      onAccountOpportunitySelect();
+    }
+    
+    private function onAccountOpportunityDestroy(result:AccountOpportunity):void {
+      onAccountOpportunityCreate(result);
+    }    
+  ]]></mx:Script>
+  <mx:Panel id="accountOpportunitiesPanel"
+    title="AccountOpportunities" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="25%" height="100%">
+    <mx:List id="accountOpportunitiesList"
+      width="100%" height="100%"
+      dataProvider="{Rx.models.index(AccountOpportunity)}"
+      change="onAccountOpportunitySelect()"/>
+    <mx:ControlBar width="100%">
+      <mx:Button label="New AccountOpportunity" width="100%" height="30"
+        click="newAccountOpportunity()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+  <mx:Panel title="Edit AccountOpportunity" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="75%" height="100%">
+    <mx:Form width="100%" height="100%">
+      <mx:FormItem label="DeletedAt" width="100%">
+        <rx:DateTimeTextInput id="deletedAtDateTimeTextInput" width="200" date="{accountOpportunity.deletedAt}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Account" width="100%">
+        <mx:ComboBox id="accountComboBox" width="200"
+          labelField="{Account.LABEL}"
+          dataProvider="{Rx.models.index(Account)}" prompt="Account ..."
+          selectedItem="{accountOpportunity.account}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Opportunity" width="100%">
+        <mx:ComboBox id="opportunityComboBox" width="200"
+          labelField="{Opportunity.LABEL}"
+          dataProvider="{Rx.models.index(Opportunity)}" prompt="Opportunity ..."
+          selectedItem="{accountOpportunity.opportunity}"/>
+      </mx:FormItem>
+    </mx:Form>
+    <mx:ControlBar width="100%">
+      <mx:Button label="Save AccountOpportunity" width="50%" height="30"
+        click="saveAccountOpportunity()"/>
+      <mx:Button label="Delete AccountOpportunity" width="50%" height="30"
+        enabled="{RxUtils.canDeleteModel(accountOpportunity)}"
+        click="destroyAccountOpportunity()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+</mx:HBox>

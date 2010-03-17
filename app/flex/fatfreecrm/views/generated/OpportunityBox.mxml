@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" label="Opportunity"
+  xmlns:rx="org.restfulx.components.rx.*">
+  <mx:Script><![CDATA[
+    import org.restfulx.Rx;
+    import org.restfulx.utils.RxUtils;
+    import fatfreecrm.models.Opportunity;
+    import fatfreecrm.models.User;
+    import fatfreecrm.models.Campaign;
+
+    [Bindable]
+    private var opportunity:Opportunity = new Opportunity();
+
+    private function newOpportunity():void {
+      opportunity = new Opportunity();
+      opportunitiesList.selectedIndex = -1;
+    }
+
+    private function saveOpportunity():void {
+      updateModelProperties();
+      if (opportunity.id) {
+        opportunity.update({onSuccess: onOpportunityUpdate});
+      } else {
+        opportunity.create({onSuccess: onOpportunityCreate});
+      }
+    }
+  
+    private function updateModelProperties():void {
+      opportunity.assignedTo = int(assignedToTextInput.text);
+      opportunity.name = nameTextInput.text;
+      opportunity.access = accessTextInput.text;
+      opportunity.source = sourceTextInput.text;
+      opportunity.stage = stageTextInput.text;
+      opportunity.probability = int(probabilityTextInput.text);
+      opportunity.amount = Number(amountTextInput.text);
+      opportunity.discount = Number(discountTextInput.text);
+      opportunity.closesOn = closesOnDateField.selectedDate;
+      opportunity.deletedAt = deletedAtDateTimeTextInput.date;
+      opportunity.backgroundInfo = backgroundInfoTextInput.text;
+  
+      opportunity.user = User(userComboBox.selectedItem);
+      opportunity.campaign = Campaign(campaignComboBox.selectedItem);
+    }
+   
+    private function destroyOpportunity():void {
+      opportunity.destroy({onSuccess: onOpportunityDestroy});
+    }
+    
+    private function onOpportunitySelect():void {
+      opportunity = RxUtils.clone(opportunitiesList.selectedItem) as Opportunity;
+    }
+    
+    private function onOpportunityCreate(result:Opportunity):void {
+      opportunity = new Opportunity;
+    }
+    
+    private function onOpportunityUpdate(result:Opportunity):void {
+      opportunitiesList.selectedItem = result;
+      onOpportunitySelect();
+    }
+    
+    private function onOpportunityDestroy(result:Opportunity):void {
+      onOpportunityCreate(result);
+    }    
+  ]]></mx:Script>
+  <mx:Panel id="opportunitiesPanel"
+    title="Opportunities" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="25%" height="100%">
+    <mx:List id="opportunitiesList"
+      width="100%" height="100%"
+      dataProvider="{Rx.models.index(Opportunity)}"
+      change="onOpportunitySelect()"/>
+    <mx:ControlBar width="100%">
+      <mx:Button label="New Opportunity" width="100%" height="30"
+        click="newOpportunity()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+  <mx:Panel title="Edit Opportunity" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="75%" height="100%">
+    <mx:Form width="100%" height="100%">
+      <mx:FormItem label="AssignedTo" width="100%">
+        <mx:TextInput id="assignedToTextInput" width="100%" text="{opportunity.assignedTo}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Name" width="100%">
+        <mx:TextInput id="nameTextInput" width="100%" text="{opportunity.name}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Access" width="100%">
+        <mx:TextInput id="accessTextInput" width="100%" text="{opportunity.access}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Source" width="100%">
+        <mx:TextInput id="sourceTextInput" width="100%" text="{opportunity.source}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Stage" width="100%">
+        <mx:TextInput id="stageTextInput" width="100%" text="{opportunity.stage}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Probability" width="100%">
+        <mx:TextInput id="probabilityTextInput" width="100%" text="{opportunity.probability}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Amount" width="100%">
+        <mx:TextInput id="amountTextInput" width="100%" text="{opportunity.amount}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Discount" width="100%">
+        <mx:TextInput id="discountTextInput" width="100%" text="{opportunity.discount}"/>
+      </mx:FormItem>
+      <mx:FormItem label="ClosesOn" width="100%">
+        <mx:DateField id="closesOnDateField" selectedDate="{opportunity.closesOn}"/>
+      </mx:FormItem>
+      <mx:FormItem label="DeletedAt" width="100%">
+        <rx:DateTimeTextInput id="deletedAtDateTimeTextInput" width="200" date="{opportunity.deletedAt}"/>
+      </mx:FormItem>
+      <mx:FormItem label="BackgroundInfo" width="100%">
+        <mx:TextInput id="backgroundInfoTextInput" width="100%" text="{opportunity.backgroundInfo}"/>
+      </mx:FormItem>
+      <mx:FormItem label="User" width="100%">
+        <mx:ComboBox id="userComboBox" width="200"
+          labelField="{User.LABEL}"
+          dataProvider="{Rx.models.index(User)}" prompt="User ..."
+          selectedItem="{opportunity.user}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Campaign" width="100%">
+        <mx:ComboBox id="campaignComboBox" width="200"
+          labelField="{Campaign.LABEL}"
+          dataProvider="{Rx.models.index(Campaign)}" prompt="Campaign ..."
+          selectedItem="{opportunity.campaign}"/>
+      </mx:FormItem>
+    </mx:Form>
+    <mx:ControlBar width="100%">
+      <mx:Button label="Save Opportunity" width="50%" height="30"
+        click="saveOpportunity()"/>
+      <mx:Button label="Delete Opportunity" width="50%" height="30"
+        enabled="{RxUtils.canDeleteModel(opportunity)}"
+        click="destroyOpportunity()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+</mx:HBox>

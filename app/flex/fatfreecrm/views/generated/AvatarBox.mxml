@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" label="Avatar"
+  xmlns:rx="org.restfulx.components.rx.*">
+  <mx:Script><![CDATA[
+    import org.restfulx.Rx;
+    import org.restfulx.utils.RxUtils;
+    import fatfreecrm.models.Avatar;
+    import fatfreecrm.models.User;
+    import flash.net.FileReference;
+    import org.restfulx.utils.RxFileReference;
+
+    [Bindable]
+    private var avatar:Avatar = new Avatar();
+
+    [Bindable]
+    private var fileName:String = "None selected";
+    
+    private var file:RxFileReference;
+
+    private function newAvatar():void {
+      avatar = new Avatar();
+      avatarsList.selectedIndex = -1;
+    }
+
+    private function saveAvatar():void {
+      updateModelProperties();
+      if (avatar.id) {
+        avatar.update({onSuccess: onAvatarUpdate});
+      } else {
+        avatar.create({onSuccess: onAvatarCreate});
+      }
+    }
+  
+    private function updateModelProperties():void {
+      avatar.entityType = entityTypeTextInput.text;
+      avatar.imageFileSize = int(imageFileSizeTextInput.text);
+      avatar.imageFileName = imageFileNameTextInput.text;
+      avatar.imageContentType = imageContentTypeTextInput.text;
+  
+      avatar.user = User(userComboBox.selectedItem);
+      avatar.attachment = file;
+    }
+   
+    private function destroyAvatar():void {
+      avatar.destroy({onSuccess: onAvatarDestroy});
+    }
+    
+    private function onAvatarSelect():void {
+      avatar = RxUtils.clone(avatarsList.selectedItem) as Avatar;
+    }
+    
+    private function onAvatarCreate(result:Avatar):void {
+      avatar = new Avatar;
+    }
+    
+    private function onAvatarUpdate(result:Avatar):void {
+      avatarsList.selectedItem = result;
+      onAvatarSelect();
+    }
+    
+    private function onAvatarDestroy(result:Avatar):void {
+      onAvatarCreate(result);
+    }    
+
+    private function chooseFile():void {
+      file = new RxFileReference("image");
+      file.reference.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler, false, 0, true);
+      file.reference.addEventListener(Event.SELECT, selectFile, false, 0, true);
+      file.reference.addEventListener(Event.CANCEL, cancelBrowse, false, 0, true);
+      file.reference.browse();
+    }
+    
+    private function selectFile(event:Event):void { 
+      fileSelected(event)
+    }
+    
+    private function cancelBrowse(event:Event):void {
+      file = null;
+    }
+    
+    private function fileSelected(event:Event):void {
+      fileName = FileReference(event.target).name;
+    }
+    
+    private function ioErrorHandler(event:Event):void {
+      fileChooser.errorString = "Failed to selected a file. Please try again.";
+    }
+  ]]></mx:Script>
+  <mx:Panel id="avatarsPanel"
+    title="Avatars" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="25%" height="100%">
+    <mx:List id="avatarsList"
+      width="100%" height="100%"
+      dataProvider="{Rx.models.index(Avatar)}"
+      change="onAvatarSelect()"/>
+    <mx:ControlBar width="100%">
+      <mx:Button label="New Avatar" width="100%" height="30"
+        click="newAvatar()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+  <mx:Panel title="Edit Avatar" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="75%" height="100%">
+    <mx:Form width="100%" height="100%">
+      <mx:FormItem label="EntityType" width="100%">
+        <mx:TextInput id="entityTypeTextInput" width="100%" text="{avatar.entityType}"/>
+      </mx:FormItem>
+      <mx:FormItem label="ImageFileSize" width="100%">
+        <mx:TextInput id="imageFileSizeTextInput" width="100%" text="{avatar.imageFileSize}"/>
+      </mx:FormItem>
+      <mx:FormItem label="ImageFileName" width="100%">
+        <mx:TextInput id="imageFileNameTextInput" width="100%" text="{avatar.imageFileName}"/>
+      </mx:FormItem>
+      <mx:FormItem label="ImageContentType" width="100%">
+        <mx:TextInput id="imageContentTypeTextInput" width="100%" text="{avatar.imageContentType}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Image:" width="100%" id="fileChooser">
+        <mx:Button label="Browse…" id="fileBrowseButton" click="chooseFile()"/>
+        <mx:Label text="{fileName}" maxWidth="190"/>
+        <mx:Image source="{avatar.attachmentUrl}"/>
+      </mx:FormItem>
+      <mx:FormItem label="User" width="100%">
+        <mx:ComboBox id="userComboBox" width="200"
+          labelField="{User.LABEL}"
+          dataProvider="{Rx.models.index(User)}" prompt="User ..."
+          selectedItem="{avatar.user}"/>
+      </mx:FormItem>
+    </mx:Form>
+    <mx:ControlBar width="100%">
+      <mx:Button label="Save Avatar" width="50%" height="30"
+        click="saveAvatar()"/>
+      <mx:Button label="Delete Avatar" width="50%" height="30"
+        enabled="{RxUtils.canDeleteModel(avatar)}"
+        click="destroyAvatar()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+</mx:HBox>

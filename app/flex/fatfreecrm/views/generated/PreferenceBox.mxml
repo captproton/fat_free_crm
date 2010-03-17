@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" label="Preference"
+  xmlns:rx="org.restfulx.components.rx.*">
+  <mx:Script><![CDATA[
+    import org.restfulx.Rx;
+    import org.restfulx.utils.RxUtils;
+    import fatfreecrm.models.Preference;
+    import fatfreecrm.models.User;
+
+    [Bindable]
+    private var preference:Preference = new Preference();
+
+    private function newPreference():void {
+      preference = new Preference();
+      preferencesList.selectedIndex = -1;
+    }
+
+    private function savePreference():void {
+      updateModelProperties();
+      if (preference.id) {
+        preference.update({onSuccess: onPreferenceUpdate});
+      } else {
+        preference.create({onSuccess: onPreferenceCreate});
+      }
+    }
+  
+    private function updateModelProperties():void {
+      preference.name = nameTextInput.text;
+      preference.value = valueTextArea.text;
+  
+      preference.user = User(userComboBox.selectedItem);
+    }
+   
+    private function destroyPreference():void {
+      preference.destroy({onSuccess: onPreferenceDestroy});
+    }
+    
+    private function onPreferenceSelect():void {
+      preference = RxUtils.clone(preferencesList.selectedItem) as Preference;
+    }
+    
+    private function onPreferenceCreate(result:Preference):void {
+      preference = new Preference;
+    }
+    
+    private function onPreferenceUpdate(result:Preference):void {
+      preferencesList.selectedItem = result;
+      onPreferenceSelect();
+    }
+    
+    private function onPreferenceDestroy(result:Preference):void {
+      onPreferenceCreate(result);
+    }    
+  ]]></mx:Script>
+  <mx:Panel id="preferencesPanel"
+    title="Preferences" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="25%" height="100%">
+    <mx:List id="preferencesList"
+      width="100%" height="100%"
+      dataProvider="{Rx.models.index(Preference)}"
+      change="onPreferenceSelect()"/>
+    <mx:ControlBar width="100%">
+      <mx:Button label="New Preference" width="100%" height="30"
+        click="newPreference()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+  <mx:Panel title="Edit Preference" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="75%" height="100%">
+    <mx:Form width="100%" height="100%">
+      <mx:FormItem label="Name" width="100%">
+        <mx:TextInput id="nameTextInput" width="100%" text="{preference.name}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Value" width="100%">
+        <mx:TextArea id="valueTextArea" width="100%" height="200" text="{preference.value}"/>
+      </mx:FormItem>
+      <mx:FormItem label="User" width="100%">
+        <mx:ComboBox id="userComboBox" width="200"
+          labelField="{User.LABEL}"
+          dataProvider="{Rx.models.index(User)}" prompt="User ..."
+          selectedItem="{preference.user}"/>
+      </mx:FormItem>
+    </mx:Form>
+    <mx:ControlBar width="100%">
+      <mx:Button label="Save Preference" width="50%" height="30"
+        click="savePreference()"/>
+      <mx:Button label="Delete Preference" width="50%" height="30"
+        enabled="{RxUtils.canDeleteModel(preference)}"
+        click="destroyPreference()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+</mx:HBox>

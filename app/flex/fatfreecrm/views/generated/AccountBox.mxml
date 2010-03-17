@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" label="Account"
+  xmlns:rx="org.restfulx.components.rx.*">
+  <mx:Script><![CDATA[
+    import org.restfulx.Rx;
+    import org.restfulx.utils.RxUtils;
+    import fatfreecrm.models.Account;
+    import fatfreecrm.models.User;
+
+    [Bindable]
+    private var account:Account = new Account();
+
+    private function newAccount():void {
+      account = new Account();
+      accountsList.selectedIndex = -1;
+    }
+
+    private function saveAccount():void {
+      updateModelProperties();
+      if (account.id) {
+        account.update({onSuccess: onAccountUpdate});
+      } else {
+        account.create({onSuccess: onAccountCreate});
+      }
+    }
+  
+    private function updateModelProperties():void {
+      account.assignedTo = int(assignedToTextInput.text);
+      account.name = nameTextInput.text;
+      account.access = accessTextInput.text;
+      account.website = websiteTextInput.text;
+      account.tollFreePhone = tollFreePhoneTextInput.text;
+      account.phone = phoneTextInput.text;
+      account.fax = faxTextInput.text;
+      account.deletedAt = deletedAtDateTimeTextInput.date;
+      account.email = emailTextInput.text;
+      account.backgroundInfo = backgroundInfoTextInput.text;
+  
+      account.user = User(userComboBox.selectedItem);
+    }
+   
+    private function destroyAccount():void {
+      account.destroy({onSuccess: onAccountDestroy});
+    }
+    
+    private function onAccountSelect():void {
+      account = RxUtils.clone(accountsList.selectedItem) as Account;
+    }
+    
+    private function onAccountCreate(result:Account):void {
+      account = new Account;
+    }
+    
+    private function onAccountUpdate(result:Account):void {
+      accountsList.selectedItem = result;
+      onAccountSelect();
+    }
+    
+    private function onAccountDestroy(result:Account):void {
+      onAccountCreate(result);
+    }    
+  ]]></mx:Script>
+  <mx:Panel id="accountsPanel"
+    title="Accounts" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="25%" height="100%">
+    <mx:List id="accountsList"
+      width="100%" height="100%"
+      dataProvider="{Rx.models.index(Account)}"
+      change="onAccountSelect()"/>
+    <mx:ControlBar width="100%">
+      <mx:Button label="New Account" width="100%" height="30"
+        click="newAccount()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+  <mx:Panel title="Edit Account" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="75%" height="100%">
+    <mx:Form width="100%" height="100%">
+      <mx:FormItem label="AssignedTo" width="100%">
+        <mx:TextInput id="assignedToTextInput" width="100%" text="{account.assignedTo}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Name" width="100%">
+        <mx:TextInput id="nameTextInput" width="100%" text="{account.name}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Access" width="100%">
+        <mx:TextInput id="accessTextInput" width="100%" text="{account.access}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Website" width="100%">
+        <mx:TextInput id="websiteTextInput" width="100%" text="{account.website}"/>
+      </mx:FormItem>
+      <mx:FormItem label="TollFreePhone" width="100%">
+        <mx:TextInput id="tollFreePhoneTextInput" width="100%" text="{account.tollFreePhone}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Phone" width="100%">
+        <mx:TextInput id="phoneTextInput" width="100%" text="{account.phone}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Fax" width="100%">
+        <mx:TextInput id="faxTextInput" width="100%" text="{account.fax}"/>
+      </mx:FormItem>
+      <mx:FormItem label="DeletedAt" width="100%">
+        <rx:DateTimeTextInput id="deletedAtDateTimeTextInput" width="200" date="{account.deletedAt}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Email" width="100%">
+        <mx:TextInput id="emailTextInput" width="100%" text="{account.email}"/>
+      </mx:FormItem>
+      <mx:FormItem label="BackgroundInfo" width="100%">
+        <mx:TextInput id="backgroundInfoTextInput" width="100%" text="{account.backgroundInfo}"/>
+      </mx:FormItem>
+      <mx:FormItem label="User" width="100%">
+        <mx:ComboBox id="userComboBox" width="200"
+          labelField="{User.LABEL}"
+          dataProvider="{Rx.models.index(User)}" prompt="User ..."
+          selectedItem="{account.user}"/>
+      </mx:FormItem>
+    </mx:Form>
+    <mx:ControlBar width="100%">
+      <mx:Button label="Save Account" width="50%" height="30"
+        click="saveAccount()"/>
+      <mx:Button label="Delete Account" width="50%" height="30"
+        enabled="{RxUtils.canDeleteModel(account)}"
+        click="destroyAccount()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+</mx:HBox>

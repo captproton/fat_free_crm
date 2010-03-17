@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" label="Contact"
+  xmlns:rx="org.restfulx.components.rx.*">
+  <mx:Script><![CDATA[
+    import org.restfulx.Rx;
+    import org.restfulx.utils.RxUtils;
+    import fatfreecrm.models.Contact;
+    import fatfreecrm.models.User;
+    import fatfreecrm.models.Lead;
+
+    [Bindable]
+    private var contact:Contact = new Contact();
+
+    private function newContact():void {
+      contact = new Contact();
+      contactsList.selectedIndex = -1;
+    }
+
+    private function saveContact():void {
+      updateModelProperties();
+      if (contact.id) {
+        contact.update({onSuccess: onContactUpdate});
+      } else {
+        contact.create({onSuccess: onContactCreate});
+      }
+    }
+  
+    private function updateModelProperties():void {
+      contact.assignedTo = int(assignedToTextInput.text);
+      contact.reportsTo = int(reportsToTextInput.text);
+      contact.firstName = firstNameTextInput.text;
+      contact.lastName = lastNameTextInput.text;
+      contact.access = accessTextInput.text;
+      contact.title = titleTextInput.text;
+      contact.department = departmentTextInput.text;
+      contact.source = sourceTextInput.text;
+      contact.email = emailTextInput.text;
+      contact.altEmail = altEmailTextInput.text;
+      contact.phone = phoneTextInput.text;
+      contact.mobile = mobileTextInput.text;
+      contact.fax = faxTextInput.text;
+      contact.blog = blogTextInput.text;
+      contact.linkedin = linkedinTextInput.text;
+      contact.facebook = facebookTextInput.text;
+      contact.twitter = twitterTextInput.text;
+      contact.bornOn = bornOnDateField.selectedDate;
+      contact.doNotCall = doNotCallCheckBox.selected;
+      contact.deletedAt = deletedAtDateTimeTextInput.date;
+      contact.backgroundInfo = backgroundInfoTextInput.text;
+  
+      contact.user = User(userComboBox.selectedItem);
+      contact.lead = Lead(leadComboBox.selectedItem);
+    }
+   
+    private function destroyContact():void {
+      contact.destroy({onSuccess: onContactDestroy});
+    }
+    
+    private function onContactSelect():void {
+      contact = RxUtils.clone(contactsList.selectedItem) as Contact;
+    }
+    
+    private function onContactCreate(result:Contact):void {
+      contact = new Contact;
+    }
+    
+    private function onContactUpdate(result:Contact):void {
+      contactsList.selectedItem = result;
+      onContactSelect();
+    }
+    
+    private function onContactDestroy(result:Contact):void {
+      onContactCreate(result);
+    }    
+  ]]></mx:Script>
+  <mx:Panel id="contactsPanel"
+    title="Contacts" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="25%" height="100%">
+    <mx:List id="contactsList"
+      width="100%" height="100%"
+      dataProvider="{Rx.models.index(Contact)}"
+      change="onContactSelect()"/>
+    <mx:ControlBar width="100%">
+      <mx:Button label="New Contact" width="100%" height="30"
+        click="newContact()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+  <mx:Panel title="Edit Contact" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="75%" height="100%">
+    <mx:Form width="100%" height="100%">
+      <mx:FormItem label="AssignedTo" width="100%">
+        <mx:TextInput id="assignedToTextInput" width="100%" text="{contact.assignedTo}"/>
+      </mx:FormItem>
+      <mx:FormItem label="ReportsTo" width="100%">
+        <mx:TextInput id="reportsToTextInput" width="100%" text="{contact.reportsTo}"/>
+      </mx:FormItem>
+      <mx:FormItem label="FirstName" width="100%">
+        <mx:TextInput id="firstNameTextInput" width="100%" text="{contact.firstName}"/>
+      </mx:FormItem>
+      <mx:FormItem label="LastName" width="100%">
+        <mx:TextInput id="lastNameTextInput" width="100%" text="{contact.lastName}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Access" width="100%">
+        <mx:TextInput id="accessTextInput" width="100%" text="{contact.access}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Title" width="100%">
+        <mx:TextInput id="titleTextInput" width="100%" text="{contact.title}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Department" width="100%">
+        <mx:TextInput id="departmentTextInput" width="100%" text="{contact.department}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Source" width="100%">
+        <mx:TextInput id="sourceTextInput" width="100%" text="{contact.source}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Email" width="100%">
+        <mx:TextInput id="emailTextInput" width="100%" text="{contact.email}"/>
+      </mx:FormItem>
+      <mx:FormItem label="AltEmail" width="100%">
+        <mx:TextInput id="altEmailTextInput" width="100%" text="{contact.altEmail}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Phone" width="100%">
+        <mx:TextInput id="phoneTextInput" width="100%" text="{contact.phone}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Mobile" width="100%">
+        <mx:TextInput id="mobileTextInput" width="100%" text="{contact.mobile}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Fax" width="100%">
+        <mx:TextInput id="faxTextInput" width="100%" text="{contact.fax}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Blog" width="100%">
+        <mx:TextInput id="blogTextInput" width="100%" text="{contact.blog}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Linkedin" width="100%">
+        <mx:TextInput id="linkedinTextInput" width="100%" text="{contact.linkedin}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Facebook" width="100%">
+        <mx:TextInput id="facebookTextInput" width="100%" text="{contact.facebook}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Twitter" width="100%">
+        <mx:TextInput id="twitterTextInput" width="100%" text="{contact.twitter}"/>
+      </mx:FormItem>
+      <mx:FormItem label="BornOn" width="100%">
+        <mx:DateField id="bornOnDateField" selectedDate="{contact.bornOn}"/>
+      </mx:FormItem>
+      <mx:FormItem label="DoNotCall" width="100%">
+        <mx:CheckBox id="doNotCallCheckBox" selected="{contact.doNotCall}"/>
+      </mx:FormItem>
+      <mx:FormItem label="DeletedAt" width="100%">
+        <rx:DateTimeTextInput id="deletedAtDateTimeTextInput" width="200" date="{contact.deletedAt}"/>
+      </mx:FormItem>
+      <mx:FormItem label="BackgroundInfo" width="100%">
+        <mx:TextInput id="backgroundInfoTextInput" width="100%" text="{contact.backgroundInfo}"/>
+      </mx:FormItem>
+      <mx:FormItem label="User" width="100%">
+        <mx:ComboBox id="userComboBox" width="200"
+          labelField="{User.LABEL}"
+          dataProvider="{Rx.models.index(User)}" prompt="User ..."
+          selectedItem="{contact.user}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Lead" width="100%">
+        <mx:ComboBox id="leadComboBox" width="200"
+          labelField="{Lead.LABEL}"
+          dataProvider="{Rx.models.index(Lead)}" prompt="Lead ..."
+          selectedItem="{contact.lead}"/>
+      </mx:FormItem>
+    </mx:Form>
+    <mx:ControlBar width="100%">
+      <mx:Button label="Save Contact" width="50%" height="30"
+        click="saveContact()"/>
+      <mx:Button label="Delete Contact" width="50%" height="30"
+        enabled="{RxUtils.canDeleteModel(contact)}"
+        click="destroyContact()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+</mx:HBox>

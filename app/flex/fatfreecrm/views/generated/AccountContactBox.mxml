@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" label="AccountContact"
+  xmlns:rx="org.restfulx.components.rx.*">
+  <mx:Script><![CDATA[
+    import org.restfulx.Rx;
+    import org.restfulx.utils.RxUtils;
+    import fatfreecrm.models.AccountContact;
+    import fatfreecrm.models.Account;
+    import fatfreecrm.models.Contact;
+
+    [Bindable]
+    private var accountContact:AccountContact = new AccountContact();
+
+    private function newAccountContact():void {
+      accountContact = new AccountContact();
+      accountContactsList.selectedIndex = -1;
+    }
+
+    private function saveAccountContact():void {
+      updateModelProperties();
+      if (accountContact.id) {
+        accountContact.update({onSuccess: onAccountContactUpdate});
+      } else {
+        accountContact.create({onSuccess: onAccountContactCreate});
+      }
+    }
+  
+    private function updateModelProperties():void {
+      accountContact.deletedAt = deletedAtDateTimeTextInput.date;
+  
+      accountContact.account = Account(accountComboBox.selectedItem);
+      accountContact.contact = Contact(contactComboBox.selectedItem);
+    }
+   
+    private function destroyAccountContact():void {
+      accountContact.destroy({onSuccess: onAccountContactDestroy});
+    }
+    
+    private function onAccountContactSelect():void {
+      accountContact = RxUtils.clone(accountContactsList.selectedItem) as AccountContact;
+    }
+    
+    private function onAccountContactCreate(result:AccountContact):void {
+      accountContact = new AccountContact;
+    }
+    
+    private function onAccountContactUpdate(result:AccountContact):void {
+      accountContactsList.selectedItem = result;
+      onAccountContactSelect();
+    }
+    
+    private function onAccountContactDestroy(result:AccountContact):void {
+      onAccountContactCreate(result);
+    }    
+  ]]></mx:Script>
+  <mx:Panel id="accountContactsPanel"
+    title="AccountContacts" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="25%" height="100%">
+    <mx:List id="accountContactsList"
+      width="100%" height="100%"
+      dataProvider="{Rx.models.index(AccountContact)}"
+      change="onAccountContactSelect()"/>
+    <mx:ControlBar width="100%">
+      <mx:Button label="New AccountContact" width="100%" height="30"
+        click="newAccountContact()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+  <mx:Panel title="Edit AccountContact" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="75%" height="100%">
+    <mx:Form width="100%" height="100%">
+      <mx:FormItem label="DeletedAt" width="100%">
+        <rx:DateTimeTextInput id="deletedAtDateTimeTextInput" width="200" date="{accountContact.deletedAt}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Account" width="100%">
+        <mx:ComboBox id="accountComboBox" width="200"
+          labelField="{Account.LABEL}"
+          dataProvider="{Rx.models.index(Account)}" prompt="Account ..."
+          selectedItem="{accountContact.account}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Contact" width="100%">
+        <mx:ComboBox id="contactComboBox" width="200"
+          labelField="{Contact.LABEL}"
+          dataProvider="{Rx.models.index(Contact)}" prompt="Contact ..."
+          selectedItem="{accountContact.contact}"/>
+      </mx:FormItem>
+    </mx:Form>
+    <mx:ControlBar width="100%">
+      <mx:Button label="Save AccountContact" width="50%" height="30"
+        click="saveAccountContact()"/>
+      <mx:Button label="Delete AccountContact" width="50%" height="30"
+        enabled="{RxUtils.canDeleteModel(accountContact)}"
+        click="destroyAccountContact()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+</mx:HBox>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" label="ContactOpportunity"
+  xmlns:rx="org.restfulx.components.rx.*">
+  <mx:Script><![CDATA[
+    import org.restfulx.Rx;
+    import org.restfulx.utils.RxUtils;
+    import fatfreecrm.models.ContactOpportunity;
+    import fatfreecrm.models.Contact;
+    import fatfreecrm.models.Opportunity;
+
+    [Bindable]
+    private var contactOpportunity:ContactOpportunity = new ContactOpportunity();
+
+    private function newContactOpportunity():void {
+      contactOpportunity = new ContactOpportunity();
+      contactOpportunitiesList.selectedIndex = -1;
+    }
+
+    private function saveContactOpportunity():void {
+      updateModelProperties();
+      if (contactOpportunity.id) {
+        contactOpportunity.update({onSuccess: onContactOpportunityUpdate});
+      } else {
+        contactOpportunity.create({onSuccess: onContactOpportunityCreate});
+      }
+    }
+  
+    private function updateModelProperties():void {
+      contactOpportunity.role = roleTextInput.text;
+      contactOpportunity.deletedAt = deletedAtDateTimeTextInput.date;
+  
+      contactOpportunity.contact = Contact(contactComboBox.selectedItem);
+      contactOpportunity.opportunity = Opportunity(opportunityComboBox.selectedItem);
+    }
+   
+    private function destroyContactOpportunity():void {
+      contactOpportunity.destroy({onSuccess: onContactOpportunityDestroy});
+    }
+    
+    private function onContactOpportunitySelect():void {
+      contactOpportunity = RxUtils.clone(contactOpportunitiesList.selectedItem) as ContactOpportunity;
+    }
+    
+    private function onContactOpportunityCreate(result:ContactOpportunity):void {
+      contactOpportunity = new ContactOpportunity;
+    }
+    
+    private function onContactOpportunityUpdate(result:ContactOpportunity):void {
+      contactOpportunitiesList.selectedItem = result;
+      onContactOpportunitySelect();
+    }
+    
+    private function onContactOpportunityDestroy(result:ContactOpportunity):void {
+      onContactOpportunityCreate(result);
+    }    
+  ]]></mx:Script>
+  <mx:Panel id="contactOpportunitiesPanel"
+    title="ContactOpportunities" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="25%" height="100%">
+    <mx:List id="contactOpportunitiesList"
+      width="100%" height="100%"
+      dataProvider="{Rx.models.index(ContactOpportunity)}"
+      change="onContactOpportunitySelect()"/>
+    <mx:ControlBar width="100%">
+      <mx:Button label="New ContactOpportunity" width="100%" height="30"
+        click="newContactOpportunity()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+  <mx:Panel title="Edit ContactOpportunity" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="75%" height="100%">
+    <mx:Form width="100%" height="100%">
+      <mx:FormItem label="Role" width="100%">
+        <mx:TextInput id="roleTextInput" width="100%" text="{contactOpportunity.role}"/>
+      </mx:FormItem>
+      <mx:FormItem label="DeletedAt" width="100%">
+        <rx:DateTimeTextInput id="deletedAtDateTimeTextInput" width="200" date="{contactOpportunity.deletedAt}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Contact" width="100%">
+        <mx:ComboBox id="contactComboBox" width="200"
+          labelField="{Contact.LABEL}"
+          dataProvider="{Rx.models.index(Contact)}" prompt="Contact ..."
+          selectedItem="{contactOpportunity.contact}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Opportunity" width="100%">
+        <mx:ComboBox id="opportunityComboBox" width="200"
+          labelField="{Opportunity.LABEL}"
+          dataProvider="{Rx.models.index(Opportunity)}" prompt="Opportunity ..."
+          selectedItem="{contactOpportunity.opportunity}"/>
+      </mx:FormItem>
+    </mx:Form>
+    <mx:ControlBar width="100%">
+      <mx:Button label="Save ContactOpportunity" width="50%" height="30"
+        click="saveContactOpportunity()"/>
+      <mx:Button label="Delete ContactOpportunity" width="50%" height="30"
+        enabled="{RxUtils.canDeleteModel(contactOpportunity)}"
+        click="destroyContactOpportunity()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+</mx:HBox>

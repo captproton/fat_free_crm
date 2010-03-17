@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" label="Comment"
+  xmlns:rx="org.restfulx.components.rx.*">
+  <mx:Script><![CDATA[
+    import org.restfulx.Rx;
+    import org.restfulx.utils.RxUtils;
+    import fatfreecrm.models.Comment;
+    import fatfreecrm.models.User;
+
+    [Bindable]
+    private var comment:Comment = new Comment();
+
+    private function newComment():void {
+      comment = new Comment();
+      commentsList.selectedIndex = -1;
+    }
+
+    private function saveComment():void {
+      updateModelProperties();
+      if (comment.id) {
+        comment.update({onSuccess: onCommentUpdate});
+      } else {
+        comment.create({onSuccess: onCommentCreate});
+      }
+    }
+  
+    private function updateModelProperties():void {
+      comment.commentableType = commentableTypeTextInput.text;
+      comment.sub_rosa = privateCheckBox.selected;
+      comment.title = titleTextInput.text;
+      comment.comment = commentTextArea.text;
+  
+      comment.user = User(userComboBox.selectedItem);
+    }
+   
+    private function destroyComment():void {
+      comment.destroy({onSuccess: onCommentDestroy});
+    }
+    
+    private function onCommentSelect():void {
+      comment = RxUtils.clone(commentsList.selectedItem) as Comment;
+    }
+    
+    private function onCommentCreate(result:Comment):void {
+      comment = new Comment;
+    }
+    
+    private function onCommentUpdate(result:Comment):void {
+      commentsList.selectedItem = result;
+      onCommentSelect();
+    }
+    
+    private function onCommentDestroy(result:Comment):void {
+      onCommentCreate(result);
+    }    
+  ]]></mx:Script>
+  <mx:Panel id="commentsPanel"
+    title="Comments" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="25%" height="100%">
+    <mx:List id="commentsList"
+      width="100%" height="100%"
+      dataProvider="{Rx.models.index(Comment)}"
+      change="onCommentSelect()"/>
+    <mx:ControlBar width="100%">
+      <mx:Button label="New Comment" width="100%" height="30"
+        click="newComment()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+  <mx:Panel title="Edit Comment" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
+    borderThickness="1" backgroundColor="#EEEEEE" width="75%" height="100%">
+    <mx:Form width="100%" height="100%">
+      <mx:FormItem label="CommentableType" width="100%">
+        <mx:TextInput id="commentableTypeTextInput" width="100%" text="{comment.commentableType}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Private" width="100%">
+        <mx:CheckBox id="privateCheckBox" selected="{comment.sub_rosa}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Title" width="100%">
+        <mx:TextInput id="titleTextInput" width="100%" text="{comment.title}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Comment" width="100%">
+        <mx:TextArea id="commentTextArea" width="100%" height="200" text="{comment.comment}"/>
+      </mx:FormItem>
+      <mx:FormItem label="User" width="100%">
+        <mx:ComboBox id="userComboBox" width="200"
+          labelField="{User.LABEL}"
+          dataProvider="{Rx.models.index(User)}" prompt="User ..."
+          selectedItem="{comment.user}"/>
+      </mx:FormItem>
+    </mx:Form>
+    <mx:ControlBar width="100%">
+      <mx:Button label="Save Comment" width="50%" height="30"
+        click="saveComment()"/>
+      <mx:Button label="Delete Comment" width="50%" height="30"
+        enabled="{RxUtils.canDeleteModel(comment)}"
+        click="destroyComment()"/>
+    </mx:ControlBar>
+  </mx:Panel>
+</mx:HBox>
