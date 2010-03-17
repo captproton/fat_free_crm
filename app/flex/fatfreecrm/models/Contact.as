@@ -6,7 +6,7 @@ package fatfreecrm.models {
   [Resource(name="contacts")]
   [Bindable]
   public class Contact extends RxModel {
-    public static const LABEL:String = "assignedTo";
+    public static const LABEL:String = "lastName";
 
     public var assignedTo:int = 0;
 

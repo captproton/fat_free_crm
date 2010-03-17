@@ -33,6 +33,7 @@ class OpportunitiesController < ApplicationController
       format.html # index.html.haml
       format.js   # index.js.rjs
       format.xml  { render :xml => @opportunities }
+      format.fxml  { render :fxml => @opportunities }
     end
   end
 
@@ -46,6 +47,7 @@ class OpportunitiesController < ApplicationController
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @opportunity }
+      format.fxml  { render :fxml => @opportunity }
     end
 
   rescue ActiveRecord::RecordNotFound

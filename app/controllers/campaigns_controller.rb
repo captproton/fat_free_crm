@@ -32,6 +32,7 @@ class CampaignsController < ApplicationController
       format.html # index.html.haml
       format.js   # index.js.rjs
       format.xml  { render :xml => @campaigns }
+      format.fxml  { render :fxml => @campaigns }
     end
   end
 
@@ -46,6 +47,7 @@ class CampaignsController < ApplicationController
     respond_to do |format|
       format.html # show.html.haml
       format.xml  { render :xml => @campaign }
+      format.fxml  { render :fxml => @campaign }
     end
 
   rescue ActiveRecord::RecordNotFound
@@ -66,6 +68,7 @@ class CampaignsController < ApplicationController
     respond_to do |format|
       format.js   # new.js.rjs
       format.xml  { render :xml => @campaign }
+      format.fxml  { render :fxml => @campaign }
     end
   end
 

@@ -31,6 +31,7 @@ class AccountsController < ApplicationController
       format.html # index.html.haml
       format.js   # index.js.rjs
       format.xml  { render :xml => @accounts }
+      format.fxml  { render :fxml => @accounts }
     end
   end
 
@@ -45,6 +46,7 @@ class AccountsController < ApplicationController
     respond_to do |format|
       format.html # show.html.haml
       format.xml  { render :xml => @account }
+      format.fxml  { render :fxml => @account }
     end
 
   rescue ActiveRecord::RecordNotFound

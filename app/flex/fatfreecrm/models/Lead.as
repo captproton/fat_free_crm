@@ -6,7 +6,7 @@ package fatfreecrm.models {
   [Resource(name="leads")]
   [Bindable]
   public class Lead extends RxModel {
-    public static const LABEL:String = "assignedTo";
+    public static const LABEL:String = "company";
 
     public var assignedTo:int = 0;
 

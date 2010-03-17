@@ -31,6 +31,7 @@ class CommentsController < ApplicationController
     respond_to do |format|
       format.html { redirect_to(@asset) }
       format.xml  { render :xml => @comments }
+      format.fxml  { render :fxml => @comments }
     end
 
   rescue ActiveRecord::RecordNotFound # Kicks in if @asset was not found.

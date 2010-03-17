@@ -38,6 +38,7 @@ class UsersController < ApplicationController
     respond_to do |format|
       format.html # show.html.haml
       format.xml  { render :xml => @user }
+      format.fxml  { render :fxml => @user }
     end
   end
 
@@ -50,7 +51,7 @@ class UsersController < ApplicationController
 
       respond_to do |format|
         format.html # new.html.haml <-- signup form
-        format.xml  { render :xml => @user }
+        format.fxml  { render :fxml => @user }
       end
     else
       redirect_to login_path

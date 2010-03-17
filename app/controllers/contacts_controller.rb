@@ -31,6 +31,7 @@ class ContactsController < ApplicationController
       format.html # index.html.haml
       format.js   # index.js.rjs
       format.xml  { render :xml => @contacts }
+      format.fxml  { render :fxml => @contacts }
     end
   end
 
@@ -45,6 +46,7 @@ class ContactsController < ApplicationController
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @contact }
+      format.fxml  { render :fxml => @contact }
     end
 
   rescue ActiveRecord::RecordNotFound

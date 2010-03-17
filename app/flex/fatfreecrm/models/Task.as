@@ -5,7 +5,7 @@ package fatfreecrm.models {
   [Resource(name="tasks")]
   [Bindable]
   public class Task extends RxModel {
-    public static const LABEL:String = "assignedTo";
+    public static const LABEL:String = "name";
 
     public var assignedTo:int = 0;
 

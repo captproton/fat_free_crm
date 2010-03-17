@@ -25,12 +25,17 @@ class TasksController < ApplicationController
   #----------------------------------------------------------------------------
   def index
     @view = params[:view] || "pending"
+    @flashyView = "assigned"
     @tasks = Task.find_all_grouped(@current_user, @view)
+    @flashyTasks = Task.all
 
     respond_to do |format|
       format.html # index.html.haml
       # Hash keys must be strings... symbols generate "undefined method 'singularize' error"
       format.xml  { render :xml => @tasks.inject({}) { |tasks, (k,v)| tasks[k.to_s] = v; tasks } }
+      format.fxml  { render :fxml => @flashyTasks }
+      ## format.fxml { render :fxml => @tasks}
+      
     end
   end
 
@@ -41,6 +46,7 @@ class TasksController < ApplicationController
     respond_to do |format|
       format.html { render :action => :index }
       format.xml  { @task = Task.tracked_by(@current_user).find(params[:id]);  render :xml => @task }
+      format.fxml  { @task = Task.tracked_by(@current_user).find(params[:id]);  render :fxml => @task }
     end
   end
 
@@ -61,6 +67,7 @@ class TasksController < ApplicationController
     respond_to do |format|
       format.js   # new.js.rjs
       format.xml  { render :xml => @task }
+      format.fxml  { render :fxml => @task }
     end
 
   rescue ActiveRecord::RecordNotFound # Kicks in if related asset was not found.

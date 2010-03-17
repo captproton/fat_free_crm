@@ -32,6 +32,7 @@ class LeadsController < ApplicationController
       format.html # index.html.erb
       format.js   # index.js.rjs
       format.xml  { render :xml => @leads }
+      format.fxml  { render :fxml => @leads }
     end
   end
 
@@ -45,6 +46,7 @@ class LeadsController < ApplicationController
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @lead }
+      format.fxml  { render :fxml => @lead }
     end
 
   rescue ActiveRecord::RecordNotFound
