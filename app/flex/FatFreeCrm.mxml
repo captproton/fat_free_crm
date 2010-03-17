@@ -60,17 +60,13 @@
     <!-- For a simple demo, put all the components here. -->
 	  <generated:TaskBox/>
 	  <generated:AccountBox/>
-    <generated:AccountContactBox/>
-    <generated:AccountOpportunityBox/>
     <generated:ActivityBox/>
-    <generated:AvatarBox/>
     <generated:CampaignBox/>
-    <generated:CommentBox/>
-    <generated:ContactBox/>
-    <generated:ContactOpportunityBox/>
-    <generated:LeadBox/>
+<!--    <generated:CommentBox/>
+-->    <generated:ContactBox/>
+<!--    <generated:ContactOpportunityBox/>
+-->    <generated:LeadBox/>
     <generated:OpportunityBox/>
-    <generated:PermissionBox/>
-    <generated:PreferenceBox/>
-  </mx:ViewStack>
+<!--    <generated:PreferenceBox/>
+-->  </mx:ViewStack>
 </s:Application>

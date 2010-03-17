@@ -27,12 +27,13 @@ class CampaignsController < ApplicationController
   #----------------------------------------------------------------------------
   def index
     @campaigns = get_campaigns(:page => params[:page])
+    @flashyCampaigns = Campaign.all
 
     respond_to do |format|
       format.html # index.html.haml
       format.js   # index.js.rjs
       format.xml  { render :xml => @campaigns }
-      format.fxml  { render :fxml => @campaigns }
+      format.fxml  { render :fxml => @flashyCampaigns }
     end
   end
 

@@ -5,7 +5,7 @@ package fatfreecrm.models {
   [Resource(name="activities")]
   [Bindable]
   public class Activity extends RxModel {
-    public static const LABEL:String = "subjectType";
+    public static const LABEL:String = "info";
 
     public var subjectType:String = "";
 
