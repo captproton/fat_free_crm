@@ -1,0 +1,214 @@
+session:
+ - data: text
+ - belongs_to: [session]
+ - has_many: [sessions]
+
+permission:
+ - asset_type: string
+ - polymorphic: [asset]
+ - belongs_to: [user]
+
+setting:
+ - name: string
+ - value: text
+ - default_value: text
+
+preference:
+ - name: string
+ - value: text
+ - belongs_to: [user]
+
+account_contact:
+ - deleted_at: datetime
+ - belongs_to: [account, contact]
+
+account_opportunity:
+ - deleted_at: datetime
+ - belongs_to: [account, opportunity]
+
+contact_opportunity:
+ - role: string
+ - deleted_at: datetime
+ - belongs_to: [contact, opportunity]
+
+comment:
+ - commentable_type: string
+ - private: boolean
+ - title: string
+ - comment: text
+ - polymorphic: [commentable]
+ - belongs_to: [user]
+
+activity:
+ - subject_type: string
+ - action: string
+ - info: string
+ - private: boolean
+ - polymorphic: [subject]
+ - belongs_to: [user]
+
+avatar:
+ - entity_type: string
+ - image_file_size: integer
+ - attachment_field: [image]
+ - image_file_name: string
+ - image_content_type: string
+ - polymorphic: [entity]
+ - belongs_to: [user]
+
+user:
+ - username: string
+ - email: string
+ - first_name: string
+ - last_name: string
+ - title: string
+ - company: string
+ - alt_email: string
+ - phone: string
+ - mobile: string
+ - aim: string
+ - yahoo: string
+ - google: string
+ - skype: string
+ - password_hash: string
+ - password_salt: string
+ - persistence_token: string
+ - perishable_token: string
+ - last_request_at: datetime
+ - last_login_at: datetime
+ - current_login_at: datetime
+ - last_login_ip: string
+ - current_login_ip: string
+ - login_count: integer
+ - deleted_at: datetime
+ - admin: boolean
+ - suspended_at: datetime
+ - has_many: [permissions, preferences, comments, activities, avatars, campaigns, opportunities, tasks, contacts, accounts, leads]
+
+campaign:
+ - assigned_to: integer
+ - name: string
+ - access: string
+ - status: string
+ - budget: decimal
+ - target_leads: integer
+ - target_conversion: float
+ - target_revenue: decimal
+ - leads_count: integer
+ - opportunities_count: integer
+ - revenue: decimal
+ - starts_on: date
+ - ends_on: date
+ - objectives: text
+ - deleted_at: datetime
+ - background_info: string
+ - belongs_to: [user]
+ - has_many: [opportunities, leads]
+
+opportunity:
+ - assigned_to: integer
+ - name: string
+ - access: string
+ - source: string
+ - stage: string
+ - probability: integer
+ - amount: decimal
+ - discount: decimal
+ - closes_on: date
+ - deleted_at: datetime
+ - background_info: string
+ - belongs_to: [user, campaign]
+ - has_many: [account_opportunities, contact_opportunities]
+
+task:
+ - assigned_to: integer
+ - completed_by: integer
+ - name: string
+ - asset_type: string
+ - priority: string
+ - category: string
+ - bucket: string
+ - due_at: datetime
+ - completed_at: datetime
+ - deleted_at: datetime
+ - background_info: string
+ - polymorphic: [asset]
+ - belongs_to: [user]
+
+address:
+ - street1: string
+ - street2: string
+ - city: string
+ - state: string
+ - zipcode: string
+ - country: string
+ - full_address: string
+ - address_type: string
+ - addressable_type: string
+ - deleted_at: datetime
+ - polymorphic: [addressable]
+
+contact:
+ - assigned_to: integer
+ - reports_to: integer
+ - first_name: string
+ - last_name: string
+ - access: string
+ - title: string
+ - department: string
+ - source: string
+ - email: string
+ - alt_email: string
+ - phone: string
+ - mobile: string
+ - fax: string
+ - blog: string
+ - linkedin: string
+ - facebook: string
+ - twitter: string
+ - born_on: date
+ - do_not_call: boolean
+ - deleted_at: datetime
+ - background_info: string
+ - belongs_to: [user, lead]
+ - has_many: [account_contacts, contact_opportunities]
+
+account:
+ - assigned_to: integer
+ - name: string
+ - access: string
+ - website: string
+ - toll_free_phone: string
+ - phone: string
+ - fax: string
+ - deleted_at: datetime
+ - email: string
+ - background_info: string
+ - belongs_to: [user]
+ - has_many: [account_contacts, account_opportunities]
+
+lead:
+ - assigned_to: integer
+ - first_name: string
+ - last_name: string
+ - access: string
+ - title: string
+ - company: string
+ - source: string
+ - status: string
+ - referred_by: string
+ - email: string
+ - alt_email: string
+ - phone: string
+ - mobile: string
+ - blog: string
+ - linkedin: string
+ - facebook: string
+ - twitter: string
+ - rating: integer
+ - do_not_call: boolean
+ - deleted_at: datetime
+ - background_info: string
+ - belongs_to: [user, campaign]
+ - has_many: [contacts]
+
