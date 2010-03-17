@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
-  xmlns:generated="fatfreecrm.views.generated.*"
-  paddingBottom="8" paddingLeft="8" paddingRight="8" paddingTop="8"
-  layout="horizontal" styleName="plain" initialize="init()">
-  <mx:Script>
+<s:Application 	xmlns:fx="http://ns.adobe.com/mxml/2009"
+				xmlns:s="library://ns.adobe.com/flex/spark"
+				xmlns:mx="library://ns.adobe.com/flex/mx"
+
+			   	xmlns:d="http://ns.adobe.com/fxg/2008/dt" 
+			   	xmlns:fc="http://ns.adobe.com/flashcatalyst/2009" 
+  				xmlns:generated="fatfreecrm.views.generated.*"
+				styleName="plain" 
+				initialize="init()">
+  <fx:Script>
     <![CDATA[
       import org.restfulx.Rx;
       import fatfreecrm.controllers.ApplicationController;
@@ -12,11 +17,49 @@
         ApplicationController.initialize();
       }
     ]]>
-  </mx:Script>
-  <mx:LinkBar dataProvider="{mainViewStack}" direction="vertical" borderStyle="solid" backgroundColor="#EEEEEE"/>
+  </fx:Script>
+<!--	Application is now a spark tag, not an mx tag.  That means that xmlns's have been changed.  Layout is no longer in
+	tag, but it's own seperate, nested tag.-->
+	<s:layout>
+		<s:HorizontalLayout/>
+	</s:layout>
+	  <mx:LinkBar dataProvider="{mainViewStack}" direction="vertical" backgroundColor="#EEEEEE"/>
+<!--		Certain describers in LinkBar have been deprecated in Spark, like dropshadow.  That can be skinned in seperately.
+-->
+	<!--<mx:LinkBar dataProvider="{vs}" width="100%" direction="vertical" />-->
+	
   <mx:ViewStack id="mainViewStack" width="100%" height="100%">
+<!-- Commented-out source for code is Hello Flex 4. 
+	  <mx:TabNavigator width="100%" height="100%" paddingLeft="5"
+					   label="Tab Navigator">
+		  <mx:VBox label="One" width="100%" height="100%">
+			  <mx:Label text="Here's a button:"/>
+			  <mx:Button label="A Halo Button"/>
+		  </mx:VBox>
+		  <mx:VBox label="Two" width="100%" height="100%">
+			  <mx:Label text="Shameless self-promotion:"/>
+			  <mx:Image
+				  source="http://www.manning.com/armstrong/armstrong_cover150.jpg"/>
+		  </mx:VBox>
+		  <mx:VBox label="Three" width="100%" height="100%">
+			  <mx:Label text="Stuff inside Three"/>
+		  </mx:VBox>
+	  </mx:TabNavigator>
+	  <mx:Accordion width="100%" height="100%" label="Accordion">
+		  <mx:VBox label="Four" width="100%" height="100%">
+			  <mx:Label text="Stuff inside Four"/>
+		  </mx:VBox>
+		  <mx:VBox label="Five" width="100%" height="100%">
+			  <mx:Label text="Stuff inside Five"/>
+		  </mx:VBox>
+		  <mx:VBox label="Six" width="100%" height="100%">
+			  <mx:Label text="Stuff inside Six"/>
+		  </mx:VBox>
+	  </mx:Accordion>
+-->
     <!-- For a simple demo, put all the components here. -->
-    <generated:AccountBox/>
+	  <generated:TaskBox/>
+	  <generated:AccountBox/>
     <generated:AccountContactBox/>
     <generated:AccountOpportunityBox/>
     <generated:ActivityBox/>
@@ -29,6 +72,5 @@
     <generated:OpportunityBox/>
     <generated:PermissionBox/>
     <generated:PreferenceBox/>
-    <generated:TaskBox/>
   </mx:ViewStack>
-</mx:Application>
+</s:Application>

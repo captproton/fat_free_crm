@@ -1,6 +1,7 @@
 package fatfreecrm.controllers {
   import fatfreecrm.models.*;
   import fatfreecrm.commands.*;
+  import mx.core.FlexGlobals;
 
 	import mx.core.Application;		
   import org.restfulx.Rx;
@@ -10,7 +11,7 @@ package fatfreecrm.controllers {
   public class ApplicationController extends RxApplicationController {
     private static var controller:ApplicationController;
     
-    public static var models:Array = [Account, AccountContact, AccountOpportunity, Activity, Avatar, Campaign, Comment, Contact, ContactOpportunity, Lead, Opportunity, Permission, Preference, Task]; /* Models */
+    public static var models:Array = [Account, AccountContact, AccountOpportunity, Activity, Avatar, Campaign, Comment, Contact, ContactOpportunity, Lead, Opportunity, Permission, Preference, Task, User]; /* Models */
     
     public static var commands:Array = []; /* Commands */
     
@@ -29,8 +30,8 @@ package fatfreecrm.controllers {
       if (!RxUtils.isEmpty(airDatabaseName)) Rx.airDatabaseName = airDatabaseName;
       controller = new ApplicationController(new SingletonEnforcer, 
         extraServices, defaultServiceId);
-			Rx.sessionToken = Application.application.parameters.session_token;
-			Rx.authenticityToken = Application.application.parameters.authenticity_token;
+			Rx.sessionToken = FlexGlobals.topLevelApplication.parameters.session_token;
+			Rx.authenticityToken = FlexGlobals.topLevelApplication.parameters.authenticity_token;
     }
   }
 }

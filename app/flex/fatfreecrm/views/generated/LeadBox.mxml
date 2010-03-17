@@ -74,8 +74,7 @@
     }    
   ]]></mx:Script>
   <mx:Panel id="leadsPanel"
-    title="Leads" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
-    borderThickness="1" backgroundColor="#EEEEEE" width="25%" height="100%">
+    title="Leads" cornerRadius="0" backgroundColor="#EEEEEE" width="25%" height="100%">
     <mx:List id="leadsList"
       width="100%" height="100%"
       dataProvider="{Rx.models.index(Lead)}"
@@ -85,8 +84,7 @@
         click="newLead()"/>
     </mx:ControlBar>
   </mx:Panel>
-  <mx:Panel title="Edit Lead" cornerRadius="0" dropShadowEnabled="false" borderStyle="solid"
-    borderThickness="1" backgroundColor="#EEEEEE" width="75%" height="100%">
+  <mx:Panel title="Edit Lead" cornerRadius="0" backgroundColor="#EEEEEE" width="75%" height="100%">
     <mx:Form width="100%" height="100%">
       <mx:FormItem label="AssignedTo" width="100%">
         <mx:TextInput id="assignedToTextInput" width="100%" text="{lead.assignedTo}"/>
