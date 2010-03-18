@@ -26,7 +26,13 @@ class UsersController < ApplicationController
   # GET /users.xml                              HTML (not directly exposed yet)
   #----------------------------------------------------------------------------
   def index
-    # not exposed
+    # html and .js not exposed
+    @users = User.all
+    respond_to do |format|
+      format.fxml  { render :fxml => @users }
+    end
+
+
   end
 
   # GET /users/1
@@ -34,11 +40,12 @@ class UsersController < ApplicationController
   #----------------------------------------------------------------------------
   def show
     @user = params[:id] ? User.find(params[:id]) : @current_user
+    @flashyUser = params[:id] == current_user ? User.find(params[:id]) : @current_user
 
     respond_to do |format|
       format.html # show.html.haml
       format.xml  { render :xml => @user }
-      format.fxml  { render :fxml => @user }
+      format.fxml  { render :fxml => @flashyUser }
     end
   end
 
@@ -61,6 +68,8 @@ class UsersController < ApplicationController
   # GET /users/1/edit                                                      AJAX
   #----------------------------------------------------------------------------
   def edit
+    @user = User.find(@current_user)
+    
     # <-- render edit.js.rjs
   end
   

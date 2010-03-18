@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" label="User"
+  xmlns:rx="org.restfulx.components.rx.*">
+  <mx:Script><![CDATA[
+    import org.restfulx.Rx;
+    import org.restfulx.utils.RxUtils;
+    import fatfreecrm.models.User;
+
+    [Bindable]
+    private var user:User = new User();
+
+/*     private function newUser():void {
+      user = new User();
+      usersList.selectedIndex = -1;
+    } */
+
+    private function saveUser():void {
+      updateModelProperties();
+      if (user.id) {
+        user.update({onSuccess: onUserUpdate});
+      } else {
+        user.create({onSuccess: onUserCreate});
+      }
+    }
+  
+    private function updateModelProperties():void {
+      // user.username = usernameTextInput.text;
+      user.email = emailTextInput.text;
+      user.firstName = firstNameTextInput.text;
+      user.lastName = lastNameTextInput.text;
+      user.title = titleTextInput.text;
+      user.company = companyTextInput.text;
+      user.altEmail = altEmailTextInput.text;
+      user.phone = phoneTextInput.text;
+      user.mobile = mobileTextInput.text;
+      user.aim = aimTextInput.text;
+      user.yahoo = yahooTextInput.text;
+      user.google = googleTextInput.text;
+      user.skype = skypeTextInput.text;
+  
+    }
+   
+    private function destroyUser():void {
+      user.destroy({onSuccess: onUserDestroy});
+    }
+    
+/*     private function onUserSelect():void {
+      user = RxUtils.clone(usersList.selectedItem) as User;
+    }
+ */    
+    private function onUserCreate(result:User):void {
+      user = new User;
+    }
+    
+    private function onUserUpdate(result:User):void {
+/*       usersList.selectedItem = result;
+      onUserSelect();
+ */    }
+    
+    private function onUserDestroy(result:User):void {
+      onUserCreate(result);
+    }    
+  ]]></mx:Script>
+<!--  <mx:Panel id="usersPanel"
+    title="Users" cornerRadius="0"  backgroundColor="#EEEEEE" width="25%" height="100%">
+    <mx:List id="usersList"
+      width="100%" height="100%"
+      dataProvider="{Rx.models.index(User)}"
+      change="onUserSelect()"/>
+    <mx:ControlBar width="100%">
+      <mx:Button label="New User" width="100%" height="30"
+        click="newUser()"/>
+    </mx:ControlBar>
+  </mx:Panel>-->
+  <mx:Panel title="Edit User" cornerRadius="0"  backgroundColor="#EEEEEE" width="75%" height="100%">
+    <mx:Form width="100%" height="100%">
+<!--      <mx:FormItem label="Username" width="100%">
+        <mx:TextInput id="usernameTextInput" width="100%" text="{user.username}"/>
+      </mx:FormItem>-->
+      <mx:FormItem label="Email" width="100%">
+        <mx:TextInput id="emailTextInput" width="100%" text="{user.email}"/>
+      </mx:FormItem>
+      <mx:FormItem label="FirstName" width="100%">
+        <mx:TextInput id="firstNameTextInput" width="100%" text="{user.firstName}"/>
+      </mx:FormItem>
+      <mx:FormItem label="LastName" width="100%">
+        <mx:TextInput id="lastNameTextInput" width="100%" text="{user.lastName}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Title" width="100%">
+        <mx:TextInput id="titleTextInput" width="100%" text="{user.title}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Company" width="100%">
+        <mx:TextInput id="companyTextInput" width="100%" text="{user.company}"/>
+      </mx:FormItem>
+      <mx:FormItem label="AltEmail" width="100%">
+        <mx:TextInput id="altEmailTextInput" width="100%" text="{user.altEmail}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Phone" width="100%">
+        <mx:TextInput id="phoneTextInput" width="100%" text="{user.phone}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Mobile" width="100%">
+        <mx:TextInput id="mobileTextInput" width="100%" text="{user.mobile}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Aim" width="100%">
+        <mx:TextInput id="aimTextInput" width="100%" text="{user.aim}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Yahoo" width="100%">
+        <mx:TextInput id="yahooTextInput" width="100%" text="{user.yahoo}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Google" width="100%">
+        <mx:TextInput id="googleTextInput" width="100%" text="{user.google}"/>
+      </mx:FormItem>
+      <mx:FormItem label="Skype" width="100%">
+        <mx:TextInput id="skypeTextInput" width="100%" text="{user.skype}"/>
+      </mx:FormItem>
+    </mx:Form>
+    <mx:ControlBar width="100%">
+      <mx:Button label="Save Profile" width="50%" height="30"
+        click="saveUser()"/>
+<!--      <mx:Button label="Delete User" width="50%" height="30"
+        enabled="{RxUtils.canDeleteModel(user)}"
+        click="destroyUser()"/>
+-->    </mx:ControlBar>
+  </mx:Panel>
+</mx:HBox>

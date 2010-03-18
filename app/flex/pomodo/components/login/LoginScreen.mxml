@@ -36,7 +36,7 @@
       }
       
       private function onLoginSuccess(result:User):void {
-        Pomodo.models.currentUser = result;
+        FatFreeCrm.models.currentUser = result;
         Rx.sessionToken = result.account.sessionToken;
         dispatchEvent(new Event("login"));
       }

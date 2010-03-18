@@ -21,16 +21,16 @@
       private var totalCost:Number;
       
       private function init():void {
-        Pomodo.tracker.addEventListener(TimeChangeEvent.ID, onTimeChange);
-        Pomodo.tracker.addEventListener(SubtractTimeEvent.ID, onSubtractTime);
+        FatFreeCrm.tracker.addEventListener(TimeChangeEvent.ID, onTimeChange);
+        FatFreeCrm.tracker.addEventListener(SubtractTimeEvent.ID, onSubtractTime);
       }
 
       private function onTimeChange(event:Event):void {
-        totalCost = totalCost + (Pomodo.tracker.activeTask.sprint.billedHourlyRate / 3600);
+        totalCost = totalCost + (FatFreeCrm.tracker.activeTask.sprint.billedHourlyRate / 3600);
       }
       
       private function onSubtractTime(event:SubtractTimeEvent):void {
-        totalCost = totalCost - ((Pomodo.tracker.activeTask.sprint.billedHourlyRate * event.time) / 3600);
+        totalCost = totalCost - ((FatFreeCrm.tracker.activeTask.sprint.billedHourlyRate * event.time) / 3600);
       }
       
       public function get listData():BaseListData {

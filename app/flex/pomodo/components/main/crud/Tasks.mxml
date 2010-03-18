@@ -33,7 +33,7 @@
         selectedTask.name = nameTextInput.text;
         selectedTask.notes = notesTextArea.text;
         selectedTask.sprint = Sprint(sprintComboBox.selectedItem);
-        selectedTask.user = Pomodo.models.currentUser;
+        selectedTask.user = FatFreeCrm.models.currentUser;
         selectedTask.billedPercentage = billedHourlyRateNumericStepper.value;
         selectedTask.completed = completedCheckBox.selected;
         saveTask(selectedTask);
@@ -67,7 +67,7 @@
   </mx:Script>
   <mx:DataGrid id="tasksDataGrid"
       horizontalScrollPolicy="auto"
-      dataProvider="{Pomodo.models.tasks}"
+      dataProvider="{FatFreeCrm.models.tasks}"
       height="{this.height - 270}" right="5" top="0" left="5" click="selectTaskToEdit()">
       <mx:columns>
         <mx:DataGridColumn dataField="name" headerText="Name" width="218"/>
@@ -106,7 +106,7 @@
       <mx:TextArea id="notesTextArea" height="100%" width="100%" text="{selectedTask.notes}"/>
     </mx:FormItem>
     <mx:FormItem label="Sprint:">
-      <mx:ComboBox id="sprintComboBox" dataProvider="{Pomodo.models.sprints}" 
+      <mx:ComboBox id="sprintComboBox" dataProvider="{FatFreeCrm.models.sprints}" 
         labelField="qualifiedName" selectedItem="{selectedTask.sprint}"></mx:ComboBox>
     </mx:FormItem>
     <mx:FormItem label="Billed %:" width="100%">

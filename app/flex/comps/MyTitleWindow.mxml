@@ -4,6 +4,7 @@
 			   xmlns:fx="http://ns.adobe.com/mxml/2009"
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:crud="com.captproton.components.main.crud.*"
 			   title="Spark Add Task title"
 			   width="500" height="600"
 			   close="ttlWndw_close(event);">
@@ -47,11 +48,11 @@
 					formkind = "Opportunity"
 
 				}
-				if ( taskForm.visible == true) {
+/* 				if ( taskForm.visible == true) {
 					formkind = 'gtask'
 
 				}
-
+ */
 				if ( state == 'Tasks' ) {
 
 				}else{
@@ -106,8 +107,8 @@
 
 	<!--Task CRUD form-->
 	<s:Label id="instructionLabel" y="15" text="Basic" paddingLeft="20" paddingTop="5" fontSize="18"/>
-	
-	<s:VGroup id="taskForm" visible="false" includeInLayout="false" paddingLeft="20" paddingRight="20" paddingTop="20">
+	<crud:TaskForm id="taskForm"  visible="false" includeInLayout="false" paddingLeft="20" paddingRight="20" paddingTop="20" />
+<!--	<s:VGroup id="taskForm" visible="false" includeInLayout="false" paddingLeft="20" paddingRight="20" paddingTop="20">
 		<s:Label id="taskName" width="100%" text="Name"/>
 		<s:TextInput width="350"  />
 		<s:HGroup width="100%" paddingTop="10">
@@ -146,7 +147,7 @@
 			</s:VGroup>
 		</s:HGroup>
 
-	</s:VGroup>
+	</s:VGroup>-->
 
 	
 	<!--Campaign CRUD form-->

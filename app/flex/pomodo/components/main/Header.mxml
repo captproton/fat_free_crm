@@ -13,8 +13,8 @@
       public var container:App;   
     
       private function init():void {
-        Pomodo.tracker.addEventListener(StartWorkEvent.ID, onStartWork);
-        Pomodo.tracker.addEventListener(StopWorkEvent.ID, onStopWork);
+        FatFreeCrm.tracker.addEventListener(StartWorkEvent.ID, onStartWork);
+        FatFreeCrm.tracker.addEventListener(StopWorkEvent.ID, onStopWork);
       }
 
       private function onStartWork(event:Event):void {
@@ -26,10 +26,10 @@
       }
 
       private function toggleWorkState():void {
-        if (Pomodo.tracker.currentlyWorking()) {
-          Pomodo.tracker.stopWork();
-        } else if (Pomodo.tracker.selectedTask) {
-          Pomodo.tracker.startWork();
+        if (FatFreeCrm.tracker.currentlyWorking()) {
+          FatFreeCrm.tracker.stopWork();
+        } else if (FatFreeCrm.tracker.selectedTask) {
+          FatFreeCrm.tracker.startWork();
         } else {
           infoText.text = "Select a task to work on.";
         }
@@ -38,10 +38,10 @@
   </mx:Script>
   <mx:Image source="assets/play_green.png" click="toggleWorkState()" id="startStopButton" x="10" y="8"/>
   <mx:Canvas height="41" styleName="infoBox" y="4" id="infoBox" left="50" right="10">
-    <mx:Text text="{(Pomodo.tracker.currentlyWorking()) ? Pomodo.tracker.activeTask.name : Pomodo.tracker.selectedTask.name}"
+    <mx:Text text="{(FatFreeCrm.tracker.currentlyWorking()) ? FatFreeCrm.tracker.activeTask.name : FatFreeCrm.tracker.selectedTask.name}"
       selectable="false" id="infoText"
       fontSize="12" verticalCenter="-7" horizontalCenter="0" maxWidth="{infoBox.width - 5}"/>
-    <mx:Text text="{PomodoUtils.getFormattedTime(Pomodo.tracker.totalTaskTime)}" fontSize="16" verticalCenter="+5" 
+    <mx:Text text="{PomodoUtils.getFormattedTime(FatFreeCrm.tracker.totalTaskTime)}" fontSize="16" verticalCenter="+5" 
       horizontalCenter="0" minWidth="65" maxWidth="{infoBox.width - 5}" selectable="false"/>
   </mx:Canvas>
 </mx:Canvas>

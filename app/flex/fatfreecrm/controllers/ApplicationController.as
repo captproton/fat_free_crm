@@ -1,12 +1,13 @@
 package fatfreecrm.controllers {
   import fatfreecrm.models.*;
   import fatfreecrm.commands.*;
-  import mx.core.FlexGlobals;
 
 	import mx.core.Application;		
   import org.restfulx.Rx;
   import org.restfulx.controllers.RxApplicationController;
   import org.restfulx.utils.RxUtils;
+  import mx.core.FlexGlobals; 
+
 
   public class ApplicationController extends RxApplicationController {
     private static var controller:ApplicationController;
@@ -30,7 +31,8 @@ package fatfreecrm.controllers {
       if (!RxUtils.isEmpty(airDatabaseName)) Rx.airDatabaseName = airDatabaseName;
       controller = new ApplicationController(new SingletonEnforcer, 
         extraServices, defaultServiceId);
-			Rx.sessionToken = FlexGlobals.topLevelApplication.parameters.session_token;
+			Rx.sessionToken = FlexGlobals.topLevelApplication.parameters.session_token; 
+
 			Rx.authenticityToken = FlexGlobals.topLevelApplication.parameters.authenticity_token;
     }
   }

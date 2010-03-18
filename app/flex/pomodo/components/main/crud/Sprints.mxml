@@ -83,7 +83,7 @@
       alignSymbol="left" allowNegative="false"/>
   <mx:DataGrid id="sprintsDataGrid"
       horizontalScrollPolicy="auto"
-      dataProvider="{Pomodo.models.sprints}"
+      dataProvider="{FatFreeCrm.models.sprints}"
       height="{this.height - 270}" right="5" top="0" left="5" click="selectSprintToEdit()">
       <mx:columns>
         <mx:DataGridColumn dataField="name" headerText="Name" width="{sprintsDataGrid.width - 507}"/>
@@ -122,7 +122,7 @@
       <rx:DateTimeTextInput id="dueByDateField" date="{selectedSprint.dueBy}"/>
     </mx:FormItem>
     <mx:FormItem label="Project:">
-      <mx:ComboBox id="projectsComboBox" dataProvider="{Pomodo.models.projects}" 
+      <mx:ComboBox id="projectsComboBox" dataProvider="{FatFreeCrm.models.projects}" 
         labelField="name" selectedItem="{selectedSprint.project}"></mx:ComboBox>
     </mx:FormItem>
     <mx:FormItem label="Billed Hourly Rate:" width="100%">

@@ -1,0 +1,65 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+user_one:
+  id: <%= Fixtures.identify(:user_one) %>
+  username: User1UsernameString
+  email: User1EmailString
+  first_name: User1FirstNameString
+  last_name: User1LastNameString
+  title: User1TitleString
+  company: User1CompanyString
+  alt_email: User1AltEmailString
+  phone: User1PhoneString
+  mobile: User1MobileString
+  aim: User1AimString
+  yahoo: User1YahooString
+  google: User1GoogleString
+  skype: User1SkypeString
+
+user_two:
+  id: <%= Fixtures.identify(:user_two) %>
+  username: User2UsernameString
+  email: User2EmailString
+  first_name: User2FirstNameString
+  last_name: User2LastNameString
+  title: User2TitleString
+  company: User2CompanyString
+  alt_email: User2AltEmailString
+  phone: User2PhoneString
+  mobile: User2MobileString
+  aim: User2AimString
+  yahoo: User2YahooString
+  google: User2GoogleString
+  skype: User2SkypeString
+
+user_three:
+  id: <%= Fixtures.identify(:user_three) %>
+  username: User3UsernameString
+  email: User3EmailString
+  first_name: User3FirstNameString
+  last_name: User3LastNameString
+  title: User3TitleString
+  company: User3CompanyString
+  alt_email: User3AltEmailString
+  phone: User3PhoneString
+  mobile: User3MobileString
+  aim: User3AimString
+  yahoo: User3YahooString
+  google: User3GoogleString
+  skype: User3SkypeString
+
+user_four:
+  id: <%= Fixtures.identify(:user_four) %>
+  username: User4UsernameString
+  email: User4EmailString
+  first_name: User4FirstNameString
+  last_name: User4LastNameString
+  title: User4TitleString
+  company: User4CompanyString
+  alt_email: User4AltEmailString
+  phone: User4PhoneString
+  mobile: User4MobileString
+  aim: User4AimString
+  yahoo: User4YahooString
+  google: User4GoogleString
+  skype: User4SkypeString

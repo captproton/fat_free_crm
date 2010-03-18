@@ -17,12 +17,12 @@
       private var totalTime:Number;
       
       private function init():void {
-        Pomodo.tracker.addEventListener(TimeChangeEvent.ID, onTimeChange);
+        FatFreeCrm.tracker.addEventListener(TimeChangeEvent.ID, onTimeChange);
       }
       
       private function onTimeChange(event:Event):void {
-        if (task == Pomodo.tracker.activeTask) {
-          totalTime = Pomodo.tracker.totalTaskTime;
+        if (task == FatFreeCrm.tracker.activeTask) {
+          totalTime = FatFreeCrm.tracker.totalTaskTime;
         }
       }
     

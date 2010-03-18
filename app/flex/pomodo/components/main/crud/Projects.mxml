@@ -87,7 +87,7 @@
       source="{hourlyRateMoneyTextInput}" property="text"
       alignSymbol="left" allowNegative="false"/>
   <mx:DataGrid id="projectsDataGrid" horizontalScrollPolicy="auto"
-      dataProvider="{Pomodo.models.projects}"
+      dataProvider="{FatFreeCrm.models.projects}"
       height="{this.height - 270}" right="5" top="0" left="5" click="selectProjectToEdit()">
       <mx:columns>
         <mx:DataGridColumn dataField="name" headerText="Name" width="200"/>
@@ -136,7 +136,7 @@
   <mx:Form width="48%" bottom="40" right="5" height="200">
     <mx:FormItem label="Category:" width="100%" height="100%">
       <mx:Tree id="selectedProjectCategoryTree" width="100%" height="100%" 
-        dataProvider="{Pomodo.models.projectCategories}" selectedItem="{selectedProject.projectCategory}"></mx:Tree>
+        dataProvider="{FatFreeCrm.models.projectCategories}" selectedItem="{selectedProject.projectCategory}"></mx:Tree>
     </mx:FormItem>
   </mx:Form>
   <mx:Button label="Save" bottom="10" left="10" click="saveSelectedProject()"/>

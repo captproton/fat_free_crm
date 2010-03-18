@@ -4,8 +4,6 @@
 			   xmlns:fx="http://ns.adobe.com/mxml/2009"
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
-			   xmlns:generated="fatfreecrm.views.generated.*"
-
 			   title="Spark Add Task title"
 			   width="500" height="450"
 			   close="ttlWndw_close(event);">
@@ -80,8 +78,7 @@
 		<s:RadioButtonGroup id="permissionType" />
 	</fx:Declarations>
 	<!--Profile CRUD form-->
-	<generated:UserBox id="UserBox" horizontalCenter="0" verticalCenter="0"/>
-
+	
 	<s:VGroup id="profileForm" visible="true" includeInLayout="true" paddingLeft="20" paddingRight="20" paddingTop="20">
 		<s:Label text="Basic" fontSize="18"/>
 		<s:HGroup width="100%" paddingTop="10">
@@ -176,5 +173,6 @@
 		
 		
 	</s:VGroup>
+	
 	
 </s:TitleWindow>

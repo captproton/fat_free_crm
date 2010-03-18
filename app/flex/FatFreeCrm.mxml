@@ -7,8 +7,11 @@
 			   backgroundColor="#ffffff" 
 			   xmlns:components="com.captproton.components.*"
 			   xmlns:models="com.captproton.models.*"
+			   xmlns:generated="fatfreecrm.views.generated.*"
 			   creationComplete="application_creationCompleteHandler()" 
-			   height="600" width="800">
+			   height="600" width="800"
+			   styleName="plain" 
+			   initialize="init()">
 	
 <!--	<s:controlBarContent>
 		<s:Button id="btn"
@@ -17,6 +20,14 @@
 	</s:controlBarContent>
 -->
 	<fx:Script><![CDATA[
+		//start RestfulX general
+		import org.restfulx.Rx;
+		import fatfreecrm.controllers.ApplicationController;
+		
+		private function init():void {
+			ApplicationController.initialize();
+		}
+		// end RestfulX general
 		
 		import spark.events.IndexChangeEvent;
 		import mx.controls.Alert;
@@ -531,10 +542,11 @@
 					<fx:String><![CDATA[Lead:  bobo smith]]></fx:String>
 				</s:ArrayCollection>
 			</s:List>
-			<s:List includeIn="Tasks,TaskItem,TaskItem2" 
+<!--			<s:List includeIn="Tasks,TaskItem,TaskItem2" 
 					width="512" height="488" 
 					x="253" y="86" 
 					id="taskItemsList" 
+					dataProvider="{Rx.models.index(Task)}"
 					d:userLabel="CurrentPageList" 
 					mouseDown="currentPageList_mouseDownHandler()" 
 					buttonMode.Consumers="true" 
@@ -544,14 +556,11 @@
 
 
 
-				<s:ArrayCollection>
-					<fx:String>TaskItem 1</fx:String>
-					<fx:String>Live well and prosper</fx:String>
-					<fx:String>Deposit that million dollar check I have lying around</fx:String>
-					<fx:String>Test task</fx:String>
-					<fx:String>call bill</fx:String>
-				</s:ArrayCollection>
-			</s:List>
+
+			</s:List>-->
+			
+			<generated:TaskBox id="TaskBox" x="253" y="86"  includeIn="Tasks"/>
+
 
 			<s:List includeIn="CampaignItem1,Opportunities,SignedIn,
 					Consumers,LeadsItem2,OpportunityItem2,Leads,

@@ -68,7 +68,7 @@ package pomodo.controllers {
         activeWorkunit = new Workunit;
         activeWorkunit.startedOn = new Date;
         activeWorkunit.task = activeTask;
-        activeWorkunit.user = Pomodo.models.currentUser;
+        activeWorkunit.user = FatFreeCrm.models.currentUser;
         totalTaskTime = activeTask.computedTotalTime;
         latestTaskTime = 0;
       }
