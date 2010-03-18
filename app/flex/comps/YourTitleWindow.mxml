@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- http://blog.flexexamples.com/2009/10/23/displaying-a-popup-spark-titlewindow-container-in-flex-4/ -->
+<s:TitleWindow name="LeadFormWindow"
+			   xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   title="Spark Add Task title"
+			   width="300" height="200"
+			   close="ttlWndw_close(event);">
+	
+<!--	Partly inspired by the url above and Session 17 of HelloFlex!4, this component only varies in the meaty form that it offers.  
+	The state of the component named after the kind of form it provides.  It is mentioned in the main file similar to thus:
+	
+	<comp:HPanel id="stateOnePanel" title="State One Panel"
+				 left="10" top="10" width="200" right.stateOne="10"
+				 height="100" bottom.stateOne="10" excludeFrom="noStateOne"
+				 headerClick="toggleState('stateOne')">
+		<s:Label text="松尾 芭蕉" fontSize="20"
+				 fontSize.stateOne="140"/>
+-->	
+	<fx:Script>
+		<![CDATA[
+			import mx.core.IFlexDisplayObject;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			// import mx.containers.Form
+			
+			protected function ttlWndw_close(evt:CloseEvent):void {
+				PopUpManager.removePopUp(evt.currentTarget as IFlexDisplayObject);
+			}
+		]]>
+	</fx:Script>
+	<s:Label text="opportunity" />
+	<mx:Form width="400">
+		<mx:FormItem label="Task Name" required="true" width="100%">
+			<s:TextInput id="taskName" width="250"/>
+		</mx:FormItem>		
+	</mx:Form>
+
+</s:TitleWindow>

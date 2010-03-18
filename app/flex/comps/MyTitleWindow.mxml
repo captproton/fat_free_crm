@@ -1,0 +1,595 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- http://blog.flexexamples.com/2009/10/23/displaying-a-popup-spark-titlewindow-container-in-flex-4/ -->
+<s:TitleWindow name="MyTitleWindow"
+			   xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   title="Spark Add Task title"
+			   width="500" height="600"
+			   close="ttlWndw_close(event);">
+	
+<!--	Partly inspired by the url above and Session 17 of HelloFlex!4, this component only varies in the meaty form that it offers.  
+	The state of the component named after the kind of form it provides.  It is mentioned in the main file similar to thus:
+	
+	<comp:HPanel id="stateOnePanel" title="State One Panel"
+				 left="10" top="10" width="200" right.stateOne="10"
+				 height="100" bottom.stateOne="10" excludeFrom="noStateOne"
+				 headerClick="toggleState('stateOne')">
+		<s:Label text="松尾 芭蕉" fontSize="20"
+				 fontSize.stateOne="140"/>
+-->	
+	<s:layout>
+		<s:VerticalLayout gap="0" horizontalAlign="contentJustify"/>
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.core.IFlexDisplayObject;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			// import mx.containers.Form
+			
+			private function showAlert(event:MouseEvent):void {
+				const state:String = currentState;
+				var formkind:String = "";
+
+				
+				if ( state == 'Consumers' ) {
+
+				}
+
+				if ( state == 'Leads' ) {
+
+				}
+
+				if ( state == 'Opportunities' ) {
+					formkind = "Opportunity"
+
+				}
+				if ( taskForm.visible == true) {
+					formkind = 'gtask'
+
+				}
+
+				if ( state == 'Tasks' ) {
+
+				}else{
+					formkind = 'dk dude'
+				}
+
+				Alert.show('That was ' + currentState + '!', 'Alert!');
+
+			}
+			
+			private function showAlertTask(event:MouseEvent):void {
+				Alert.show('That was easy!', 'Alert!');
+			}
+			
+			private function showAlertCampaign(event:MouseEvent):void {
+				Alert.show('That was easy Campaign!', 'Alert!');
+			}
+
+			protected function ttlWndw_close(evt:CloseEvent):void {
+				PopUpManager.removePopUp(evt.currentTarget as IFlexDisplayObject);
+			}
+			
+			// Handle the close button and Cancel button.
+			private function handleCloseEvent():void {
+				PopUpManager.removePopUp(this);
+			}            
+			
+			// Handle the OK button.
+			private function processLogin():void {
+				// Check credentials (not shown) then remove pop up.
+				PopUpManager.removePopUp(this);
+				
+
+			}
+
+			//
+			import mx.events.ItemClickEvent;
+			
+			private function handlePayment(event:ItemClickEvent):void {
+				if (event.currentTarget.selectedValue == "check") {
+					Alert.show("You opted to pay by check."); 
+				} else if (event.currentTarget.selectedValue == "credit") {
+					Alert.show("You opted to pay by credit card.");
+				}
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:RadioButtonGroup id="permissionType" />
+	</fx:Declarations>
+
+	<!--Task CRUD form-->
+	<s:Label id="instructionLabel" y="15" text="Basic" paddingLeft="20" paddingTop="5" fontSize="18"/>
+	
+	<s:VGroup id="taskForm" visible="false" includeInLayout="false" paddingLeft="20" paddingRight="20" paddingTop="20">
+		<s:Label id="taskName" width="100%" text="Name"/>
+		<s:TextInput width="350"  />
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="30%">
+				<s:Label id="taskDue" width="100%" text="Due:"/>
+				<s:DropDownList id="taskDueComboBox"
+								horizontalCenter="0"
+								top="20">
+					<s:dataProvider>
+						<s:ArrayList source="['As soon as Possible',Today,Tomorrow,'This Week']" />
+					</s:dataProvider>
+				</s:DropDownList>
+				
+			</s:VGroup>
+			<s:VGroup width="30%">
+				<s:Label id="taskAssignTo" width="100%" text="Assign To:"/>
+				<s:DropDownList id="taskAssignToComboBox"
+								horizontalCenter="0"
+								top="20">
+					<s:dataProvider>
+						<s:ArrayList source="[Person1,'John Widow',Person2,Person3]" />
+					</s:dataProvider>
+				</s:DropDownList>
+				
+			</s:VGroup>
+			<s:VGroup width="100%">
+				<s:Label id="taskCategory" width="30%" text="Category"/>
+				<s:DropDownList id="taskCategoryComboBox"
+								horizontalCenter="0"
+								top="20">
+					<s:dataProvider>
+						<s:ArrayList source="[Call,Email,Follow-up,Lunch,Meeting,Money,Presentation,Trip]" />
+					</s:dataProvider>
+				</s:DropDownList>
+				
+			</s:VGroup>
+		</s:HGroup>
+
+	</s:VGroup>
+
+	
+	<!--Campaign CRUD form-->
+	<s:VGroup id="campaignForm" visible="false" includeInLayout="false" paddingLeft="20" paddingRight="20" paddingTop="20">
+		<s:Label id="campaignName" width="100%" text="Name"/>
+		<s:TextInput width="350" id="campaignNameInput" />
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="30%">
+				<s:Label id="campaignStart" width="100%" text="Start Date:"/>
+				<s:TextInput width="150" id="campaignStartInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="30%">
+				<s:Label id="campaignFinish" width="100%" text="Finish Date:"/>
+				<s:TextInput width="100" id="campaignFinishInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="campaignStatus" width="30%" text="Status:"/>
+				<s:DropDownList id="campaignStatusComboBox"
+								horizontalCenter="0"
+								top="20">
+					<s:dataProvider>
+						<s:ArrayList source="['Called Off',Completed,'On Hold', Planned,Started]" />
+					</s:dataProvider>
+				</s:DropDownList>
+				
+			</s:VGroup>
+		</s:HGroup>
+		<s:Label text="Objectives" paddingTop="20"/>
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="30%">
+				<s:Label id="campaignNoOfLeads" width="100%" text="Number of Leads:"/>
+				<s:TextInput width="100" id="campaignNoOfLeadsInput" />
+			</s:VGroup>
+			<s:VGroup width="30%">
+				<s:Label id="campaignConversionPercent" width="100%" text="Conversion (%):"/>
+				<s:TextInput width="100" id="campaignConversionPercentInput" />
+			</s:VGroup>
+			<s:VGroup width="30%">
+				<s:Label id="campaignRevenue" width="100%" text="Revenue ($):"/>
+				<s:TextInput width="100" id="campaignRevenueInput" />
+			</s:VGroup>
+
+		</s:HGroup>
+		<s:VGroup width="30%">
+			<s:Label id="campaignBudget" width="100%" text="Budget ($):"/>
+			<s:TextInput width="100" id="campaignBudgetInput" />
+		</s:VGroup>
+		
+
+</s:VGroup>
+	<!--Lead CRUD form-->
+
+	<s:VGroup id="leadForm" visible="false" includeInLayout="false" paddingLeft="20" paddingRight="20" paddingTop="20">
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="35%">
+				<s:Label id="leadFirstName" width="100%" text="First Name:"/>
+				<s:TextInput width="80%" id="leadFirstNameInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="leadLastName" width="100%" text="Last Name:"/>
+				<s:TextInput width="100%" id="leadLastNameInput" />
+				
+			</s:VGroup>
+		</s:HGroup>
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="35%">
+				<s:Label id="leadEmail" width="100%" text="Email:"/>
+				<s:TextInput width="80%" id="leadEmailInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="leadPhone" width="100%" text="Phone:"/>
+				<s:TextInput width="100%" id="leadPhoneInput" />
+				
+			</s:VGroup>
+		</s:HGroup>
+		<s:Label text="Status" paddingTop="20"/>
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="30%">
+				<s:Label id="leadAssignedTo" width="100%" text="Assigned to:"/>
+				<s:TextInput width="100" id="leadAssignedToInput" />
+			</s:VGroup>
+			<s:VGroup width="30%">
+				<s:Label id="leadStatus" width="100%" text="Status"/>
+				<s:TextInput width="100" id="leadStatusInput" />
+			</s:VGroup>
+			<s:VGroup width="30%">
+				<s:Label id="leadSource" width="100%" text="Source:"/>
+				<s:TextInput width="100" id="leadSourceInput" />
+			</s:VGroup>
+			
+		</s:HGroup>
+		<s:HGroup width="60">
+			<s:VGroup width="30%">
+				<s:Label id="leadRating" width="100%" text="Rating:"/>
+				<s:TextInput width="100" id="leadRatingInput" />
+			</s:VGroup>
+			<s:VGroup width="30%">
+				<s:Label id="leadCampaign" width="100%" text="Campaign:"/>
+				<s:TextInput width="100" id="leadCampaignInput" />
+			</s:VGroup>
+			
+		</s:HGroup>
+		<s:Label text="Contact Information"/>
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="35%">
+				<s:Label id="leadTitle" width="100%" text="Title:"/>
+				<s:TextInput width="80%" id="leadTitleInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="leadCompany" width="100%" text="Company:"/>
+				<s:TextInput width="100%" id="leadCompanyInput" />
+				
+			</s:VGroup>
+		</s:HGroup>
+		
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="35%">
+				<s:Label id="leadAltEmail" width="100%" text="Alternative Email:"/>
+				<s:TextInput width="80%" id="leadAltEmailInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="leadMobile" width="100%" text="Mobile:"/>
+				<s:TextInput width="100%" id="leadMobileInput" />
+				
+			</s:VGroup>
+		</s:HGroup>
+		
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="35%">
+				<s:Label id="leadAddress" width="100%" text="Address:"/>
+				<s:TextArea width="80%" heightInLines="3" id="leadAddressInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="leadReferredBy" width="100%" text="Referred By:"/>
+				<s:TextInput width="100%" id="leadReferredByInput" />
+				<s:CheckBox label="Do not call" id="leadDoNotCall"/>
+				
+			</s:VGroup>
+		</s:HGroup>
+		
+		<s:Label text="Web Presence" color="#000000" backgroundColor="#000000"/>
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="35%">
+				<s:Label id="leadWebsite" width="100%" text="Website/Blog:"/>
+				<s:TextInput width="80%" id="leadWebsiteInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="leadTwitter" width="100%" text="Twitter:"/>
+				<s:TextInput width="100%" id="leadTwitterInput" />
+				
+			</s:VGroup>
+		</s:HGroup>
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="35%">
+				<s:Label id="leadLinkedIn" width="100%" text="LinkedIn:"/>
+				<s:TextInput width="80%" id="leadLinkedInInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="leadFacebook" width="100%" text="Facebook:"/>
+				<s:TextInput width="100%" id="leadFacebookInput" />
+				
+			</s:VGroup>
+		</s:HGroup>
+
+		<s:Label text="Permissions"/>
+		
+		
+		
+	</s:VGroup>
+	
+	<!--Consumer CRUD form-->
+
+	<s:VGroup id="consumerForm" visible="false" includeInLayout="false" paddingLeft="20" paddingRight="20" paddingTop="20">
+
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="40%">
+				<s:Label id="consumerName" width="100%" text="Account Name:"/>
+				<s:TextInput width="150" id="consumerNameInput" />
+				
+			</s:VGroup>
+
+			<s:VGroup width="40%">
+				<s:Label id="consumerAssignedTo" width="30%" text="Assigned to:"/>
+				<s:DropDownList id="consumerAssignedToComboBox"
+								horizontalCenter="0"
+								top="20">
+					<s:dataProvider>
+						<s:ArrayList source="['Myself','Billy Bob','Ralph'" />
+					</s:dataProvider>
+				</s:DropDownList>
+				
+			</s:VGroup>
+
+		</s:HGroup>
+		<s:Label text="Contact Information" paddingTop="20"/>
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="40%">
+				<s:Label id="consumerWebsite" width="100%" text="Website:"/>
+				<s:TextInput width="100" id="consumerWebsiteInput" />
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="consumerTollFree" width="100%" text="Phone (toll-free):"/>
+				<s:TextInput width="100" id="consumerTollFreeInput" />
+			</s:VGroup>
+		</s:HGroup>
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="40%">
+				<s:Label id="consumerPhone" width="100%" text="Phone:"/>
+				<s:TextInput width="100" id="consumerPhoneInput" />
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="consumerFax" width="100%" text="Fax:"/>
+				<s:TextInput width="100" id="consumerFaxInput" />
+			</s:VGroup>
+		</s:HGroup>
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="40%">
+				<s:Label id="consumerBillingAddress" width="100%" text="Billing Address:"/>
+				<s:TextArea width="100" heightInLines="3" id="consumerBillingAddressInput" />
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="consumerShippingAddress" width="100%" text="Shipping Address:"/>
+				<s:TextArea width="100" heightInLines="3" id="consumerShippingAddressInput" />
+			</s:VGroup>
+		</s:HGroup>
+		
+		
+	</s:VGroup>
+	
+	<!--Contact CRUD form-->
+
+	<s:VGroup id="contactForm" visible="false" includeInLayout="false" paddingLeft="20" paddingRight="20">
+		<s:HGroup width="100%">
+			<s:VGroup width="35%">
+				<s:Label id="contactFirstName" width="100%" text="First Name:"/>
+				<s:TextInput width="80%" id="contactFirstNameInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="contactLastName" width="100%" text="Last Name:"/>
+				<s:TextInput width="100%" id="contactLastNameInput" />
+				
+			</s:VGroup>
+		</s:HGroup>
+		<s:HGroup width="100%" >
+			<s:VGroup width="35%">
+				<s:Label id="contactEmail" width="100%" text="Email:"/>
+				<s:TextInput width="80%" id="contactEmailInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="contactPhone" width="100%" text="Phone:"/>
+				<s:TextInput width="100%" id="contactPhoneInput" />
+				
+			</s:VGroup>
+		</s:HGroup>
+		<s:Label text="Status" fontSize="18"/>
+		<s:HGroup width="100%">
+			<s:VGroup width="30%">
+				<s:Label id="contactAccount" width="100%" text="Account:"/>
+				<s:TextInput width="100" id="contactAccountInput" />
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="contactAssignedTo" width="100%" text="Assigned to:"/>
+				<s:DropDownList id="contactAssignedToComboBox"
+								horizontalCenter="0"
+								top="20">
+					<s:dataProvider>
+						<s:ArrayList source="[Myself,'me@me.com','Will Buzzoff', Planned,Started]" />
+					</s:dataProvider>
+				</s:DropDownList>
+				
+			</s:VGroup>
+
+			
+		</s:HGroup>
+
+		<s:Label text="Extra Information" fontSize="18" visible="false" includeInLayout="false"/>
+		<s:HGroup width="100%" visible="false" includeInLayout="false">
+			<s:VGroup width="35%">
+				<s:Label id="contactTitle" width="100%" text="Title:"/>
+				<s:TextInput width="80%" id="contactTitleInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="contactDepartment" width="100%" text="Department:"/>
+				<s:TextInput width="100%" id="contactDepartmentInput" />
+				
+			</s:VGroup>
+		</s:HGroup>
+		
+		<s:HGroup width="100%" visible="false" includeInLayout="false" >
+			<s:VGroup width="35%">
+				<s:Label id="contactAltEmail" width="100%" text="Alternative Email:"/>
+				<s:TextInput width="80%" id="contactAltEmailInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="contactMobile" width="100%" text="Mobile:"/>
+				<s:TextInput width="100%" id="contactMobileInput" />
+				
+			</s:VGroup>
+		</s:HGroup>
+		
+		<s:HGroup width="100%" visible="false" includeInLayout="false"  >
+			<s:VGroup width="35%">
+				<s:Label id="contactAddress" width="100%" text="Address:"/>
+				<s:TextArea width="80%" heightInLines="3" id="contactAddressInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="contactFax" width="100%" text="Fax:"/>
+				<s:TextInput width="100%" id="contactFaxInput" />
+				<s:CheckBox label="Do not call" id="contactDoNotCall"/>
+				
+			</s:VGroup>
+		</s:HGroup>
+		
+		<s:Label text="Web Presence" fontSize="18" visible="false" includeInLayout="false"/>
+		<s:HGroup width="100%" visible="false" includeInLayout="false">
+			<s:VGroup width="35%">
+				<s:Label id="contactWebsite" width="100%" text="Website/Blog:"/>
+				<s:TextInput width="80%" id="contactWebsiteInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="contactTwitter" width="100%" text="Twitter:"/>
+				<s:TextInput width="100%" id="contactTwitterInput" />
+				
+			</s:VGroup>
+		</s:HGroup>
+		<s:HGroup width="100%" visible="false" includeInLayout="false">
+			<s:VGroup width="35%">
+				<s:Label id="contactLinkedIn" width="100%" text="LinkedIn:"/>
+				<s:TextInput width="80%" id="contactLinkedInInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="contactFacebook" width="100%" text="Facebook:"/>
+				<s:TextInput width="100%" id="contactFacebookInput" />
+				
+			</s:VGroup>
+		</s:HGroup>
+		
+		
+		
+		
+	</s:VGroup>
+
+
+	
+
+	<!--Opportunity CRUD form-->
+	<s:VGroup id="opportunityForm" visible="false" includeInLayout="false" paddingLeft="20" paddingRight="20" paddingTop="20">
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="30%">
+				<s:Label id="opportunityName" width="100%" text="Name:"/>
+				<s:TextInput width="350" id="opportuniytNameInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="30%">
+				<s:Label id="opportunityStage" width="100%" text="Stage:"/>
+				<s:DropDownList id="opportunityStageComboBox"
+								horizontalCenter="0"
+								top="20">
+					<s:dataProvider>
+						<s:ArrayList source="['Prospecting',Analysis,'Presentation', Proposal,Negotiation]" />
+					</s:dataProvider>
+				</s:DropDownList>
+				
+			</s:VGroup>
+		</s:HGroup>
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="25%">
+				<s:Label id="opportunityCloseDate" width="100%" text="Close Date:"/>
+				<s:TextInput width="50" id="opportunityStageInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="20%">
+				<s:Label id="opportunityProbability" width="100%" text="Probability (%):"/>
+				<s:TextInput width="50" id="opportunityProbabilityInput" />
+			</s:VGroup>
+			<s:VGroup width="20%">
+				<s:Label id="opportunityAmount" width="100%" text="Amount ($):"/>
+				<s:TextInput width="50" id="opportunityAmountInput" />
+			</s:VGroup>
+			<s:VGroup width="20%">
+				<s:Label id="opportunityDiscount" width="100%" text="Discount ($):"/>
+				<s:TextInput width="50" id="opportunityDiscountInput" />
+			</s:VGroup>
+			
+		</s:HGroup>
+		
+		
+	</s:VGroup>
+
+<!--	Permissions CRUD  -->
+	<s:VGroup paddingLeft="20" paddingRight="20" paddingTop="10">
+		<s:Label text="Permissions" fontSize="18"/>
+		
+		
+		<s:VGroup paddingLeft="10" paddingTop="5" id="permissionRadios">
+			<s:RadioButton groupName="permissionType" 
+						   id="permissionPrivate" 
+						   value="private" 
+						   label="Keep it private, do not share with others" 
+						   width="250" selected="true"/>
+			<s:RadioButton groupName="permissionType" 
+						   id="shareWithEveryone" 
+						   value="everyone" 
+						   label="Share it with everyone" 
+						   width="250"/>
+			<s:RadioButton groupName="permissionType" 
+						   id="shareWithGroup" 
+						   value="group" 
+						   label="Share it with these people" 
+						   width="250"/>
+		</s:VGroup>
+		
+<!--	Submit Buttons		-->
+		<s:HGroup paddingBottom="20" paddingTop="20" paddingLeft="20"> 
+			<s:Button id="submitButton" label="Save" click="showAlert(event);" /> 
+			<s:Button label="Cancel" click="handleCloseEvent();"/>
+			<s:Button label="Add More" click="showAlert(event);" />
+			<s:HGroup id="formSubmitAlternatives" visible="false" includeInLayout="false"> 
+				<s:Button label="ASAP"/>
+				<s:Button label="Today"/>
+				<s:Button label="Tomorrow"/>
+				<s:Button label="This Week"/>
+				<s:Button label="Next Week"/>
+				<s:Button label="Later"/>
+			</s:HGroup>
+		</s:HGroup> 
+		
+	</s:VGroup>
+
+</s:TitleWindow>

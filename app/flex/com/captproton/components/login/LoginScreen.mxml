@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:d="http://ns.adobe.com/fxg/2008/dt"
+		 xmlns:mx="library://ns.adobe.com/flex/halo" 
+		 xmlns:validators="org.restfulx.validators.*"
+		width="400" height="300">
+	  <fx:Metadata>
+	    [Event(name="login", type="flash.events.Event")]
+	  </fx:Metadata>
+
+	<fx:Script>
+		
+		<![CDATA[
+      import org.restfulx.utils.RxFileReference;
+      import mx.core.Application;
+      import org.restfulx.Rx;
+      import pomodo.models.User;
+      import pomodo.models.Account;
+
+      [Bindable]
+      private var photoFileName:String = "None selected";
+
+      private var photo:RxFileReference;
+
+      [Bindable]
+      private var signUpFormDirty:Boolean = true;
+
+      private function login():void {
+        Rx.http(onLoginSuccess, onLoginFailure).invoke("session.fxml", 
+          { login: userTI.text, password: passwordTI.text }, "POST", true);
+      }
+
+      private function signUp():void {
+        var account:Account = new Account;
+        account.login = signUpUsername.text;
+        account.email = signUpEmail.text;
+        account.password = signUpPassword.text;
+        account.passwordConfirmation = signUpPasswordConfirmation.text;
+        account.attachment = photo;
+        account.create(onSignUp);
+      }
+
+      private function onLoginSuccess(result:User):void {
+        Pomodo.models.currentUser = result;
+        Rx.sessionToken = result.account.sessionToken;
+        dispatchEvent(new Event("login"));
+      }
+
+      private function onLoginFailure(result:Object):void {
+        loginForm.errorString = "Wrong username or password. Try again.";
+      }
+
+      private function onSignUp(account:Account):void {
+/*         views.selectedChild = signUpConfirmationView; */
+      }
+
+      private function loginOnEnter(event:KeyboardEvent):void {
+        if (event.keyCode == 13) {
+          login();
+        }
+      }
+
+      private function signUpOnEnter(event:KeyboardEvent):void {
+        if (event.keyCode == 13) {
+          signUp();
+        }
+      }
+
+      private function chooseFile():void {
+        photo = new RxFileReference("avatar");
+        photo.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler, false, 0, true);
+        photo.addEventListener(Event.SELECT, selectFile, false, 0, true);
+        photo.addEventListener(Event.CANCEL, cancelBrowse, false, 0, true);
+        photo.browse();
+      }
+
+      private function selectFile(event:Event):void { 
+        fileSelected(event)
+      }
+
+      private function cancelBrowse(event:Event):void {
+        photo = null;
+      }
+
+      private function fileSelected(event:Event):void {
+        photoFileName = RxFileReference(event.target).name;
+      }
+
+      private function ioErrorHandler(event:Event):void {
+/*         photoChooser.errorString = "Failed to selected a file. Please try again."; */
+      }
+
+
+		]]>
+	</fx:Script>
+		<fx:Declarations>
+			
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<mx:Fade id="hideEffect" duration="300" alphaFrom="1" alphaTo="0"/>
+	  <mx:Fade id="showEffect" duration="300" alphaFrom="0" alphaTo="1"/>
+	  
+	  <!-- Flex Validators -->
+	  <mx:StringValidator source="{signUpUsername}" property="text" 
+	        minLength="1" invalid="signUpFormDirty = true"/>
+	  <mx:EmailValidator source="{signUpEmail}" property="text" invalid="signUpFormDirty = true"/>
+	  <mx:RegExpValidator source="{signUpPasswordConfirmation}" 
+	    property="text" expression="{signUpPassword.text}" noMatchError="Passwords do not match"
+	    invalid="signUpFormDirty = true" valid="signUpFormDirty = false"/>
+
+	  <!-- Proxies for Rails Validators -->
+	  <validators:ServiceErrorValidator id="signUpLoginNameValidator" field="login" listener="{signUpUsername}" serviceErrors="{Rx.models.errors}"/>
+	  <validators:ServiceErrorValidator id="signUpPasswordValidator" field="password" listener="{signUpPassword}" 
+	     serviceErrors="{Rx.models.errors}"/>
+	
+	</fx:Declarations>
+	<fx:DesignLayer d:userLabel="SessionManagement" visible.CRMDashboard="false" id="designlayer7" visible.CRMItem="false">
+		<fx:DesignLayer id="designlayer2" d:userLabel="RegisterPanel" visible.SignedIn="false">
+			<fx:DesignLayer id="designlayer3" d:userLabel="RegisterPanel1" visible.RegsiterPanelCongrats="false" visible.RegisterPanel2="false" visible.SignedIn="false">
+				<s:Rect height="374" id="rect0" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" radiusX="10" width="202" x="182.5" y="98.5">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#250f73" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#9ea1fc"/>
+					</s:fill>
+				</s:Rect>
+				<s:Button click="login()" keyDown="loginOnEnter(event)" id="button0" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" label="Sign In" d:userLabel="RegisterSide1SignInButton" x="458" y="383"/>
+				<s:Button click="registerSide1RegisterButton_clickHandler()" id="button5" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" label="Register" d:userLabel="RegisterSide1RegisterButton" x="249" y="416"/>
+				<s:RichText color="#2b4381" fontFamily="Arial Bold" fontSize="18" id="richtext0" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100 S150" text="Already Registered?" x="412" y="112"/>
+				<s:RichText color="#2b4381" fontFamily="Arial Bold" fontSize="12" id="richtext7" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100 S150" text="Register now to:" x="202" y="160"/>
+				<s:RichText color="#2b4381" fontFamily="Arial Bold" fontSize="18" id="richtext1" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100 S150 S200" text="Not Registered Yet?" x="199" y="125"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" id="richtext2" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100 S150 S200" whiteSpaceCollapse="preserve" x="412" y="147">
+					<s:content><s:p><s:span>If you are already registered, </s:span></s:p><s:p><s:span>please sign in.</s:span></s:p></s:content>
+				</s:RichText>
+				<s:TextInput id="textinput3" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" text="" x="485" y="200"/>
+				<s:TextInput id="textinput4" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" text="" x="485" y="243"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" id="richtext3" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100" text="Account ID" x="412" y="210"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" id="richtext4" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100" text="Password" x="412" y="250"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" id="richtext5" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100 S150" text="Forgot your password?	 " x="413" y="305"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" id="richtext6" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100 S150" text="Forgot your Account ID?" x="412" y="343"/>
+				<s:Button click="button_clickHandler_2()" id="button6" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" label="Click Here!" d:userLabel="ForgotPasswordButton" x="537" y="299"/>
+				<s:Button click="button_clickHandler_3()" height="21" id="button7" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" label="Click Here!" d:userLabel="ForgotAcctIDButton" width="81" x="540" y="337"/>
+			</fx:DesignLayer>
+			<fx:DesignLayer id="designlayer4" d:userLabel="RegisterPanel2" visible.RegisterPanel1="false" visible.RegsiterPanelCongrats="false">
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="24" id="richtext8" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100 S150 S200 S250"	text="Please Enter the Following Information" x="185" y="129"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" height="12.05" id="richtext9" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100"	text="Account ID" x="240"	y="175"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" height="12" id="richtext12" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100"				text="First Name" x="240"						y="210"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" height="12" id="richtext13" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100"				text="Last Name" x="240"							y="253"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" height="12.05" id="richtext9a" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100" text="Email" x="240" y="293"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" height="12" id="richtext10" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100"				text="Password" x="240"						y="329"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" height="12" id="richtext11" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100"				text="Confirm Password" x="240" y="363"/>
+				<s:TextInput id="signUpUsername" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" text="" width="128" x="394" y="175"/>
+				<s:TextInput id="textinput9" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" text="" x="394" y="210"/>
+				<s:TextInput id="textinput0" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" text="" width="128" x="394" y="245"/>
+				<s:TextInput id="signUpEmail" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" text="" x="394" y="280"/>
+				<s:TextInput id="signUpPassword" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" text="" x="394" y="316"/>
+				<s:TextInput id="signUpPasswordConfirmation" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" text="" x="394" y="350"/>
+				<s:Button id="button9" 
+						  includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" 
+						  label="Continue" 
+						  d:userLabel="Button" 
+						  x="343" y="413"
+						  click="signUp()" keyDown="signUpOnEnter(event)" 
+						  enabled="{!signUpFormDirty}"/>
+			</fx:DesignLayer>
+			<fx:DesignLayer id="designlayer5" d:userLabel="RegisterPanelCongrats" visible.RegisterPanel1="false" visible.RegisterPanel2="false">
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" id="richtext14" includeIn="RegsiterPanelCongrats" tabStops="S0 S50 S100 S150" whiteSpaceCollapse="preserve" x="290" y="121">
+					<s:content><s:p><s:span>Congratulations!</s:span></s:p><s:p></s:p><s:p><s:span>You are now a member!</s:span></s:p></s:content>
+				</s:RichText>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" id="richtext15" includeIn="RegsiterPanelCongrats" tabStops="S0 S50 S100" text="Yada Yada!" x="310" y="213"/>
+				<s:Button click="button_clickHandler_5()" id="button11" includeIn="RegsiterPanelCongrats" label="Back to the Site" x="357" y="376"/>
+			</fx:DesignLayer>
+			<s:Rect alpha="0.5" height="411" id="rect1" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" radiusX="10" width="456" x="163.5" y="81.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#2b4381" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#cdcbff"/>
+				</s:fill>
+			</s:Rect>
+			<s:Button click="closeRegistrationButton_clickHandler()" height="21.05" id="button4" includeIn="RegisterPanel1,RegisterPanel2,RegsiterPanelCongrats" label="X" d:userLabel="CloseRegistrationButton" width="28.95" x="603" y="72"/>
+		</fx:DesignLayer>
+		<fx:DesignLayer id="designlayer1" d:userLabel="LoginLogoutPanel" visible.SignedIn="false">
+			<s:Group includeIn="RegisterPanel1,RegisterPanel2,RegsiterPanelCongrats,SignedOut" x="656" y="98" id="loginForm">
+				<s:BitmapImage id="bitmapimage1" source="@Embed('/com/captproton/assets/images/Picture 3.png')" x="0" y="0"/>
+				<s:TextInput id="userTI" skinClass="com.captproton.components.TextInput3" text="user" x="30" y="21"/>
+				<s:TextInput id="passwordTI" skinClass="com.captproton.components.TextInput3" text="pwd" x="30" y="41"/>
+				<s:Button buttonMode="true" click="login()" keyDown="loginOnEnter(event)" height="20" id="button2" label="Login" width="84" x="29" y="66"/>
+				<s:Button buttonMode="true" click="button_clickHandler_1()" height="20" id="button3" label="Register" width="84" x="29" y="110"/>
+			</s:Group>
+		</fx:DesignLayer>
+		<fx:DesignLayer d:userLabel="SignedIn">
+		</fx:DesignLayer>
+	</fx:DesignLayer>
+	
+
+
+</s:Group>

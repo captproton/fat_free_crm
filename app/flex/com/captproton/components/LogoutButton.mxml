@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark"
+       alpha.disabled="0.5">
+
+    <fx:Metadata>
+        [HostComponent("spark.components.Button")]
+    </fx:Metadata>
+
+    <s:states>
+        <s:State name="up" />
+        <s:State name="over" />
+        <s:State name="down" />
+        <s:State name="disabled" />
+    </s:states>
+
+    <!-- background -->
+    <s:Rect x="0.5" y="0.5" width="69" height="22"
+          radiusX="2" radiusY="2">
+        <s:stroke>
+            <s:SolidColorStroke color="0x5380D0" weight="1"/>
+        </s:stroke>
+        <s:fill>
+            <s:SolidColor color="0xFFFFFF" color.over="0xEBF4FF" color.down="0xDEEBFF" />
+        </s:fill>
+    </s:Rect>
+
+    <!-- shadow (down state only) -->
+    <s:Rect x="2" y="1" width="66" height="1" includeIn="down">
+        <s:fill>
+            <s:SolidColor color="0x5380D0" alpha="0.25" />
+        </s:fill>
+    </s:Rect>
+    <s:Rect x="1" y="2" width="68" height="1" includeIn="down">
+        <s:fill>
+            <s:SolidColor color="0x5380D0" alpha="0.07" />
+        </s:fill>
+    </s:Rect>
+    <s:Rect x="1" y="2" height="20" width="1" includeIn="down">
+        <s:fill>
+            <s:SolidColor color="0x5380D0" alpha="0.07" />
+        </s:fill>
+    </s:Rect>
+    <s:Rect x="68" y="2" height="20" width="1" includeIn="down">
+        <s:fill>
+            <s:SolidColor color="0x5380D0" alpha="0.07" />
+        </s:fill>
+    </s:Rect>
+    
+    <!-- label -->
+    <s:RichText id="labelDisplay" text="(Label)"
+             x="1" y="6" minWidth="69" color="0x2b4381"
+             textAlign="center">
+    </s:RichText>
+
+</s:Skin>

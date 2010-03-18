@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:d="http://ns.adobe.com/fxg/2008/dt"
+		 xmlns:mx="library://ns.adobe.com/flex/halo" width="400" height="300">
+	<fx:Script>
+		<![CDATA[
+			// Logout
+			import org.restfulx.events.ServiceCallStopEvent;
+			import org.restfulx.events.ServiceCallStartEvent;
+			import mx.core.FlexGlobals;
+
+
+		protected function button_clickHandler_6():void
+		{
+			FlexGlobals.topLevelApplication.currentState = "CRMDashboard";
+
+			// currentState='CRMDashboard';
+		}
+		protected function goToSignedOut():void
+		{
+			FlexGlobals.topLevelApplication.currentState = "SignedOut";
+
+			// currentState='SignedOut';
+		}
+		// Sign Out
+/* 			private function init():void {
+				Rx.models.addEventListener(ServiceCallStartEvent.ID, onSyncStart);
+				Rx.models.addEventListener(ServiceCallStopEvent.ID, onSyncEnd);  
+			}
+			
+			private function onSyncStart(event:Event):void {
+				syncIcon.visible = true;
+				syncText.visible = true;
+			}
+			
+			private function onSyncEnd(event:Event):void {
+				syncIcon.visible = false;
+				syncText.visible = false;
+			}
+ */			
+			private function logoutOnEnter(event:KeyboardEvent):void {
+				if (event.keyCode == 13) {
+					goToSignedOut();
+				}
+			}
+			
+
+		]]>
+	</fx:Script>
+		<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:DesignLayer d:userLabel="CRMHeader" id="designlayer8">
+		<s:Button  label="Dashboard" x="37" y="37" id="dashboarButton12" click="button_clickHandler_6()"/>
+		<s:Button label="Tasks" x="114" y="37" id="tasksButton" />
+		<s:Button label="Campaigns" x="183" y="37" id="campaignsButton" />
+		<s:Button label="Leads" x="263" y="37" id="leadsbutton" />
+		<s:Button label="Consumers" x="335" y="37" id="consumersbutton" />
+		<s:Button label="Contacts" x="418" y="37" id="contactsButton" />
+		<s:Button label="Opportunities" x="489" y="37" id="opportunitiesButton" />
+		<s:RichText  x="32" y="17" color="#2b4381" fontFamily="Arial" fontSize="18" tabStops="S0 S50 S100" text="Application Name" id="richtext18" buttonMode="true" d:userLabel="ApplicationTitle"/>
+		<s:RichText  x="361" y="13" color="#2b4381" fontFamily="Arial" fontSize="12" tabStops="S0 S50 S100 S150" text="Welcome, LoginName! " id="richtext19" d:userLabel="WelcomeUser"/>
+		<s:Button  label="Find" x="570" y="9" id="button20" buttonMode="true" d:userLabel="FindButton"/>
+		<s:Button  label="Profile" x="646" y="9" id="button21" buttonMode="true" d:userLabel="ProfileButton"/>
+		<s:Button  label="Logout" x="722" y="9" id="button22" buttonMode="true" keyDown="logoutOnEnter(event)" d:userLabel="LogoutButton" click="goToSignedOut()"/>
+		<s:Button label="Help" x="490" y="9" id="button25" buttonMode="true"  d:userLabel="HelpButton"/>
+	</fx:DesignLayer>
+
+</s:Group>

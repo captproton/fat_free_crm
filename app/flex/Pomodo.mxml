@@ -1,0 +1,1020 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:d="http://ns.adobe.com/fxg/2008/dt" 
+			   xmlns:fc="http://ns.adobe.com/flashcatalyst/2009" 
+			   xmlns:crud="com.captproton.components.main.crud.*"
+			   backgroundColor="#ffffff" 
+			   xmlns:components="com.captproton.components.*"
+			   xmlns:models="com.captproton.models.*"
+			   creationComplete="application_creationCompleteHandler()" 
+			   height="600" width="800">
+	
+<!--	<s:controlBarContent>
+		<s:Button id="btn"
+				  label="Show TitleWindow"
+				  click="btn_click(event);" />
+	</s:controlBarContent>
+-->
+	<fx:Script><![CDATA[
+		
+		import spark.events.IndexChangeEvent;
+		import mx.controls.Alert;
+		import mx.collections.ArrayCollection;
+
+		// start pop-up crud window and alert window
+		import mx.events.CloseEvent;
+		import mx.controls.Alert;
+		import mx.managers.PopUpManager;
+/* 		import comps.TaskFormWindow;
+		import comps.CampaignFormWindow;
+		import comps.LeadFormWindow;
+		import comps.ConsumerFormWindow;
+		import comps.ContactFormWindow;
+ */		import comps.MyTitleWindow;
+		import comps.YourTitleWindow;
+		import comps.OpportunityFormWindow;
+
+		
+		private function showAlert(event:MouseEvent):void {
+			Alert.show('That was easy!', 'Alert!');
+		}
+		
+		private function showPopUp(event:MouseEvent):void {
+			var titleWindow:ProfileFormWindow = ProfileFormWindow(
+				PopUpManager.createPopUp(this, ProfileFormWindow, true));
+			titleWindow.x = 50;
+			titleWindow.y = 50;
+			titleWindow.addEventListener(CloseEvent.CLOSE, onCloseTTW);
+		}
+
+		private function showProfileCrud(event:MouseEvent):void {
+			var titleWindow:ProfileFormWindow = ProfileFormWindow(
+				PopUpManager.createPopUp(this, ProfileFormWindow, true));
+			titleWindow.x = 50;
+			titleWindow.y = 50;
+			titleWindow.title = "Your Profile";
+			titleWindow.addEventListener(CloseEvent.CLOSE, onCloseTTW);
+		}
+
+		private function onCloseTTW(event:CloseEvent):void {
+			var ttw:ProfileFormWindow = ProfileFormWindow(event.target);
+			// richEditableText.text = ttw.richTextEditor.htmlText;
+		}
+
+		private function onCloseCCW(event:CloseEvent):void {
+			var ccw:CampaignFormWindow = CampaignFormWindow(event.target);
+		}
+		// finish pop-up crud window and alert window
+
+		//start code to remove later
+
+		// import pomodo.models.Address;
+
+
+		//finish code to remove later
+
+		protected function btnBar_labelFunc(item:Object):String {
+			return String(item.lbl).toUpperCase() + " (" + item.count + ")";
+		}
+
+		protected function button_clickHandler():void
+		{
+			const state:String = currentState;
+			if ( state == 'SignedOut' ) {
+				currentState='SignedIn';
+			}
+			currentState='SignedIn';
+		}
+		
+		protected function button_clickHandler_1():void
+		{
+			currentState='RegisterPanel1';
+		}
+		
+		
+		protected function registerSide1RegisterButton_clickHandler():void
+		{
+			currentState='RegisterPanel2';
+		}
+		
+		
+		
+		protected function button_clickHandler_2():void
+		{
+			navigateToURL( new URLRequest("/forgot_password"), "_blank");
+		}
+		
+		
+		protected function registerSide1SignInButton_clickHandler():void
+		{
+			currentState='SignedIn';
+		}
+		
+		
+		protected function button_clickHandler_3():void
+		{
+			navigateToURL( new URLRequest("/forgot_username"), "_blank");
+		}
+		
+		
+		protected function closeRegistrationButton_clickHandler():void
+		{
+			currentState='SignedOut';
+		}
+		
+		
+		protected function button_clickHandler_4():void
+		{
+			currentState='RegsiterPanelCongrats';
+		}
+		
+		
+		protected function application_creationCompleteHandler():void
+		{
+			currentState='SignedOut';
+		}
+		
+		
+		protected function button_clickHandler_5():void
+		{
+			currentState='SignedIn';
+		}
+		
+		
+		
+		
+		
+		protected function currentPageList_mouseDownHandler():void
+		{
+			const state:String = currentState;
+			if ( state == 'Tasks' ) {
+				var taskGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
+				PopUpManager.centerPopUp(taskGlass);
+				taskGlass.title="Task Details";
+				taskGlass.instructionLabel.text="Enter details below";
+				taskGlass.taskForm.visible=true;
+				taskGlass.taskForm.includeInLayout=true;
+				taskGlass.submitButton.label="create task";
+			}
+			if ( state == 'Campaigns' ) {
+				var campaignGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
+				PopUpManager.centerPopUp(campaignGlass);
+				campaignGlass.title="Campaign Details";
+				campaignGlass.campaignForm.visible=true;
+				campaignGlass.campaignForm.includeInLayout=true;
+			}
+			if ( state == 'Leads' ) {
+				var leadGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
+				PopUpManager.centerPopUp(leadGlass);
+				leadGlass.title="Lead Details";
+				leadGlass.leadForm.visible=true;
+				leadGlass.leadForm.includeInLayout=true;
+			}
+			if ( state == 'Consumers' ) {
+				var consumerGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
+				PopUpManager.centerPopUp(consumerGlass);
+				consumerGlass.title="Consumer Details";
+				consumerGlass.consumerForm.visible=true;
+				consumerGlass.consumerForm.includeInLayout=true;
+			}
+			if ( state == 'Contacts' ) {
+				var  contactGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
+				PopUpManager.centerPopUp(contactGlass);
+				contactGlass.title="Contact Details";
+				contactGlass.contactForm.visible=true;
+				contactGlass.contactForm.includeInLayout=true;
+			}
+			if ( state == 'Opportunities' ) {
+				var oppGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
+				PopUpManager.centerPopUp(oppGlass);
+				oppGlass.title="Opportunity Details";
+				oppGlass.opportunityForm.visible=true
+				oppGlass.opportunityForm.includeInLayout=true
+
+			}
+		}
+		
+		
+		protected function button_clickHandler_6():void
+		{
+			currentState='CRMDashboard';
+		}
+		
+		protected function button_clickHandler_TasksButton():void
+		{
+			currentState='Tasks';
+		}
+		
+		
+		protected function logoutButton_clickHandler():void
+		{
+			navigateToURL( new URLRequest("/logout"), "_self");
+		}
+		
+		protected function helpButton_clickHandler():void
+		{
+			navigateToURL( new URLRequest("/help"), "_blank");
+		}
+		
+		
+		protected function button_clickHandler_7():void
+		{
+			const state:String = currentState;
+			if ( state == 'ConsumerItem' ) {
+				currentState='Consumers';
+			}
+			if ( state == 'ConsumerItem2' ) {
+				currentState='Consumers';
+			}
+			if ( state == 'LeadsItem' ) {
+				currentState='Leads';
+			}
+			if ( state == 'LeadsItem2' ) {
+				currentState='Leads';
+			}
+			if ( state == 'OpportunityItem' ) {
+				currentState='Opportunities';
+			}
+			if ( state == 'OpportunityItem2' ) {
+				currentState='Opportunities';
+			}
+			if ( state == 'TaskItem' ) {
+				currentState='Tasks';
+			}
+			if ( state == 'TaskItem2' ) {
+				currentState='Tasks';
+			}
+		}
+		
+		
+		protected function moreDetailButton_clickHandler():void
+		{
+			const state:String = currentState;
+			if ( state == 'ConsumerItem' ) {
+				currentState='ConsumerItem2';
+			}
+			if ( state == 'CampaignItem1' ) {
+				currentState='CampaignItem2';
+			}
+			if ( state == 'LeadsItem' ) {
+				currentState='LeadsItem2';
+			}
+		}
+		
+		
+		protected function button_clickHandler_8():void
+		{
+			currentState='Campaigns';
+		}
+		
+		
+		protected function currentPageList_changeHandler():void
+		{
+/* 			const state:String = currentState;
+			if ( state == 'Tasks' ) {
+				currentState='TaskItem';
+			}
+			if ( state == 'Campaigns' ) {
+				currentState='CampaignItem1';
+			}
+			if ( state == 'Leads' ) {
+				currentState='LeadsItem';
+			}
+			if ( state == 'Consumers' ) {
+				currentState='ConsumerItem';
+			}
+ 			if ( state == 'Opportunities' ) {
+				currentState='OpportunityItem';
+			} 
+ */		}
+		
+		
+		protected function button_clickHandler_9():void
+		{
+			const state:String = currentState;
+			currentState='Leads';
+			if ( state == 'Leads' ) {
+				currentState='Leads';
+			}
+		}
+		
+		
+		protected function button_clickHandler_10():void
+		{
+			const state:String = currentState;
+			if ( state == 'ConsumerItem2' ) {
+				currentState='ConsumerItem';
+			}
+			if ( state == 'CampaignItem2' ) {
+				currentState='CampaignItem1';
+			}
+			if ( state == 'LeadsItem2' ) {
+				currentState='LeadsItem';
+			}
+			if ( state == 'TaskItem2' ) {
+				currentState='TaskItem';
+			}
+		}
+		
+		
+		protected function button_clickHandler_11():void
+		{
+			currentState='Consumers';
+		}
+		
+
+		protected function button_clickHandler_open_contacts():void
+		{
+			currentState='Contacts';
+		}
+
+		protected function button_clickHandler_12():void
+		{
+			currentState='Opportunities';
+		}
+
+		protected function button_clickHandler_open_profile():void
+		{
+			var titleWindow:ProfileFormWindow = ProfileFormWindow(
+				PopUpManager.createPopUp(this, ProfileFormWindow, true));
+			titleWindow.x = 50;
+			titleWindow.y = 50;
+			titleWindow.addEventListener(CloseEvent.CLOSE, onCloseTTW);
+		}
+
+		
+	]]></fx:Script>
+	<s:states>
+		<s:State name="SignedOut" fc:color="0xcc0000"/>
+		<s:State name="SignedIn" fc:color="0x0081cc"/>
+		<s:State name="RegisterPanel1" fc:color="0x00cc21"/>
+		<s:State name="RegisterPanel2" fc:color="0x0003a3"/>
+		<s:State name="RegsiterPanelCongrats" fc:color="0xff5f08"/>
+		<s:State name="CRMDashboard" fc:color="0xdf08ff"/>
+		<s:State name="Tasks" fc:color="0x82ff36"/>
+		<s:State name="TaskItem" fc:color="0x82ff36"/>
+		<s:State name="TaskItem2" fc:color="0x919410"/>
+		<s:State name="CampaignItem1" fc:color="0xa30017"/>
+		<s:State name="CampaignItem2" fc:color="0x08ffb6"/>
+		<s:State name="Campaigns" fc:color="0x510900"/>
+		<s:State name="LeadsItem2" fc:color="0x9308ff"/>
+		<s:State name="Leads"/>
+		<s:State name="LeadsItem"/>
+		<s:State name="Consumers"/>
+		<s:State name="ConsumerItem"/>
+		<s:State name="ConsumerItem2"/>
+		<s:State name="Contacts"/>
+		<s:State name="Opportunities"/>
+		<s:State name="OpportunityItem"/>
+		<s:State name="OpportunityItem2"/>
+		<s:State name="Profile"/>
+
+	</s:states>
+	
+
+	<fx:Style>
+		@namespace "library://ns.adobe.com/flex/spark";
+		
+	</fx:Style>
+
+
+	<fx:DesignLayer d:userLabel="SessionManagement" visible.CRMDashboard="false" id="designlayer7" visible.TaskItem="false" visible.TaskItem2="false" visible.CampaignItem1="false" visible.CampaignItem2="false" visible.Campaigns="false" visible.LeadsItem2="false" visible.Leads="false" visible.LeadsItem="false" visible.Consumers="false" visible.ConsumerItem="false" visible.ConsumerItem2="false" visible.Opportunities="false" visible.OpportunityItem="false" visible.OpportunityItem2="false">
+		<fx:DesignLayer id="designlayer2" d:userLabel="RegisterPanel" visible.SignedIn="false">
+			<fx:DesignLayer id="designlayer3" d:userLabel="RegisterPanel1" visible.RegsiterPanelCongrats="false" visible.RegisterPanel2="false" visible.SignedIn="false">
+				<s:Rect height="374" id="rect0" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" radiusX="10" width="202" x="182.5" y="98.5" d:userLabel="ResonsToRegister">
+					<s:stroke>
+						<s:SolidColorStroke caps="none" color="#250f73" joints="miter" miterLimit="4" weight="1"/>
+					</s:stroke>
+					<s:fill>
+						<s:SolidColor color="#9ea1fc"/>
+					</s:fill>
+				</s:Rect>
+				<s:Button click="registerSide1SignInButton_clickHandler()" id="button0" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" label="Sign In" d:userLabel="RegisterSide1SignInButton" x="458" y="383"/>
+				<s:Button click="registerSide1RegisterButton_clickHandler()" id="button5" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" label="Register" d:userLabel="RegisterSide1RegisterButton" x="249" y="416"/>
+				<s:RichText color="#2b4381" fontFamily="Arial Bold" fontSize="18" id="richtext0" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100 S150" text="Already Registered?" x="412" y="112" d:userLabel="AlreadyRegisteredLabel"/>
+				<s:RichText color="#2b4381" fontFamily="Arial Bold" fontSize="12" id="richtext7" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100 S150" text="Register now to:" x="202" y="160" d:userLabel="RegisternowLabel"/>
+				<s:RichText color="#2b4381" fontFamily="Arial Bold" fontSize="18" id="richtext1" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100 S150 S200" text="Not Registered Yet?" x="199" y="125" d:userLabel="NotRegisteredYet"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" id="richtext2" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100 S150 S200" whiteSpaceCollapse="preserve" x="412" y="147" d:userLabel="PlsSignInLabel">
+					<s:content><s:p><s:span>If you are already registered, </s:span></s:p><s:p><s:span>please sign in.</s:span></s:p></s:content>
+				</s:RichText>
+				<s:TextInput id="textinput3" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" text="" x="485" y="200" d:userLabel="AcctIDInput"/>
+				<s:TextInput id="textinput4" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" text="" x="485" y="243" d:userLabel="PwdInput"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" id="richtext3" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100" text="Account ID" x="412" y="210" d:userLabel="AcctIDLabel"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" id="richtext4" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100" text="Password" x="412" y="250" d:userLabel="PwdLabel"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" id="richtext5" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100 S150" text="Forgot your password?  " x="413" y="305" d:userLabel="ForgotPwdLabel"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" id="richtext6" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100 S150" text="Forgot your Account ID?" x="412" y="343" d:userLabel="ForgotIDLabel"/>
+				<s:Button click="button_clickHandler_2()" id="button6" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" label="Click Here!" d:userLabel="ForgotPasswordButton" x="537" y="299"/>
+				<s:Button click="button_clickHandler_3()" height="21" id="button7" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" label="Click Here!" d:userLabel="ForgotAcctIDButton" width="81" x="540" y="337"/>
+			</fx:DesignLayer>
+			<fx:DesignLayer id="designlayer4" d:userLabel="RegisterPanel2" visible.RegisterPanel1="false" visible.RegsiterPanelCongrats="false">
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="24" id="richtext8" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100 S150 S200 S250" text="Please Enter the Following Information" x="185" y="129"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" height="12.05" id="richtext9" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100" text="Account ID" x="240" y="218"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" height="12" id="richtext10" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100" text="Password" x="240" y="329"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" height="12" id="richtext11" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100" text="Confirm Password" x="240" y="363"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" height="12" id="richtext12" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100" text="First Name" x="240" y="253"/>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" height="12" id="richtext13" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" tabStops="S0 S50 S100" text="Last Name" x="240" y="293"/>
+				<s:TextInput id="textinput5" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" text="" width="127.95" x="394" y="210"/>
+				<s:TextInput id="textinput0" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" text="" width="128" x="394" y="245"/>
+				<s:TextInput id="textinput6" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" text="" x="394" y="280"/>
+				<s:TextInput id="textinput7" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" text="" x="394" y="316"/>
+				<s:TextInput id="textinput8" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" text="" x="394" y="350"/>
+				<s:Button click="button_clickHandler_4()" id="button9" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" label="Continue" d:userLabel="Button" x="343" y="413"/>
+			</fx:DesignLayer>
+			<fx:DesignLayer id="designlayer5" d:userLabel="RegisterPanelCongrats" visible.RegisterPanel1="false" visible.RegisterPanel2="false">
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" id="richtext14" includeIn="RegsiterPanelCongrats" tabStops="S0 S50 S100 S150" whiteSpaceCollapse="preserve" x="290" y="121">
+					<s:content><s:p><s:span>Congratulations!</s:span></s:p><s:p></s:p><s:p><s:span>You are now a member!</s:span></s:p></s:content>
+				</s:RichText>
+				<s:RichText color="#2b4381" fontFamily="Arial" fontSize="12" id="richtext15" includeIn="RegsiterPanelCongrats" tabStops="S0 S50 S100" text="Yada Yada!" x="310" y="213"/>
+				<s:Button click="button_clickHandler_5()" id="button11" includeIn="RegsiterPanelCongrats" label="Back to the Site" x="357" y="376"/>
+			</fx:DesignLayer>
+			<s:Rect alpha="0.5" height="411" id="rect1" includeIn="RegsiterPanelCongrats,RegisterPanel2,RegisterPanel1" radiusX="10" width="456" x="163.5" y="81.5">
+				<s:stroke>
+					<s:SolidColorStroke caps="none" color="#2b4381" joints="miter" miterLimit="4" weight="1"/>
+				</s:stroke>
+				<s:fill>
+					<s:SolidColor color="#cdcbff"/>
+				</s:fill>
+			</s:Rect>
+			<s:Button click="closeRegistrationButton_clickHandler()" height="21.05" id="button4" includeIn="RegisterPanel1,RegisterPanel2,RegsiterPanelCongrats" label="X" d:userLabel="CloseRegistrationButton" width="28.95" x="603" y="72"/>
+		</fx:DesignLayer>
+		<fx:DesignLayer id="designlayer1" d:userLabel="LoginLogoutPanel" visible.SignedIn="false">
+			<s:Group includeIn="RegisterPanel1,RegisterPanel2,RegsiterPanelCongrats,SignedOut" x="656" y="98" id="group1">
+				<s:BitmapImage id="bitmapimage1" source="@Embed('/com/captproton/assets/images/Picture 3.png')" x="0" y="0"/>
+				<s:TextInput id="textinput1" skinClass="com.captproton.components.TextInput3" text="" x="30" y="41"/>
+				<s:TextInput id="textinput2" skinClass="com.captproton.components.TextInput3" text="" x="30" y="21"/>
+				<s:Button buttonMode="true" click="button_clickHandler()" id="button2" label="Login" x="34" y="66"/>
+				<s:Button buttonMode="true" click="button_clickHandler_1()" height="20" id="button3" label="Register" width="84" x="29" y="110"/>
+			</s:Group>
+		</fx:DesignLayer>
+		<fx:DesignLayer d:userLabel="SignedIn">
+		</fx:DesignLayer>
+	</fx:DesignLayer>
+	<fx:DesignLayer d:userLabel="CRMDashboard" id="designlayer6">
+		<fx:DesignLayer d:userLabel="CRMHeader" id="designlayer8">
+			<fx:DesignLayer d:userLabel="Layer 1"  />
+
+			<s:Button  label="Dashboard" 
+					   enabled.CRMDashboard="false" includeIn="Tasks,TaskItem,CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,TaskItem,
+					   		LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,
+					   		CampaignItem2,LeadsItem,Campaigns,Contacts" x="37" y="37" id="button12" click="button_clickHandler_6()" buttonMode.Campaigns="true"/>
+			<s:Button label="Tasks" 
+					  enabled.Tasks="false"
+					  enabled.TaskItem="false"
+					  enabled.TaskItem2="false"
+					  x="114" y="37" 
+					  id="TasksButton" 
+					  includeIn="Tasks,TaskItem,CampaignItem1,Opportunities,TaskItem,TaskItem2,SignedIn,Consumers,LeadsItem2,OpportunityItem2,
+					  		Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts" 
+					  click="button_clickHandler_TasksButton()"
+					  buttonMode.Campaigns="true"/>
+			<s:Button label="Campaigns" 
+					  enabled.Campaigns="false" x="183" y="37" id="button10" 
+					  includeIn="CampaignItem1,Opportunities,TaskItem2,TaskItem,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts" click="button_clickHandler_8()" buttonMode.Campaigns="true" buttonMode.SignedIn="true"/>
+			<s:Button label="Leads" 
+					  enabled.Leads="false" 
+					  x="263" y="37" id="button13" 
+					  includeIn="CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts" 
+					  buttonMode.Campaigns="true" 
+					  click="button_clickHandler_9()" 
+					  buttonMode.LeadsItem="true" 
+					  buttonMode.Leads="true" 
+					  buttonMode.SignedIn="true"/>
+			<s:Button label="Consumers" 
+					  enabled.Consumers="false" 
+					  x="335" y="37" id="button14" 
+					  includeIn="CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,
+					  OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,
+					  LeadsItem,Campaigns,Contacts" buttonMode.Campaigns="true" buttonMode.SignedIn="true" 
+					  click="button_clickHandler_11()"/>
+			<s:Button label="Contacts" 
+					  enabled.Contacts="false" 
+					  x="418" y="37" 
+					  id="button15" 
+					  includeIn="CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,
+					  OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,
+					  Campaigns,Contacts" 
+					  buttonMode.Campaigns="true"
+					  click="button_clickHandler_open_contacts()"/>
+			<s:Button label="Opportunities" 
+					  enabled.Opportunities="false" x="489" y="37" id="button16" includeIn="CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts" buttonMode.Campaigns="true" click="button_clickHandler_12()"/>
+			<s:RichText includeIn="CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts" x="32" y="17" color="#2b4381" fontFamily="Arial" fontSize="18" tabStops="S0 S50 S100" text="Application Name" id="richtext18" buttonMode="true" d:userLabel="ApplicationTitle"/>
+			<s:RichText includeIn="CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts" x="361" y="13" color="#2b4381" fontFamily="Arial" fontSize="12" tabStops="S0 S50 S100 S150" text="Welcome, LoginName! " id="richtext19" d:userLabel="WelcomeUser"/>
+			<s:Button label="Find" includeIn="CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts"  x="570" y="9" id="button20" buttonMode="true" d:userLabel="FindButton"/>
+			<s:Button label="Profile"
+					  enabled.Profile="false"
+					  includeIn="CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,
+					  OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,
+					  Campaigns,Contacts" 
+					  x="646" y="9" 
+					  id="button21" 
+					  buttonMode="true" 
+					  d:userLabel="ProfileButton"
+					  click="showPopUp(event)"/>
+			<s:Button label="Logout" 
+					  includeIn="CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts"  x="722" y="9" id="button22" buttonMode="true" d:userLabel="LogoutButton" click="logoutButton_clickHandler()"/>
+			<s:Button label="Help" 
+					  x="490" y="9" id="button25" buttonMode="true" includeIn="CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts" d:userLabel="HelpButton" click="helpButton_clickHandler()"/>
+		</fx:DesignLayer>
+		<fx:DesignLayer d:userLabel="CRMBodyList" id="designlayer9">
+			<s:List id="list3" d:userLabel="RecentItemsList" width="215" height="220" x="29" y="351" includeIn="CampaignItem1,Opportunities,TaskItem2,Consumers,Tasks,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts" y.CRMDashboard="88" height.CRMDashboard="223" y.Consumers="141" height.Consumers="225" height.ConsumerItem="225" y.ConsumerItem="141" height.ConsumerItem2="225" y.ConsumerItem2="141" height.Opportunities="225" y.Opportunities="141" height.OpportunityItem="225" y.OpportunityItem="141" height.OpportunityItem2="225" y.OpportunityItem2="141">
+				<s:ArrayCollection>
+					<fx:String><![CDATA[Campaign:  Test]]></fx:String>
+					<fx:String><![CDATA[Account:  Boa]]></fx:String>
+					<fx:String>Lead: born on 4th</fx:String>
+					<fx:String><![CDATA[Lead:  Joane Doe]]></fx:String>
+					<fx:String><![CDATA[Account:  Bixby]]></fx:String>
+					<fx:String><![CDATA[Contact:  Test Contact]]></fx:String>
+					<fx:String>Campaign: World Domination</fx:String>
+					<fx:String><![CDATA[Opportunitiy:  ahum]]></fx:String>
+					<fx:String><![CDATA[Contact:  John Doe]]></fx:String>
+					<fx:String><![CDATA[Lead:  bobo smith]]></fx:String>
+				</s:ArrayCollection>
+			</s:List>
+			<s:List includeIn="Tasks,TaskItem,TaskItem2" 
+					width="512" height="488" 
+					x="253" y="86" 
+					id="taskItemsList" 
+					d:userLabel="CurrentPageList" 
+					mouseDown="currentPageList_mouseDownHandler()" 
+					buttonMode.Consumers="true" 
+					buttonMode.ConsumerItem="true" buttonMode.ConsumerItem2="true" 
+					buttonMode.Opportunities="true" buttonMode.OpportunityItem="true" 
+					buttonMode.OpportunityItem2="true" itemCreationPolicy="immediate">
+
+
+
+				<s:ArrayCollection>
+					<fx:String>TaskItem 1</fx:String>
+					<fx:String>Live well and prosper</fx:String>
+					<fx:String>Deposit that million dollar check I have lying around</fx:String>
+					<fx:String>Test task</fx:String>
+					<fx:String>call bill</fx:String>
+				</s:ArrayCollection>
+			</s:List>
+
+			<s:List includeIn="CampaignItem1,Opportunities,SignedIn,
+					Consumers,LeadsItem2,OpportunityItem2,Leads,
+					ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,
+					CampaignItem2,LeadsItem,Campaigns,Contacts" 
+					width="512" height="488" 
+					x="253" y="86" 
+					id="list4" 
+					d:userLabel="CurrentPageList" 
+					mouseDown="currentPageList_mouseDownHandler()" 
+					change="currentPageList_changeHandler()" buttonMode.LeadsItem2="true" buttonMode.Consumers="true" buttonMode.ConsumerItem="true" buttonMode.ConsumerItem2="true" buttonMode.Opportunities="true" buttonMode.OpportunityItem="true" buttonMode.OpportunityItem2="true" itemCreationPolicy="immediate">
+				<s:ArrayCollection>
+					<fx:String>Dog</fx:String>
+					<fx:String>Cat</fx:String>
+					<fx:String>Fish</fx:String>
+					<fx:String>Horse</fx:String>
+					<fx:String>Potato</fx:String>
+				</s:ArrayCollection>
+			</s:List>
+
+			<s:RichText 
+				includeIn="CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,OpportunityItem2,
+							Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts" 
+				x="271" y="67" 
+				color="#2b4381" 
+				fontFamily="Arial" fontSize="12" 
+				tabStops="S0 S50 S100 S150" 
+				text="Current Page Title Here" 
+				id="richtext17" 
+				d:userLabel="CurrentPageTitle" 
+
+				tabStops.Tasks="S0 S50 S100" 
+				text.Tasks="Tasks" 
+				tabStops.TaskItem2="S0 S50 S100" 
+				text.TaskItem2="Tasks" 
+				tabStops.TaskItem="S0 S50 S100" 
+				text.TaskItem="Tasks" 
+				
+				tabStops.Campaigns="S0 S50 S100" 
+				text.Campaigns="Campaigns" 
+				tabStops.CampaignItem1="S0 S50 S100" 
+				text.CampaignItem1="Campaigns" 
+				
+				tabStops.Leads="S0 S50" 
+				text.Leads="Leads" 
+				tabStops.LeadsItem2="S0 S50" 
+				text.LeadsItem2="Leads" 
+				tabStops.LeadsItem="S0 S50" 
+				text.LeadsItem="Leads"
+				
+				tabStops.Consumers="S0 S50 S100" 
+				text.Consumers="Consumers" 
+				tabStops.ConsumerItem="S0 S50 S100" 
+				text.ConsumerItem="Consumers" 
+				tabStops.ConsumerItem2="S0 S50 S100" 
+				text.ConsumerItem2="Consumers"
+				
+				tabStops.Contacts="S0 S50 S100" 
+				text.Contacts="Contacts" 
+				
+				tabStops.Opportunities="S0 S50 S100" 
+				text.Opportunities="Opportunities" 
+				tabStops.OpportunityItem="S0 S50 S100" 
+				text.OpportunityItem="Opportunities" />
+			
+			<s:Button label="(+)" 
+					  includeIn="CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,
+					  OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,
+					  LeadsItem,Campaigns,Contacts" 
+					  x="608" y="60" 
+					  id="button23" 
+					  click="currentPageList_mouseDownHandler()"
+					  d:userLabel="CreateItemButton"/>
+			<s:Button label="Options" includeIn="CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts" x="695" y="60" id="button24" d:userLabel="OptionsButton"/>
+			<s:RichText color="#2b4381" 
+						fontFamily="Arial" fontSize="12" 
+						tabStops="S0 S50 S100" 
+						text="Recent Items" 
+						id="richtext16" 
+						d:userLabel="RecentItemsTitle" 
+						x.Tasks="32" y.Tasks="334" 
+						includeIn="CampaignItem1,Opportunities,TaskItem2,Consumers,Tasks,TaskItem,
+							LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,
+							CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts" 
+						y.TaskItem2="334" x.TaskItem2="32" 
+						x.CampaignItem1="32" y.CampaignItem1="334" 
+						x.CampaignItem2="32" y.CampaignItem2="334" 
+						y.CRMDashboard="66" x.CRMDashboard="34" 
+						x.Campaigns="32" y.Campaigns="334" 
+						x.LeadsItem2="32" y.LeadsItem2="334" 
+						x.Leads="32" y.Leads="334" 
+						x.LeadsItem="32" y.LeadsItem="334" 
+						x.Consumers="32" y.Consumers="124" 
+						x.ConsumerItem="32" y.ConsumerItem="124" 
+						x.ConsumerItem2="32" y.ConsumerItem2="124" 
+						x.Opportunities="32" y.Opportunities="124" 
+						x.OpportunityItem="32" y.OpportunityItem="124" 
+						x.OpportunityItem2="32" y.OpportunityItem2="124"/>
+		</fx:DesignLayer>
+		<fx:DesignLayer d:userLabel="CRMFooter" id="designlayer10">
+			<s:RichText includeIn="CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,OpportunityItem2,
+						Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts" 
+						x="43" y="580" 
+						color="#2b4381" 
+						fontFamily="Arial" fontSize="12" 
+						tabStops="S0 S50 S100 S150 S200" 
+						text="Powered by Applied Science" 
+						id="richtext20" d:userLabel="PoweredBy"/>
+		</fx:DesignLayer>
+		<fx:DesignLayer d:userLabel="CRMBodyItem" visible.CRMDashboard="false" id="designlayer11"/>
+		</fx:DesignLayer>
+	<fx:DesignLayer d:userLabel="CrudNavigator" id="designlayer13">
+		<fx:DesignLayer d:userLabel="MoreItemDetail" visible.Tasks="false"  visible.TaskItem="false" id="designlayer12" visible.CampaignItem1="false" visible.Campaigns="false" visible.Leads="false" visible.LeadsItem="false" visible.ConsumerItem="false" visible.Consumers="false" visible.OpportunityItem="false" visible.Opportunities="false">
+			<s:BitmapImage source="@Embed('/com/captproton/assets/images/bills_details_BG.png')" 
+						   includeIn="CampaignItem1,Opportunities,TaskItem2,Consumers,LeadsItem2,OpportunityItem2,
+						   Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem,Campaigns" 
+						   id="bitmapimage3" 
+						   x="529" y="108" 
+						   d:userLabel="MoreDetailOverlay"/>
+			<s:BitmapImage source="@Embed('/com/captproton/assets/images/bills_details_BG_s_Drop_Shadow.png')" 
+						   includeIn="CampaignItem1,Opportunities,TaskItem2,Consumers,LeadsItem2,OpportunityItem2,
+						   Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem,Campaigns" 
+						   id="bitmapimage4" 
+						   d:userLabel="MoreDetailOverlayShadow" 
+						   x="528" y="108"/>
+			<s:Button includeIn="CampaignItem1,Opportunities,TaskItem2,TaskItem,Consumers,LeadsItem2,OpportunityItem2,
+					  Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem,Campaigns" 
+					  skinClass="com.captproton.components.CloseMoreDetail_Button" 
+					  x="725" y="148" 
+					  id="button29" 
+					  click="button_clickHandler_10()" 
+					  d:userLabel="LessDetailButton"/>
+		</fx:DesignLayer>
+		<fx:DesignLayer d:userLabel="TaskCategoryBrowser" visible.Leads="false" id="designlayer14">
+			<s:Button includeIn="Tasks,TaskItem,TaskItem2" 
+					  label="Pending" 
+					  x="27" y="98" 
+					  id="button17" 
+					  d:userLabel="TaskItemsPendingButton"/>
+			<s:Button label="Assigned" x="97" y="98" id="button18" includeIn="Tasks,TaskItem,TaskItem2" d:userLabel="TaskItemsAssignedButton"/>
+			<s:Button label="Completed" x="167" y="98" id="button19" includeIn="Tasks,TaskItem,TaskItem2" d:userLabel="TaskItemsCompletedButton"/>
+		</fx:DesignLayer>
+		<s:List includeIn="Tasks,TaskItem,TaskItem2,CampaignItem1,CampaignItem2,Campaigns,Leads,LeadsItem,LeadsItem2" width="215" height="184" x="29" y="138" id="list5" y.CampaignItem1="118" y.CampaignItem2="118" y.Campaigns="118" y.LeadsItem2="118" y.Leads="118" d:userLabel="CrudKindsList" y.LeadsItem="118">
+			<s:ArrayCollection>
+				<fx:String>Contacted</fx:String>
+				<fx:String>Converted</fx:String>
+				<fx:String>New</fx:String>
+				<fx:String>Rejected</fx:String>
+				<fx:String>Other</fx:String>
+				<fx:String>Total Leads</fx:String>
+				<fx:String/>
+				<fx:String/>
+			</s:ArrayCollection>
+		</s:List>
+		<s:RichText 
+			includeIn="OpportunityItem2,CampaignItem1,Opportunities,Leads,Consumers,ConsumerItem2,
+						ConsumerItem,OpportunityItem,CampaignItem2,LeadsItem,LeadsItem2,Campaigns" 
+			x="34" y="67" 
+			color="#2b4381" 
+			fontFamily="Arial" fontSize="12" 
+			tabStops="S0 S50 S100 S150" 
+			text="" 
+			id="richtext22" 
+			
+			tabStops.CampaignItem2="S0 S50 S100" text.CampaignItem2="Search Campaigns" 
+			tabStops.Campaigns="S0 S50 S100" text.Campaigns="Search Campaigns" 
+			tabStops.CampaignItem1="S0 S50 S100" text.CampaignItem1="Search Campaigns" 
+			
+			tabStops.LeadsItem2="S0 S50 S100" text.LeadsItem2="Search Leads" 
+			tabStops.Leads="S0 S50 S100" text.Leads="Search Leads" 
+			tabStops.LeadsItem="S0 S50 S100" text.LeadsItem="Search Leads" 
+			
+			tabStops.Consumers="S0 S50 S100 S150" text.Consumers="Search Consumers" 
+			tabStops.ConsumerItem="S0 S50 S100 S150" text.ConsumerItem="Search Consumers" 
+			tabStops.ConsumerItem2="S0 S50 S100 S150" text.ConsumerItem2="Search Consumers" 
+			
+			tabStops.Opportunities="S0 S50 S100 S150" text.Opportunities="Search Opportunities" 
+			tabStops.OpportunityItem="S0 S50 S100 S150" text.OpportunityItem="Search Opportunities" 
+			tabStops.OpportunityItem2="S0 S50 S100 S150" text.OpportunityItem2="Search Opportunities"/>
+		
+		<s:TextInput includeIn="OpportunityItem2,CampaignItem1,Opportunities,Leads,Consumers,ConsumerItem2,ConsumerItem,OpportunityItem,CampaignItem2,LeadsItem,LeadsItem2,Campaigns,Contacts" text="" x="30" y="87" id="textinput9" height="22" width="179"/>
+		<s:Button includeIn="OpportunityItem2,CampaignItem1,Opportunities,Leads,Consumers,ConsumerItem2,ConsumerItem,OpportunityItem,CampaignItem2,LeadsItem,LeadsItem2,Campaigns,Contacts" label="Q!" x="214" y="87" id="button28" width="33"/>
+		<fx:DesignLayer d:userLabel="ItemDetail" visible.Consumers="false" id="designlayer15" visible.Opportunities="false">
+			<s:BitmapImage source="@Embed('/com/captproton/assets/images/Check_in______Check_out___Price_per_night__Total_amount_billed__copy.png')" includeIn="CampaignItem1,Opportunities,TaskItem2,Consumers,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem" id="bitmapimage2" x="256" y="85" d:userLabel="ItemDetailPanel" visible.Leads="false"/>
+			<s:RichText includeIn="CampaignItem1,Opportunities,TaskItem2,Consumers,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem" 
+						x="273" y="101" 
+						color="#ffffff" 
+						fontFamily="Arial" fontSize="18" 
+						tabStops="S0 S50 S100" 
+						text="Item Name here" 
+						id="richtext21" 
+						d:userLabel="DetailTitleText" visible.Leads="false"/>
+			<s:Button includeIn="CampaignItem1,Opportunities,
+					  TaskItem2,Consumers,
+					  TaskItem,LeadsItem2,
+					  OpportunityItem2,Leads,
+					  ConsumerItem,ConsumerItem2,
+					  OpportunityItem,CampaignItem2,
+					  LeadsItem" 
+					  skinClass="com.captproton.components.Button2" 
+					  x="493" y="99" 
+					  id="button26" 
+					  click="button_clickHandler_7()" 
+					  d:userLabel="CloseDetailButton" visible.Leads="false"/>
+			<s:Button includeIn="CampaignItem1,Opportunities,TaskItem2,Consumers,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem" skinClass="com.captproton.components.Button3" x="490" y="284" id="button27" d:userLabel="MoreDetailButton" click="moreDetailButton_clickHandler()" visible.Leads="false" buttonMode.LeadsItem="true"/>
+			<s:Panel title="Address"
+					 x="22" y="22"
+					  height="222" width="300"
+					 includeIn="OpportunityItem"> 
+				<s:layout> 
+					<s:VerticalLayout paddingLeft="5" paddingTop="5" gap="10"/> 
+				</s:layout> 
+				<s:Label text="form goes here" 
+						 x="22" y="22"/>   
+				
+				<s:HGroup>
+					
+					<s:Button label="cancel" click="button_clickHandler_7()"  /> <s:Button label="Submit" />
+				</s:HGroup>
+			</s:Panel>
+			<s:RichEditableText id="richEditableText" width="100%" includeIn="Opportunities,OpportunityItem,OpportunityItem2"
+								height="100%"/>
+
+
+		</fx:DesignLayer>
+	</fx:DesignLayer>
+	<s:transitions>
+		<s:Transition fromState="CampaignItem1" toState="SignedOut" autoReverse="true">
+			<s:Parallel>
+				<s:Parallel target="{designlayer7}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button12}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{TasksButton}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button10}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button13}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button14}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button15}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button16}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext18}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext19}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button20}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button21}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button22}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button25}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{list3}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{list4}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext17}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button23}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button24}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext16}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext20}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{bitmapimage2}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext21}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button26}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button27}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{designlayer12}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{list5}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext22}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{textinput9}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button28}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+			</s:Parallel>
+		</s:Transition>
+		<s:Transition fromState="Consumers" toState="SignedOut" autoReverse="true">
+			<s:Parallel>
+				<s:Parallel target="{designlayer7}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button12}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{TasksButton}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button10}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button13}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button14}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button15}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button16}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext18}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext19}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button20}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button21}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button22}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button25}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{list3}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{list4}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext17}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button23}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button24}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext16}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext20}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{designlayer12}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext22}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{textinput9}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button28}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{designlayer15}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+			</s:Parallel>
+		</s:Transition>
+		<s:Transition fromState="RegisterPanel1" toState="SignedOut" autoReverse="true">
+			<s:Parallel>
+				<s:Parallel target="{rect0}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button0}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button5}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext0}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext7}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext1}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext2}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{textinput3}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{textinput4}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext3}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext4}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext5}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{richtext6}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button6}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button7}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{designlayer4}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{designlayer5}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{rect1}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+				<s:Parallel target="{button4}">
+					<s:Fade duration="0"/>
+				</s:Parallel>
+			</s:Parallel>
+		</s:Transition>
+	</s:transitions>
+</s:Application>

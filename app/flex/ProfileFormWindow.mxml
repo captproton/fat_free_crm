@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- http://blog.flexexamples.com/2009/10/23/displaying-a-popup-spark-titlewindow-container-in-flex-4/ -->
+<s:TitleWindow name="MyTitleWindow"
+			   xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   title="Spark Add Task title"
+			   width="500" height="450"
+			   close="ttlWndw_close(event);">
+	
+	<!--	Partly inspired by the url above and Session 17 of HelloFlex!4, this component only varies in the meaty form that it offers.  
+	The state of the component named after the kind of form it provides.  It is mentioned in the main file similar to thus:
+	
+	<comp:HPanel id="stateOnePanel" title="State One Panel"
+	left="10" top="10" width="200" right.stateOne="10"
+	height="100" bottom.stateOne="10" excludeFrom="noStateOne"
+	headerClick="toggleState('stateOne')">
+	<s:Label text="松尾 芭蕉" fontSize="20"
+	fontSize.stateOne="140"/>
+	-->	
+	<s:layout>
+		<s:VerticalLayout gap="0" horizontalAlign="contentJustify"/>
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.core.IFlexDisplayObject;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			// import mx.containers.Form
+			
+
+		
+			private function showAlertTask(event:MouseEvent):void {
+				Alert.show('That was easy!', 'Alert!');
+			}
+			
+			private function showAlertCampaign(event:MouseEvent):void {
+				Alert.show('That was easy Campaign!', 'Alert!');
+			}
+			
+			protected function ttlWndw_close(evt:CloseEvent):void {
+				PopUpManager.removePopUp(evt.currentTarget as IFlexDisplayObject);
+			}
+			
+			// Handle the close button and Cancel button.
+			private function handleCloseEvent():void {
+				PopUpManager.removePopUp(this);
+			}            
+			
+			// Handle the OK button.
+			private function processLogin():void {
+				// Check credentials (not shown) then remove pop up.
+				PopUpManager.removePopUp(this);
+				
+				
+			}
+			
+			//
+			import mx.events.ItemClickEvent;
+			
+			private function handlePayment(event:ItemClickEvent):void {
+				if (event.currentTarget.selectedValue == "check") {
+					Alert.show("You opted to pay by check."); 
+				} else if (event.currentTarget.selectedValue == "credit") {
+					Alert.show("You opted to pay by credit card.");
+				}
+			}
+			
+			private function showAlert(event:MouseEvent):void {
+				Alert.show('That was easy!', 'Alert!');
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:RadioButtonGroup id="permissionType" />
+	</fx:Declarations>
+	<!--Profile CRUD form-->
+	
+	<s:VGroup id="profileForm" visible="true" includeInLayout="true" paddingLeft="20" paddingRight="20" paddingTop="20">
+		<s:Label text="Basic" fontSize="18"/>
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="35%">
+				<s:Label id="profileFirstName" width="100%" text="First Name:"/>
+				<s:TextInput width="80%" id="profileFirstNameInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="profileLastName" width="100%" text="Last Name:"/>
+				<s:TextInput width="100%" id="profileLastNameInput" />
+				
+			</s:VGroup>
+		</s:HGroup>
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="35%">
+				<s:Label id="profileTitle" width="100%" text="Title:"/>
+				<s:TextInput width="80%" id="profileTitleInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="profileCompany" width="100%" text="Company:"/>
+				<s:TextInput width="100%" id="profileCompanyInput" />
+				
+			</s:VGroup>
+		</s:HGroup>
+		<s:Label text="Contact Information" paddingTop="20" fontSize="18"/>
+		<s:HGroup width="100%" paddingTop="10">
+			<s:VGroup width="35%">
+				<s:Label id="profileEmail" width="90%" text="Email:"/>
+				<s:TextInput width="90%" id="profileEmailInput" />
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="profileAltEmail" width="90%" text="Alternative Email:"/>
+				<s:TextInput width="90%" id="profileAltEmailInput" />
+			</s:VGroup>
+			
+		</s:HGroup>
+		
+		<s:HGroup width="100%">
+			<s:VGroup width="35%">
+				<s:Label id="profilePhone" width="100%" text="Phone:"/>
+				<s:TextInput width="80%" id="profilePhoneInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="40%">
+				<s:Label id="profileMobile" width="100%" text="Mobile:"/>
+				<s:TextInput width="100%" id="porfileMobileInput" />
+				
+			</s:VGroup>
+		</s:HGroup>
+		
+		<s:HGroup width="100%">
+			<s:VGroup width="20%">
+				<s:Label id="contactAOL" width="100%" text="AOL IM:"/>
+				<s:TextInput width="80%" id="contactAOLInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="20%">
+				<s:Label id="contactYIM" width="100%" text="Yahoo IM:"/>
+				<s:TextInput width="100%" id="contactYIMInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="20%">
+				<s:Label id="contactGIM" width="100%" text="Google IM:"/>
+				<s:TextInput width="80%" id="contactGIMInput" />
+				
+			</s:VGroup>
+			<s:VGroup width="20%">
+				<s:Label id="contactSkype" width="100%" text="Skype:"/>
+				<s:TextInput width="100%" id="contactSkypeInput" />
+				
+			</s:VGroup>
+		</s:HGroup>
+		
+		
+		<!--	Submit Buttons		-->
+		<s:HGroup paddingBottom="20" paddingTop="20" paddingLeft="20"> 
+			<s:Button id="submitButton" label="Save" click="showAlert(event);" /> 
+			<s:Button label="Cancel" click="handleCloseEvent();"/>
+			<s:Button label="Add More" click="showAlert(event);" />
+			<s:HGroup id="formSubmitAlternatives" visible="false" includeInLayout="false"> 
+				<s:Button label="ASAP"/>
+				<s:Button label="Today"/>
+				<s:Button label="Tomorrow"/>
+				<s:Button label="This Week"/>
+				<s:Button label="Next Week"/>
+				<s:Button label="Later"/>
+			</s:HGroup>
+		</s:HGroup> 
+
+		
+		
+	</s:VGroup>
+	
+	
+</s:TitleWindow>

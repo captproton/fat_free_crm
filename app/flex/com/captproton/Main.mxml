@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application 
+	xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" 
+	xmlns:d="http://ns.adobe.com/fxg/2008/dt" xmlns:fc="http://ns.adobe.com/flashcatalyst/2009"
+	width="800" height="600" backgroundColor="#ffffff" preloaderBaseColor="#ffffff">
+	<fx:DesignLayer d:userLabel="Layer 1">
+		<s:BitmapImage source="@Embed('/assets/images/Picture 3.png')" x="656" y="98"/>
+		<s:TextInput text="" x="686" y="139" skinClass="components.TextInput3"/>
+		<s:TextInput text="" x="686" y="119" skinClass="components.TextInput3"/>
+		<s:Button label="Login" x="690" y="164" buttonMode="true"/>
+		<s:Button label="Register" x="685" y="208" height="20" width="84" buttonMode="true"/>
+	</fx:DesignLayer>
+</s:Application>
