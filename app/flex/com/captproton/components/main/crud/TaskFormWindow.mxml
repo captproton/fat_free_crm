@@ -1,17 +1,191 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
-  xmlns:s="library://ns.adobe.com/flex/spark"
-  xmlns:mx="library://ns.adobe.com/flex/halo"
-  layout="vertical" title="TestTitleWindow"
-  width="600" height="400" showCloseButton="true"
-  close="PopUpManager.removePopUp(this);">
-  <fx:Script>
-    <![CDATA[
-      import mx.managers.PopUpManager;
-    ]]>
-  </fx:Script>
-  <s:Group width="100%">
-    <s:Label text="You can put a lot in a TaskWindow!"/>
-  </s:Group>
-  <mx:RichTextEditor id="richTextEditor" width="100%" height="100%"/>
-</mx:TitleWindow>
+<!-- http://blog.flexexamples.com/2009/10/23/displaying-a-popup-spark-titlewindow-container-in-flex-4/ -->
+<s:TitleWindow name="MyTitleWindow"
+			   xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:crud="com.captproton.components.main.crud.*"
+			   title="Spark Add Task title"
+			    x="-100" y="-100"
+			   close="ttlWndw_close(event);">
+	
+	<fx:Script><![CDATA[
+		// start example script code
+		import mx.managers.PopUpManager;
+		import mx.collections.ArrayList;
+		
+		// Variables whose values are set by the main application.
+		// Data provider array for the component's ComboBox control.
+		[Bindable]
+		public var myArray:ArrayList;
+		// A reference to the TextInput control 
+		// in which to put the result.
+		public var targetComponent:TextInput;
+		
+		// OK button click event listener.
+		// Sets the target component in the application to the 
+		// selected ComboBox item value.
+		private function submitData():void {
+			targetComponent.text = String(cb1.selectedItem);
+			removeMe();
+		}
+		
+		// Cancel button click event listener.
+		private function removeMe():void {
+			PopUpManager.removePopUp(this);
+		}
+		// end example script code
+		// window management
+		import mx.core.IFlexDisplayObject;
+		import mx.events.CloseEvent;
+		import mx.managers.PopUpManager;
+		// data management
+		import org.restfulx.Rx;
+		import org.restfulx.utils.RxUtils;
+		import fatfreecrm.models.Campaign;
+		import fatfreecrm.models.User;
+		
+		protected function ttlWndw_close(evt:CloseEvent):void {
+			PopUpManager.removePopUp(evt.currentTarget as IFlexDisplayObject);
+		}
+
+		
+		
+		[Bindable]
+		private var campaign:Campaign = new Campaign();
+		
+		private function newCampaign():void {
+			campaign = new Campaign();
+			// campaignsList.selectedIndex = -1;
+		}
+		
+		private function saveCampaign():void {
+			updateModelProperties();
+			if (campaign.id) {
+				campaign.update({onSuccess: onCampaignUpdate});
+			} else {
+				campaign.create({onSuccess: onCampaignCreate});
+			}
+		}
+		
+		private function updateModelProperties():void {
+			campaign.assignedTo = int(assignedToTextInput.text);
+			campaign.name = nameTextInput.text;
+			campaign.access = accessTextInput.text;
+			campaign.status = statusTextInput.text;
+			campaign.budget = Number(budgetTextInput.text);
+			campaign.targetLeads = int(targetLeadsTextInput.text);
+			campaign.targetConversion = Number(targetConversionTextInput.text);
+			campaign.targetRevenue = Number(targetRevenueTextInput.text);
+			campaign.leadsCount = int(leadsCountTextInput.text);
+			campaign.opportunitiesCount = int(opportunitiesCountTextInput.text);
+			campaign.revenue = Number(revenueTextInput.text);
+			campaign.startsOn = startsOnDateField.selectedDate;
+			campaign.endsOn = endsOnDateField.selectedDate;
+			campaign.objectives = objectivesTextArea.text;
+			// campaign.deletedAt = deletedAtDateTimeTextInput.date;
+			campaign.backgroundInfo = backgroundInfoTextInput.text;
+			
+			campaign.user = User(userComboBox.selectedItem);
+		}
+		
+		private function destroyCampaign():void {
+			campaign.destroy({onSuccess: onCampaignDestroy});
+		}
+		
+		private function onCampaignSelect():void {
+			// campaign = RxUtils.clone(campaignsList.selectedItem) as Campaign;
+		}
+		
+		private function onCampaignCreate(result:Campaign):void {
+			campaign = new Campaign;
+		}
+		
+		private function onCampaignUpdate(result:Campaign):void {
+			// campaignsList.selectedItem = result;
+			onCampaignSelect();
+		}
+		
+		private function onCampaignDestroy(result:Campaign):void {
+			onCampaignCreate(result);
+		}    
+	]]></fx:Script>
+	<s:layout>
+		<s:VerticalLayout/>
+	</s:layout>
+
+	<s:Panel title="Edit Taskwe" cornerRadius="0" backgroundColor="#EEEEEE" width="75%">
+		<s:layout>
+			<s:VerticalLayout/>
+		</s:layout>
+
+		<mx:Form width="100%" height="100%">
+			<mx:FormItem label="AssignedTo" width="100%">
+				<mx:TextInput id="assignedToTextInput" width="100%" text="{campaign.assignedTo}"/>
+			</mx:FormItem>
+			<mx:FormItem label="Name" width="100%">
+				<mx:TextInput id="nameTextInput" width="100%" text="{campaign.name}"/>
+			</mx:FormItem>
+			<mx:FormItem label="Access" width="100%">
+				<mx:TextInput id="accessTextInput" width="100%" text="{campaign.access}"/>
+			</mx:FormItem>
+			<mx:FormItem label="Status" width="100%">
+				<mx:TextInput id="statusTextInput" width="100%" text="{campaign.status}"/>
+			</mx:FormItem>
+			<mx:FormItem label="Budget" width="100%">
+				<mx:TextInput id="budgetTextInput" width="100%" text="{campaign.budget}"/>
+			</mx:FormItem>
+			<mx:FormItem label="TargetLeads" width="100%"  visible="false" includeInLayout="false">
+				<mx:TextInput id="targetLeadsTextInput" width="100%" text="{campaign.targetLeads}"/>
+			</mx:FormItem>
+			<mx:FormItem label="TargetConversion" width="100%" visible="false" includeInLayout="false">
+				<mx:TextInput id="targetConversionTextInput" width="100%" text="{campaign.targetConversion}"/>
+			</mx:FormItem>
+			<mx:FormItem label="TargetRevenue" width="100%" visible="false" includeInLayout="false">
+				<mx:TextInput id="targetRevenueTextInput" width="100%" text="{campaign.targetRevenue}"/>
+			</mx:FormItem>
+			<mx:FormItem label="LeadsCount" width="100%">
+				<mx:TextInput id="leadsCountTextInput" width="100%" text="{campaign.leadsCount}"/>
+			</mx:FormItem>
+			<mx:FormItem label="OpportunitiesCount" width="100%">
+				<mx:TextInput id="opportunitiesCountTextInput" width="100%" text="{campaign.opportunitiesCount}"/>
+			</mx:FormItem>
+			<mx:FormItem label="Revenue" width="100%">
+				<mx:TextInput id="revenueTextInput" width="100%" text="{campaign.revenue}"/>
+			</mx:FormItem>
+			<mx:FormItem label="StartsOn" width="100%">
+				<mx:DateField id="startsOnDateField" selectedDate="{campaign.startsOn}"/>
+			</mx:FormItem>
+			<mx:FormItem label="EndsOn" width="100%">
+				<mx:DateField id="endsOnDateField" selectedDate="{campaign.endsOn}"/>
+			</mx:FormItem>
+			<mx:FormItem label="Objectives" width="100%" visible="false" includeInLayout="false">
+				<mx:TextArea id="objectivesTextArea" width="100%" height="200" text="{campaign.objectives}"/>
+			</mx:FormItem>
+			<mx:FormItem label="BackgroundInfo" width="100%" visible="false" includeInLayout="false">
+				<mx:TextInput id="backgroundInfoTextInput" width="100%" text="{campaign.backgroundInfo}"/>
+			</mx:FormItem>
+			<mx:FormItem label="User" width="100%" visible="false" includeInLayout="false">
+				<mx:ComboBox id="userComboBox" width="200"
+							 labelField="{User.LABEL}"
+							 dataProvider="{Rx.models.index(User)}" prompt="User ..."
+							 selectedItem="{campaign.user}"/>
+			</mx:FormItem>
+		</mx:Form>
+		<mx:ControlBar width="100%">
+			<mx:Button label="Save Campaign" width="50%" height="30"
+					   click="saveCampaign()"/>
+			<mx:Button label="Delete Campaign" width="50%" height="30"
+					   enabled="{RxUtils.canDeleteModel(campaign)}"
+					   click="destroyCampaign()"/>
+		</mx:ControlBar>
+	</s:Panel>
+	
+	<!--start example mxml code-->
+	<s:ComboBox id="cb1" dataProvider="{myArray}"/>
+	<s:HGroup>
+		<s:Button label="OK" click="submitData();" id="okButton"/>
+		<s:Button label="Cancel" click="removeMe();" id="cancelButton"/>
+	</s:HGroup>
+	<!--end example mxml code-->	
+</s:TitleWindow>

@@ -8,7 +8,7 @@ package fatfreecrm.models {
   public class Account extends RxModel {
     public static const LABEL:String = "name";
 
-    public var assignedTo:int = 0;
+    // public var assignedTo:int = 0;
 
     public var name:String = "";
 
@@ -29,9 +29,12 @@ package fatfreecrm.models {
 
     public var backgroundInfo:String = "";
 
-    [BelongsTo]
-    public var user:User;
-
+	[BelongsTo]
+	public var assignee:User;
+	
+	[BelongsTo]
+	public var user:User;
+	
     [HasMany]
     public var accountContacts:ModelsCollection;
     

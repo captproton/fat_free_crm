@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
 			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" 
 			   xmlns:d="http://ns.adobe.com/fxg/2008/dt" 
 			   xmlns:fc="http://ns.adobe.com/flashcatalyst/2009" 
 			   xmlns:crud="com.captproton.components.main.crud.*"
@@ -23,7 +24,15 @@
 		//start RestfulX general
 		import org.restfulx.Rx;
 		import fatfreecrm.controllers.ApplicationController;
-		
+		import org.restfulx.utils.RxUtils;
+		import fatfreecrm.models.Task;
+		import fatfreecrm.models.Campaign;
+		import fatfreecrm.models.Lead;
+		import fatfreecrm.models.Account;
+		import fatfreecrm.models.Contact;
+		import fatfreecrm.models.Opportunity;
+		import fatfreecrm.models.User;
+
 		private function init():void {
 			ApplicationController.initialize();
 		}
@@ -37,12 +46,14 @@
 		import mx.events.CloseEvent;
 		import mx.controls.Alert;
 		import mx.managers.PopUpManager;
+		
 /* 		import comps.TaskFormWindow;
 		import comps.CampaignFormWindow;
 		import comps.LeadFormWindow;
 		import comps.ConsumerFormWindow;
 		import comps.ContactFormWindow;
- */		import comps.MyTitleWindow;
+ */		
+		import comps.MyTitleWindow;
 		import comps.YourTitleWindow;
 		import comps.OpportunityFormWindow;
 
@@ -160,14 +171,14 @@
 		{
 			const state:String = currentState;
 			if ( state == 'Tasks' ) {
-				var taskGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
+/* 				var taskGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
 				PopUpManager.centerPopUp(taskGlass);
 				taskGlass.title="Task Details";
 				taskGlass.instructionLabel.text="Enter details below";
 				taskGlass.taskForm.visible=true;
 				taskGlass.taskForm.includeInLayout=true;
 				taskGlass.submitButton.label="create task";
-			}
+ */			}
 			if ( state == 'Campaigns' ) {
 				var campaignGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
 				PopUpManager.centerPopUp(campaignGlass);
@@ -183,11 +194,69 @@
 				leadGlass.leadForm.includeInLayout=true;
 			}
 			if ( state == 'Consumers' ) {
-				var consumerGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
+				currentState='ConsumerItem';
+				/* var consumerGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
 				PopUpManager.centerPopUp(consumerGlass);
 				consumerGlass.title="Consumer Details";
 				consumerGlass.consumerForm.visible=true;
-				consumerGlass.consumerForm.includeInLayout=true;
+				consumerGlass.consumerForm.includeInLayout=true; */
+			}
+			if ( state == 'Contacts' ) {
+/* 				var  contactGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
+				PopUpManager.centerPopUp(contactGlass);
+				contactGlass.title="Contact Details";
+				contactGlass.contactForm.visible=true;
+				contactGlass.contactForm.includeInLayout=true;
+ */			}
+			if ( state == 'Opportunities' ) {
+				currentState='LeadsItem';
+
+				// var oppGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
+				// PopUpManager.centerPopUp(oppGlass);
+				// oppGlass.title="Opportunity Details";
+				// oppGlass.opportunityForm.visible=true
+				// oppGlass.opportunityForm.includeInLayout=true
+				
+			}
+		}
+		protected function create_item_button_clickHandler():void
+		{
+			const state:String = currentState;
+			if ( state == 'Tasks' ) {
+/* 				var taskGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
+				PopUpManager.centerPopUp(taskGlass);
+				taskGlass.title="Task Details";
+				taskGlass.instructionLabel.text="Enter details below";
+				taskGlass.taskForm.visible=true;
+				taskGlass.taskForm.includeInLayout=true;
+				taskGlass.submitButton.label="create task";
+ */			}
+			if ( state == 'Campaigns' ) {
+				var campaignGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
+				PopUpManager.centerPopUp(campaignGlass);
+				campaignGlass.title="Campaign Details";
+				campaignGlass.instructionLabel.includeInLayout=false;
+				campaignGlass.instructionLabel.visible=false;
+				campaignGlass.campaignForm.visible=true;
+				campaignGlass.campaignForm.includeInLayout=true;
+				campaignGlass.campaignForm.campaignsPanel.visible=false;
+				campaignGlass.campaignForm.campaignsPanel.includeInLayout=false;
+				
+			}
+			if ( state == 'Leads' ) {
+				var leadGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
+				PopUpManager.centerPopUp(leadGlass);
+				leadGlass.title="Lead Details";
+				leadGlass.leadForm.visible=true;
+				leadGlass.leadForm.includeInLayout=true;
+			}
+			if ( state == 'Consumers' ) {
+				currentState='ConsumerItem';
+				/* var consumerGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
+				PopUpManager.centerPopUp(consumerGlass);
+				consumerGlass.title="Consumer Details";
+				consumerGlass.consumerForm.visible=true;
+				consumerGlass.consumerForm.includeInLayout=true; */
 			}
 			if ( state == 'Contacts' ) {
 				var  contactGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
@@ -197,12 +266,14 @@
 				contactGlass.contactForm.includeInLayout=true;
 			}
 			if ( state == 'Opportunities' ) {
-				var oppGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
+				currentState='OpportunityItem';
+
+/* 				var oppGlass:MyTitleWindow = PopUpManager.createPopUp(this, MyTitleWindow, true) as MyTitleWindow;
 				PopUpManager.centerPopUp(oppGlass);
 				oppGlass.title="Opportunity Details";
 				oppGlass.opportunityForm.visible=true
-				oppGlass.opportunityForm.includeInLayout=true
-
+				oppGlass.opportunityForm.includeInLayout=true */
+				
 			}
 		}
 		
@@ -282,23 +353,24 @@
 		
 		protected function currentPageList_changeHandler():void
 		{
-/* 			const state:String = currentState;
+ 			const state:String = currentState;
 			if ( state == 'Tasks' ) {
 				currentState='TaskItem';
 			}
-			if ( state == 'Campaigns' ) {
+/*			if ( state == 'Campaigns' ) {
 				currentState='CampaignItem1';
 			}
 			if ( state == 'Leads' ) {
 				currentState='LeadsItem';
 			}
+*/
 			if ( state == 'Consumers' ) {
 				currentState='ConsumerItem';
 			}
  			if ( state == 'Opportunities' ) {
 				currentState='OpportunityItem';
 			} 
- */		}
+ 		}
 		
 		
 		protected function button_clickHandler_9():void
@@ -479,9 +551,15 @@
 					  		Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts" 
 					  click="button_clickHandler_TasksButton()"
 					  buttonMode.Campaigns="true"/>
+			<!--start here-->
 			<s:Button label="Campaigns" 
 					  enabled.Campaigns="false" x="183" y="37" id="button10" 
-					  includeIn="CampaignItem1,Opportunities,TaskItem2,TaskItem,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts" click="button_clickHandler_8()" buttonMode.Campaigns="true" buttonMode.SignedIn="true"/>
+					  includeIn="CampaignItem1,Opportunities,TaskItem2,TaskItem,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,
+					  OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,
+					  Campaigns,Contacts" 
+					  click="button_clickHandler_8()" 
+					  buttonMode.Campaigns="true" 
+					  buttonMode.SignedIn="true"/>
 			<s:Button label="Leads" 
 					  enabled.Leads="false" 
 					  x="263" y="37" id="button13" 
@@ -493,6 +571,7 @@
 					  buttonMode.SignedIn="true"/>
 			<s:Button label="Consumers" 
 					  enabled.Consumers="false" 
+					  enabled.ConsumerItem="false" 
 					  x="335" y="37" id="button14" 
 					  includeIn="CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,
 					  OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,
@@ -559,28 +638,78 @@
 
 			</s:List>-->
 			
-			<generated:TaskBox id="TaskBox" x="253" y="86"  includeIn="Tasks"/>
+			<generated:TaskBox id="TaskBox" x="253" y="86"  includeIn="Tasks" visible="false"/>
+			<!--<crud:TaskItem id="TasksCrud" x="253" y="86" includeIn="Tasks, TaskItem"/>-->
+			<crud:Consumers id="ConsumerCrud" x="253" y="86" includeIn="Consumers,ConsumerItem"/>
+			<crud:Tasks id="TasksCrud" x="253" y="86"  includeIn="Tasks"/>
+			<crud:Campaigns id="CampaignsCrud" x="253" y="86"  includeIn="Campaigns"/>
+			<crud:Leads id="LeadsCrud" x="253" y="86"  includeIn="Leads"/>
+			<crud:Contacts id="ContactsCrud" x="253" y="86"  includeIn="Contacts"/>
+<!--			<crud:TaskItem id="TaskItem" x="253" y="86"  includeIn="TaskItem"/>-->
 
-
-			<s:List includeIn="CampaignItem1,Opportunities,SignedIn,
-					Consumers,LeadsItem2,OpportunityItem2,Leads,
-					ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,
-					CampaignItem2,LeadsItem,Campaigns,Contacts" 
+			<!--<s:List includeIn="Tasks" 
 					width="512" height="488" 
 					x="253" y="86" 
-					id="list4" 
+					id="TasksPageList" 
+					dataProvider="{Rx.models.index(Task)}"
+					d:userLabel="CampaignPageList" 
+					mouseDown="currentPageList_mouseDownHandler()" 
+					change="currentPageList_changeHandler()" 
+					itemCreationPolicy="immediate">
+			</s:List>-->
+
+
+			<!-- <s:List includeIn="Campaigns" 
+								width="512" height="488" 
+								x="253" y="86" 
+								id="CampaignsPageList" 
+								dataProvider="{Rx.models.index(Campaign)}"
+								d:userLabel="CurrentPageList" 
+								mouseDown="currentPageList_mouseDownHandler()" 
+								change="currentPageList_changeHandler()" 
+								itemCreationPolicy="immediate">
+						</s:List> -->
+
+			<!--<s:List includeIn="Leads" 
+					width="512" height="488" 
+					x="253" y="86" 
+					id="LeadsPageList" 
+					dataProvider="{Rx.models.index(Lead)}"
 					d:userLabel="CurrentPageList" 
 					mouseDown="currentPageList_mouseDownHandler()" 
-					change="currentPageList_changeHandler()" buttonMode.LeadsItem2="true" buttonMode.Consumers="true" buttonMode.ConsumerItem="true" buttonMode.ConsumerItem2="true" buttonMode.Opportunities="true" buttonMode.OpportunityItem="true" buttonMode.OpportunityItem2="true" itemCreationPolicy="immediate">
-				<s:ArrayCollection>
-					<fx:String>Dog</fx:String>
-					<fx:String>Cat</fx:String>
-					<fx:String>Fish</fx:String>
-					<fx:String>Horse</fx:String>
-					<fx:String>Potato</fx:String>
-				</s:ArrayCollection>
-			</s:List>
-
+					change="currentPageList_changeHandler()" 
+					itemCreationPolicy="immediate">
+			</s:List>-->
+			<!--<s:List includeIn="Consumers" 
+					width="512" height="488" 
+					x="253" y="86" 
+					id="ConsumersPageList" 
+					dataProvider="{Rx.models.index(Account)}"
+					d:userLabel="CurrentPageList" 
+					mouseDown="currentPageList_mouseDownHandler()" 
+					change="currentPageList_changeHandler()" 
+					itemCreationPolicy="immediate">
+			</s:List>-->
+			<!--<s:List includeIn="Contacts" 
+					width="512" height="488" 
+					x="253" y="86" 
+					id="ContactsPageList" 
+					dataProvider="{Rx.models.index(Contact)}"
+					d:userLabel="CurrentPageList" 
+					mouseDown="currentPageList_mouseDownHandler()" 
+					change="currentPageList_changeHandler()" 
+					itemCreationPolicy="immediate">
+			</s:List>-->
+			<!--<s:List includeIn="Opportunities" 
+					width="512" height="488" 
+					x="253" y="86" 
+					id="OpportunitiesPageList" 
+					dataProvider="{Rx.models.index(Opportunity)}"
+					d:userLabel="CurrentPageList" 
+					mouseDown="currentPageList_mouseDownHandler()" 
+					change="currentPageList_changeHandler()" 
+					itemCreationPolicy="immediate">
+			</s:List>-->
 			<s:RichText 
 				includeIn="CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,OpportunityItem2,
 							Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts" 
@@ -627,12 +756,13 @@
 				text.OpportunityItem="Opportunities" />
 			
 			<s:Button label="(+)" 
+					  enabled.ConsumerItem="false" 
 					  includeIn="CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,
 					  OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,
 					  LeadsItem,Campaigns,Contacts" 
 					  x="608" y="60" 
 					  id="button23" 
-					  click="currentPageList_mouseDownHandler()"
+					  click="create_item_button_clickHandler()"
 					  d:userLabel="CreateItemButton"/>
 			<s:Button label="Options" includeIn="CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts" x="695" y="60" id="button24" d:userLabel="OptionsButton"/>
 			<s:RichText color="#2b4381" 
@@ -662,7 +792,7 @@
 		</fx:DesignLayer>
 		<fx:DesignLayer d:userLabel="CRMFooter" id="designlayer10">
 			<s:RichText includeIn="CampaignItem1,Opportunities,TaskItem2,SignedIn,Consumers,Tasks,TaskItem,LeadsItem2,OpportunityItem2,
-						Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts" 
+						Leads,ConsumerItem2,OpportunityItem,CRMDashboard,CampaignItem2,LeadsItem,Campaigns,Contacts" 
 						x="43" y="580" 
 						color="#2b4381" 
 						fontFamily="Arial" fontSize="12" 
@@ -675,19 +805,19 @@
 	<fx:DesignLayer d:userLabel="CrudNavigator" id="designlayer13">
 		<fx:DesignLayer d:userLabel="MoreItemDetail" visible.Tasks="false"  visible.TaskItem="false" id="designlayer12" visible.CampaignItem1="false" visible.Campaigns="false" visible.Leads="false" visible.LeadsItem="false" visible.ConsumerItem="false" visible.Consumers="false" visible.OpportunityItem="false" visible.Opportunities="false">
 			<s:BitmapImage source="@Embed('/com/captproton/assets/images/bills_details_BG.png')" 
-						   includeIn="CampaignItem1,Opportunities,TaskItem2,Consumers,LeadsItem2,OpportunityItem2,
-						   Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem,Campaigns" 
+						   includeIn="CampaignItem1,Opportunities,TaskItem2,Consumers,LeadsItem2,OpportunityItem,OpportunityItem2,
+						   Leads,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem,Campaigns" 
 						   id="bitmapimage3" 
 						   x="529" y="108" 
 						   d:userLabel="MoreDetailOverlay"/>
 			<s:BitmapImage source="@Embed('/com/captproton/assets/images/bills_details_BG_s_Drop_Shadow.png')" 
 						   includeIn="CampaignItem1,Opportunities,TaskItem2,Consumers,LeadsItem2,OpportunityItem2,
-						   Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem,Campaigns" 
+						   Leads,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem,Campaigns" 
 						   id="bitmapimage4" 
 						   d:userLabel="MoreDetailOverlayShadow" 
 						   x="528" y="108"/>
 			<s:Button includeIn="CampaignItem1,Opportunities,TaskItem2,TaskItem,Consumers,LeadsItem2,OpportunityItem2,
-					  Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem,Campaigns" 
+					  Leads,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem,Campaigns" 
 					  skinClass="com.captproton.components.CloseMoreDetail_Button" 
 					  x="725" y="148" 
 					  id="button29" 
@@ -741,11 +871,11 @@
 			tabStops.OpportunityItem="S0 S50 S100 S150" text.OpportunityItem="Search Opportunities" 
 			tabStops.OpportunityItem2="S0 S50 S100 S150" text.OpportunityItem2="Search Opportunities"/>
 		
-		<s:TextInput includeIn="OpportunityItem2,CampaignItem1,Opportunities,Leads,Consumers,ConsumerItem2,ConsumerItem,OpportunityItem,CampaignItem2,LeadsItem,LeadsItem2,Campaigns,Contacts" text="" x="30" y="87" id="textinput9" height="22" width="179"/>
-		<s:Button includeIn="OpportunityItem2,CampaignItem1,Opportunities,Leads,Consumers,ConsumerItem2,ConsumerItem,OpportunityItem,CampaignItem2,LeadsItem,LeadsItem2,Campaigns,Contacts" label="Q!" x="214" y="87" id="button28" width="33"/>
+		<s:TextInput includeIn="OpportunityItem2,CampaignItem1,Opportunities,Leads,Consumers,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem,LeadsItem2,Campaigns,Contacts" text="" x="30" y="87" id="textinput9" height="22" width="179"/>
+		<s:Button includeIn="OpportunityItem2,CampaignItem1,Opportunities,Leads,Consumers,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem,LeadsItem2,Campaigns,Contacts" label="Q!" x="214" y="87" id="button28" width="33"/>
 		<fx:DesignLayer d:userLabel="ItemDetail" visible.Consumers="false" id="designlayer15" visible.Opportunities="false">
-			<s:BitmapImage source="@Embed('/com/captproton/assets/images/Check_in______Check_out___Price_per_night__Total_amount_billed__copy.png')" includeIn="CampaignItem1,Opportunities,TaskItem2,Consumers,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem" id="bitmapimage2" x="256" y="85" d:userLabel="ItemDetailPanel" visible.Leads="false"/>
-			<s:RichText includeIn="CampaignItem1,Opportunities,TaskItem2,Consumers,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem" 
+			<s:BitmapImage source="@Embed('/com/captproton/assets/images/Check_in______Check_out___Price_per_night__Total_amount_billed__copy.png')" includeIn="CampaignItem1,Opportunities,TaskItem2,Consumers,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem" id="bitmapimage2" x="256" y="85" d:userLabel="ItemDetailPanel" visible.Leads="false"/>
+			<s:RichText includeIn="CampaignItem1,Opportunities,TaskItem2,Consumers,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem" 
 						x="273" y="101" 
 						color="#ffffff" 
 						fontFamily="Arial" fontSize="18" 
@@ -757,7 +887,7 @@
 					  TaskItem2,Consumers,
 					  TaskItem,LeadsItem2,
 					  OpportunityItem2,Leads,
-					  ConsumerItem,ConsumerItem2,
+					  ConsumerItem2,
 					  OpportunityItem,CampaignItem2,
 					  LeadsItem" 
 					  skinClass="com.captproton.components.Button2" 
@@ -765,7 +895,7 @@
 					  id="button26" 
 					  click="button_clickHandler_7()" 
 					  d:userLabel="CloseDetailButton" visible.Leads="false"/>
-			<s:Button includeIn="CampaignItem1,Opportunities,TaskItem2,Consumers,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem" skinClass="com.captproton.components.Button3" x="490" y="284" id="button27" d:userLabel="MoreDetailButton" click="moreDetailButton_clickHandler()" visible.Leads="false" buttonMode.LeadsItem="true"/>
+			<s:Button includeIn="CampaignItem1,Opportunities,TaskItem2,Consumers,TaskItem,LeadsItem2,OpportunityItem2,Leads,ConsumerItem2,OpportunityItem,CampaignItem2,LeadsItem" skinClass="com.captproton.components.Button3" x="490" y="284" id="button27" d:userLabel="MoreDetailButton" click="moreDetailButton_clickHandler()" visible.Leads="false" buttonMode.LeadsItem="true"/>
 			<s:Panel title="Address"
 					 x="22" y="22"
 					  height="222" width="300"
@@ -835,8 +965,8 @@
 				<s:Parallel target="{list3}">
 					<s:Fade duration="0"/>
 				</s:Parallel>
-				<s:Parallel target="{list4}">
-					<s:Fade duration="0"/>
+				<s:Parallel target="{CampaignsCrud}">
+					<s:Fade duration="555"/>
 				</s:Parallel>
 				<s:Parallel target="{richtext17}">
 					<s:Fade duration="0"/>
@@ -929,10 +1059,10 @@
 				<s:Parallel target="{list3}">
 					<s:Fade duration="0"/>
 				</s:Parallel>
-				<s:Parallel target="{list4}">
+<!--				<s:Parallel target="{ConsumersPageList}">
 					<s:Fade duration="0"/>
 				</s:Parallel>
-				<s:Parallel target="{richtext17}">
+-->				<s:Parallel target="{richtext17}">
 					<s:Fade duration="0"/>
 				</s:Parallel>
 				<s:Parallel target="{button23}">

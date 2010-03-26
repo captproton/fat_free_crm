@@ -22,7 +22,7 @@
 #
 #  id           :integer(4)      not null, primary key
 #  user_id      :integer(4)
-#  assigned_to  :integer(4)
+#  assignee_id  :integer(4)
 #  completed_by :integer(4)
 #  name         :string(255)     default(""), not null
 #  asset_id     :integer(4)
@@ -40,23 +40,23 @@ class Task < ActiveRecord::Base
   attr_accessor :calendar
 
   belongs_to  :user
-  belongs_to  :assignee, :class_name => "User", :foreign_key => :assigned_to
+  belongs_to  :assignee, :class_name => "User"## temp comment out for flex UI, :foreign_key => :assigned_to
   belongs_to  :completor, :class_name => "User", :foreign_key => :completed_by
   belongs_to  :asset, :polymorphic => true
   has_many    :activities, :as => :subject, :order => 'created_at DESC'
 
   # Tasks created by the user for herself, or assigned to her by others. That's what we see on Tasks/Pending and Tasks/Completed.
-  named_scope :my, lambda { |user| { :conditions => [ "(user_id = ? AND assigned_to IS NULL) OR assigned_to = ?", user.id, user.id ], :include => :assignee } }
+  named_scope :my, lambda { |user| { :conditions => [ "(user_id = ? AND assignee_id IS NULL) OR assignee_id = ?", user.id, user.id ], :include => :assignee } }
 
   # Tasks assigned by the user to others. That's what we see on Tasks/Assigned.
-  named_scope :assigned_by, lambda { |user| { :conditions => [ "user_id = ? AND assigned_to IS NOT NULL AND assigned_to != ?", user.id, user.id ], :include => :assignee } }
+  named_scope :assigned_by, lambda { |user| { :conditions => [ "user_id = ? AND assignee_id IS NOT NULL AND assignee_id != ?", user.id, user.id ], :include => :assignee } }
 
   # Tasks created by the user or assigned to the user, i.e. the union of the two scopes above. That's the tasks the user is allowed to see and track.
-  named_scope :tracked_by, lambda { |user| { :conditions => [ "user_id = ? OR assigned_to = ?", user.id, user.id ], :include => :assignee } }
+  named_scope :tracked_by, lambda { |user| { :conditions => [ "user_id = ? OR assignee_id = ?", user.id, user.id ], :include => :assignee } }
 
   # Status based scopes to be combined with the due date and completion time.
   named_scope :pending,       :conditions => "completed_at IS NULL", :order => "due_at, id"
-  named_scope :assigned,      :conditions => "completed_at IS NULL AND assigned_to IS NOT NULL", :order => "due_at, id"
+  named_scope :assigned,      :conditions => "completed_at IS NULL AND assignee_id IS NOT NULL", :order => "due_at, id"
   named_scope :completed,     :conditions => "completed_at IS NOT NULL", :order => "completed_at DESC"
 
   # Due date scopes.
@@ -192,7 +192,7 @@ class Task < ActiveRecord::Base
   #----------------------------------------------------------------------------
   def notify_assignee
     # logger.p self.new_record? ? "create" : "update"
-    if self.assigned_to
+    if self.assignee_id
       # Notify assignee.
     end
   end

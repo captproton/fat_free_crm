@@ -97,12 +97,17 @@ class CampaignsController < ApplicationController
     respond_to do |format|
       if @campaign.save_with_permissions(params[:users])
         @campaigns = get_campaigns
-        get_data_for_sidebar
+        ## get_data_for_sidebar # comment out for flex UI
         format.js   # create.js.rjs
         format.xml  { render :xml => @campaign, :status => :created, :location => @campaign }
+        format.fxml  { render :fxml => @campaign }
+        
+        
       else
         format.js   # create.js.rjs
         format.xml  { render :xml => @campaign.errors, :status => :unprocessable_entity }
+        format.fxml  { render :fxml => @campaign.errors }
+        
       end
     end
   end
@@ -118,10 +123,14 @@ class CampaignsController < ApplicationController
         get_data_for_sidebar if called_from_index_page?
         format.js
         format.xml  { head :ok }
+        format.fxml  { render :fxml => @campaign }
+        
       else
         @users = User.except(@current_user).all # Need it to redraw [Edit Campaign] form.
         format.js
         format.xml  { render :xml => @campaign.errors, :status => :unprocessable_entity }
+        format.fxml  { render :fxml => @campaign.errors }
+        
       end
     end
 
@@ -140,6 +149,8 @@ class CampaignsController < ApplicationController
       format.html { respond_to_destroy(:html) }
       format.js   { respond_to_destroy(:ajax) }
       format.xml  { head :ok }
+      format.fxml  { render :fxml => @campaign }
+      
     end
 
   rescue ActiveRecord::RecordNotFound

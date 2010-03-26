@@ -23,7 +23,7 @@
 #  id          :integer(4)      not null, primary key
 #  user_id     :integer(4)
 #  campaign_id :integer(4)
-#  assigned_to :integer(4)
+#  assignee_id :integer(4)
 #  first_name  :string(64)      default(""), not null
 #  last_name   :string(64)      default(""), not null
 #  access      :string(8)       default("Private")
@@ -50,7 +50,7 @@
 class Lead < ActiveRecord::Base
   belongs_to  :user
   belongs_to  :campaign
-  belongs_to  :assignee, :class_name => "User", :foreign_key => :assigned_to
+  belongs_to  :assignee, :class_name => "User"## temp comment out for flex UI# , :foreign_key => :assigned_to
   has_one     :contact, :dependent => :nullify # On destroy keep the contact, but nullify its lead_id
   has_many    :tasks, :as => :asset, :dependent => :destroy, :order => 'created_at DESC'
   has_many    :activities, :as => :subject, :order => 'created_at DESC'
@@ -62,7 +62,7 @@ class Lead < ActiveRecord::Base
   named_scope :converted, :conditions => "status='converted'"
   named_scope :for_campaign, lambda { |id| { :conditions => [ "campaign_id=?", id ] } }
   named_scope :created_by, lambda { |user| { :conditions => [ "user_id = ?" , user.id ] } }
-  named_scope :assigned_to, lambda { |user| { :conditions => ["assigned_to = ? " , user.id ] } }
+  named_scope :assigned_to, lambda { |user| { :conditions => ["assignee_id = ? " , user.id ] } }
 
   simple_column_search :first_name, :last_name, :company, :escape => lambda { |query| query.gsub(/[^\w\s\-\.']/, "").strip }
   uses_user_permissions

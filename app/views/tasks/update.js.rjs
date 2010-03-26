@@ -5,7 +5,7 @@ if @task.errors.empty?
     page << replace_content(@task)  # partial with the new task, and update recent items.
     page[:recently].replace :partial => "common/recently"
   else
-    if @task.assigned_to != @task_before_update.assigned_to
+    if @task.assignee_id != @task_before_update.assignee_id
       page << reassign(id)
     elsif @task.bucket != @task_before_update.bucket
       page << reschedule(id)

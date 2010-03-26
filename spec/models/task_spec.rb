@@ -5,7 +5,7 @@
 #
 #  id           :integer(4)      not null, primary key
 #  user_id      :integer(4)
-#  assigned_to  :integer(4)
+#  assignee_id  :integer(4)
 #  completed_by :integer(4)
 #  name         :string(255)     default(""), not null
 #  asset_id     :integer(4)
@@ -74,19 +74,19 @@ describe Task do
     it "should reassign the task to another person" do
       him = Factory(:user)
       her = Factory(:user)
-      task = Factory(:task, :assigned_to => him.id)
-      task.update_attributes( { :assigned_to => her.id } )
+      task = Factory(:task, :assignee_id => him.id)
+      task.update_attributes( { :assignee_id => her.id } )
       task.errors.should be_empty
-      task.assigned_to.should == her.id
+      task.assignee_id.should == her.id
       task.assignee.should == her
     end
 
     it "should reassign the task from another person to myself" do
       him = Factory(:user)
-      task = Factory(:task, :assigned_to => him.id)
-      task.update_attributes( { :assigned_to => "" } )
+      task = Factory(:task, :assignee_id => him.id)
+      task.update_attributes( { :assignee_id => "" } )
       task.errors.should be_empty
-      task.assigned_to.should == nil
+      task.assignee_id.should == nil
       task.assignee.should == nil
     end
 
@@ -150,7 +150,7 @@ describe Task do
     end
   end
 
-  # named_scope :my, lambda { |user| { :conditions => [ "(user_id = ? AND assigned_to IS NULL) OR assigned_to = ?", user.id, user.id ], :include => :assignee } }
+  # named_scope :my, lambda { |user| { :conditions => [ "(user_id = ? AND assignee_id IS NULL) OR assignee_id = ?", user.id, user.id ], :include => :assignee } }
   describe "task.my?" do
     it "should match a task created by the user" do
       task = Factory(:task, :user => @current_user, :assignee => nil)
@@ -173,7 +173,7 @@ describe Task do
     end
   end
 
-  # named_scope :assigned_by, lambda { |user| { :conditions => [ "user_id = ? AND assigned_to IS NOT NULL AND assigned_to != ?", user.id, user.id ], :include => :assignee } }
+  # named_scope :assigned_by, lambda { |user| { :conditions => [ "user_id = ? AND assignee_id IS NOT NULL AND assignee_id != ?", user.id, user.id ], :include => :assignee } }
   describe "task.assigned_by?" do
     it "should match a task assigned by the user to somebody else" do
       task = Factory(:task, :user => @current_user, :assignee => Factory(:user))
@@ -196,7 +196,7 @@ describe Task do
     end
   end
 
-  # named_scope :tracked_by, lambda { |user| { :conditions => [ "user_id = ? OR assigned_to = ?", user.id, user.id ], :include => :assignee } }
+  # named_scope :tracked_by, lambda { |user| { :conditions => [ "user_id = ? OR assignee_id = ?", user.id, user.id ], :include => :assignee } }
   describe "task.tracked_by?" do
     it "should match a task created by the user" do
       task = Factory(:task, :user => @current_user)

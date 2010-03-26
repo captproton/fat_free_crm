@@ -41,7 +41,7 @@ module FatFreeCRM
           #
           named_scope :my, lambda { |options| {
             :include => :permissions,
-            :conditions => ["#{self.table_name}.user_id=? OR #{self.table_name}.assigned_to=? OR permissions.user_id=? OR access='Public'", 
+            :conditions => ["#{self.table_name}.user_id=? OR #{self.table_name}.assignee_id=? OR permissions.user_id=? OR access='Public'", 
               options[:user] || options, options[:user] || options, options[:user] || options ], # to support Model.my(@current_user) syntax
             :order => options[:order] || "#{self.table_name}.id DESC",
             :limit => options[:limit] # nil selects all records

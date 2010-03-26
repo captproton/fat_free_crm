@@ -8,7 +8,7 @@ package fatfreecrm.models {
   public class Campaign extends RxModel {
     public static const LABEL:String = "name";
 
-    public var assignedTo:int = 0;
+    // public var assignedTo:int = 0;
 
     public var name:String = "";
 
@@ -44,6 +44,9 @@ package fatfreecrm.models {
     [BelongsTo]
     public var user:User;
 
+	[BelongsTo]
+	public var assignee:User;
+	
     [HasMany]
     public var opportunities:ModelsCollection;
     

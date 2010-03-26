@@ -219,7 +219,7 @@ describe Activity do
     end
 
     it "should create 'reassigned' task action" do
-      @task.update_attribute(:assigned_to, @current_user.id + 1)
+      @task.update_attribute(:assignee_id, @current_user.id + 1)
       @activities = Activity.all(:conditions => @conditions)
 
       @activities.map(&:action).sort.should == %w(created reassigned)

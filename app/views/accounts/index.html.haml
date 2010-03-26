@@ -12,7 +12,10 @@
 
 .list#accounts
   - unless @accounts.empty?
+  -#
     = render :partial => "account", :collection => @accounts
   - else
+  -#
     = render :partial => "common/empty"
-#paginate= render :partial => "common/paginate"
+-#
+  #paginate= render :partial => "common/paginate"

@@ -177,11 +177,9 @@
 				</mx:FormItem>
 			</mx:Form>
 			<mx:ControlBar width="100%">
-				<mx:Button label="Cancel" width="25%" height="30"
-						   click="returnToList()"/>
-				<mx:Button label="Save Campaign" width="40%" height="30"
+				<mx:Button label="Save Campaign" width="50%" height="30"
 						   click="saveCampaign()"/>
-				<mx:Button label="Delete Campaign" width="35%" height="30"
+				<mx:Button label="Delete Campaign" width="50%" height="30"
 						   enabled="{RxUtils.canDeleteModel(campaign)}"
 						   click="destroyCampaign()"/>
 			</mx:ControlBar>

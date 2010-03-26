@@ -23,8 +23,8 @@
               = a.text_field :name, :style => "width:324px; display:none;"
             %td= spacer
             %td{ :valign => :top }
-              .label.req #{t :assigned_to}:
-              = collection_select :account, :assigned_to, @users, :id, :full_name, { :include_blank => t(:myself) }, { :style => "width:160px" }
+              .label.req #{t :assignee_id}:
+              = collection_select :account, :assignee_id, @users, :id, :full_name, { :include_blank => t(:myself) }, { :style => "width:160px" }
     = render :partial => "leads/opportunity"
     = render :partial => "leads/convert_permissions"
     .buttonbar

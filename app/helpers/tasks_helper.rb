@@ -76,7 +76,7 @@ module TasksHelper
 
   #----------------------------------------------------------------------------
   def replace_content(task, bucket = nil)
-    partial = (task.assigned_to && task.assigned_to != @current_user.id) ? "assigned" : "pending"
+    partial = (task.assignee_id && task.assignee_id != @current_user.id) ? "assigned" : "pending"
     update_page do |page|
       page[dom_id(task)].replace_html :partial => "tasks/#{partial}", :collection => [ task ], :locals => { :bucket => bucket }
     end
@@ -102,10 +102,10 @@ module TasksHelper
   #----------------------------------------------------------------------------
   def reassign(id)
     update_page do |page|
-      if @view == "pending" && @task.assigned_to != @current_user.id
+      if @view == "pending" && @task.assignee_id != @current_user.id
         page << hide_task_and_possibly_bucket(id, @task_before_update.bucket)
         page << tasks_flash("#{t(:task_assigned, @task.assignee.full_name)} (" << link_to(t(:view_assigned_tasks), url_for(:controller => :tasks, :view => :assigned)) << ").")
-      elsif @view == "assigned" && @task.assigned_to.blank?
+      elsif @view == "assigned" && @task.assignee_id.blank?
         page << hide_task_and_possibly_bucket(id, @task_before_update.bucket)
         page << tasks_flash("#{t(:task_pending)} (" << link_to(t(:view_pending_tasks), tasks_url) << ").")
       else

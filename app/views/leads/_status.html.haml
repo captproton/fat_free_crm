@@ -9,8 +9,8 @@
     %table{ :border => 0, :width => 500, :cellpadding => 0, :cellspacing => 0 }
       %tr
         %td{ :valign => :top }
-          .label.top #{t :assigned_to}:
-          = collection_select :lead, :assigned_to, @users, :id, :full_name, { :include_blank => t(:myself) }, { :style => "width:160px" }
+          .label.top #{t :assignee_id}:
+          = collection_select :lead, :assignee_id, @users, :id, :full_name, { :include_blank => t(:myself) }, { :style => "width:160px" }
         %td= spacer
         %td{ :valign => :top }
           .label.top #{t :status}:

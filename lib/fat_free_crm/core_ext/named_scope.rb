@@ -32,7 +32,7 @@ class ActiveRecord::NamedScope::Scope
       if item.is_a?(Activity)
         subject = item.subject || item.subject_type.constantize.find_with_deleted(item.subject_id)
         if subject.respond_to?(:access) # NOTE: Tasks don't have :access as of yet.
-          is_private = subject.user_id != user.id && subject.assigned_to != user.id &&
+          is_private = subject.user_id != user.id && subject.assignee_id != user.id &&
             (subject.access == "Private" || (subject.access == "Shared" && !subject.permissions.map(&:user_id).include?(user.id)))
         end
       end

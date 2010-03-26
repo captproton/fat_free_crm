@@ -176,7 +176,7 @@ var crm = {
     if ($("contact_business_address_attributes_country")) {
       this.clear_all_hints();
     }
-    $("account_assigned_to").value = $F("contact_assigned_to");
+    $("account_assignee_id").value = $F("contact_assigned_to");
     if ($("account_id").visible()) {
       $("account_id").enable();
     }
@@ -187,7 +187,7 @@ var crm = {
     if ($("contact_business_address_attributes_country")) {
       this.clear_all_hints();
     }
-    $("account_assigned_to").value = $F("contact_assigned_to");
+    $("account_assignee_id").value = $F("contact_assigned_to");
   },
 
   //----------------------------------------------------------------------------

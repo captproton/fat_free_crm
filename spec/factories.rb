@@ -45,7 +45,7 @@ end
 #----------------------------------------------------------------------------
 Factory.define :account do |a|
   a.user                { |a| a.association(:user) } 
-  a.assigned_to         nil
+  a.assignee_id         nil
   a.name                { Faker::Company.name }
   a.access              "Public"
   a.website             { Factory.next(:website) }
@@ -119,7 +119,7 @@ end
 Factory.define :campaign do |c|
   c.user                { |a| a.association(:user) }
   c.name                { Faker::Lorem.sentence[0,64] }
-  c.assigned_to         nil
+  c.assignee_id         nil
   c.access              "Public"
   c.status              { %w(planned started completed planned started completed on_hold called_off).rand }
   c.budget              { rand(500) }
@@ -153,7 +153,7 @@ end
 Factory.define :contact do |c|
   c.user                { |a| a.association(:user) }
   c.lead                { |a| a.association(:lead) }
-  c.assigned_to         nil
+  c.assignee_id         nil
   c.reports_to          nil
   c.first_name          { Faker::Name.first_name }
   c.last_name           { Faker::Name.last_name }
@@ -192,7 +192,7 @@ end
 Factory.define :lead do |l|
   l.user                { |a| a.association(:user) }
   l.campaign            { |a| a.association(:campaign) }
-  l.assigned_to         nil
+  l.assignee_id         nil
   l.first_name          { Faker::Name.first_name }
   l.last_name           { Faker::Name.last_name }
   l.access              "Public"
@@ -221,7 +221,7 @@ end
 Factory.define :opportunity do |o|
   o.user                { |a| a.association(:user) }
   o.campaign            { |a| a.association(:campaign) }
-  o.assigned_to         nil
+  o.assignee_id         nil
   o.name                { Faker::Lorem.sentence[0,64] }
   o.access              "Public"
   o.source              { %w(campaign cold_call conference online referral self web word_of_mouth other).rand }
@@ -267,7 +267,7 @@ Factory.define :task do |t|
   t.user                { |a| a.association(:user) }
   t.asset_id            nil
   t.asset_type          nil
-  t.assigned_to         nil
+  t.assignee_id         nil
   t.completed_by        nil
   t.name                { Faker::Lorem.sentence[0,64] }
   t.priority            nil

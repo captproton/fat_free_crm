@@ -22,7 +22,7 @@
 #
 #  id               :integer(4)      not null, primary key
 #  user_id          :integer(4)
-#  assigned_to      :integer(4)
+#  assignee_id      :integer(4)
 #  name             :string(64)      default(""), not null
 #  access           :string(8)       default("Private")
 #  website          :string(64)
@@ -37,7 +37,9 @@
 #
 class Account < ActiveRecord::Base
   belongs_to  :user
-  belongs_to  :assignee, :class_name => "User", :foreign_key => :assigned_to
+  ## belongs_to  :assignee, :class_name => "User", :foreign_key => :assigned_to
+  belongs_to  :assignee, :class_name => "User" ## temp drop fk to work with restfulx, :foreign_key => :assigned_to
+  
   has_many    :account_contacts, :dependent => :destroy
   has_many    :contacts, :through => :account_contacts, :uniq => true
   has_many    :account_opportunities, :dependent => :destroy
@@ -51,7 +53,7 @@ class Account < ActiveRecord::Base
   accepts_nested_attributes_for :shipping_address, :allow_destroy => true
   
   named_scope :created_by, lambda { |user| { :conditions => ["user_id = ? ", user.id ] } }
-  named_scope :assigned_to, lambda { |user| { :conditions => ["assigned_to = ? ", user.id ] } }
+  named_scope :assignee_id, lambda { |user| { :conditions => ["assignee_id = ? ", user.id ] } }
 
   simple_column_search :name, :match => :middle, :escape => lambda { |query| query.gsub(/[^\w\s\-\.']/, "").strip }
   uses_user_permissions

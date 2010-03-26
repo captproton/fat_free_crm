@@ -30,7 +30,7 @@
   - fields_for(@account) do |a|
     = a.hidden_field :user_id
     = a.hidden_field :access
-    = a.hidden_field :assigned_to
+    = a.hidden_field :assignee_id
     %table{ :width => 500, :cellpadding => 0, :cellspacing => 0 }
       %tr
         %td(valign="top")
@@ -45,8 +45,8 @@
           = a.text_field :name, :style => "width:324px; display:none;"
         %td= spacer
         %td(valign="top")
-          .label.req #{t :assigned_to}:
-          = collection_select :opportunity, :assigned_to, @users, :id, :full_name, { :include_blank => t(:myself) }, { :style => "width:160px" }
+          .label.req #{t :assignee_id}:
+          = collection_select :opportunity, :assignee_id, @users, :id, :full_name, { :include_blank => t(:myself) }, { :style => "width:160px" }
 
       - if Setting.background_info && Setting.background_info.include?(:opportunity)
         %tr

@@ -8,7 +8,7 @@ package fatfreecrm.models {
   public class Lead extends RxModel {
     public static const LABEL:String = "company";
 
-    public var assignedTo:int = 0;
+    // public var assignedTo:int = 0;
 
     public var firstName:String = "";
 
@@ -50,6 +50,9 @@ package fatfreecrm.models {
     public var deletedAt:Date = new Date;
 
     public var backgroundInfo:String = "";
+
+	[BelongsTo]
+	public var assignee:User;
 
     [BelongsTo]
     public var user:User;

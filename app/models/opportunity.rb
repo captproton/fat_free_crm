@@ -23,7 +23,7 @@
 #  id          :integer(4)      not null, primary key
 #  user_id     :integer(4)
 #  campaign_id :integer(4)
-#  assigned_to :integer(4)
+#  assignee_id :integer(4)
 #  name        :string(64)      default(""), not null
 #  access      :string(8)       default("Private")
 #  source      :string(32)
@@ -41,7 +41,7 @@ class Opportunity < ActiveRecord::Base
   belongs_to  :user
   belongs_to  :account
   belongs_to  :campaign
-  belongs_to  :assignee, :class_name => "User", :foreign_key => :assigned_to
+  belongs_to  :assignee, :class_name => "User"## temp comment out for flex UI, :foreign_key => :assigned_to
   has_one     :account_opportunity, :dependent => :destroy
   has_one     :account, :through => :account_opportunity
   has_many    :contact_opportunities, :dependent => :destroy
@@ -51,7 +51,7 @@ class Opportunity < ActiveRecord::Base
 
   named_scope :only, lambda { |filters| { :conditions => [ "stage IN (?)" + (filters.delete("other") ? " OR stage IS NULL" : ""), filters ] } }
   named_scope :created_by, lambda { |user| { :conditions => ["user_id = ?", user.id ] } }
-  named_scope :assigned_to, lambda { |user| { :conditions => [ "assigned_to = ?" ,user.id ] } }
+  named_scope :assigned_to, lambda { |user| { :conditions => [ "assignee_id = ?" ,user.id ] } }
 
   simple_column_search :name, :match => :middle, :escape => lambda { |query| query.gsub(/[^\w\s\-\.']/, "").strip }
   uses_user_permissions

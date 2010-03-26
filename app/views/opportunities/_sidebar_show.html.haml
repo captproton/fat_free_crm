@@ -31,8 +31,8 @@
     %dt= @opportunity.amount ? number_to_currency(@opportunity.weighted_amount || 0, :precision => 0) : t(:n_a)
     %tt #{t :weighted_amount}:
   %li
-    %dt= truncate((@opportunity.assigned_to ? @opportunity.assignee.full_name : @opportunity.user.full_name), :length => 16)
-    %tt #{t :assigned_to}:
+    %dt= truncate((@opportunity.assignee_id ? @opportunity.assignee.full_name : @opportunity.user.full_name), :length => 16)
+    %tt #{t :assignee_id}:
   %li
     %dt
       - if @opportunity.account

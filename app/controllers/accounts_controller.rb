@@ -25,13 +25,14 @@ class AccountsController < ApplicationController
   # GET /accounts.xml                                             HTML and AJAX
   #----------------------------------------------------------------------------
   def index
-    @accounts = get_accounts(:page => params[:page])
+    @accounts = Account.all ##get_accounts(:page => params[:page]) # temporary comment out while working on flex GUI
+    @flashyAccounts = Account.all
 
     respond_to do |format|
       format.html # index.html.haml
       format.js   # index.js.rjs
       format.xml  { render :xml => @accounts }
-      format.fxml  { render :fxml => @accounts }
+      format.fxml  { render :fxml => @flashyAccounts }
     end
   end
 
@@ -98,9 +99,12 @@ class AccountsController < ApplicationController
         @accounts = get_accounts
         format.js   # create.js.rjs
         format.xml  { render :xml => @account, :status => :created, :location => @account }
+        format.fxml  { render :fxml => @account, :status => :created, :location => @account }
+        
       else
         format.js   # create.js.rjs
         format.xml  { render :xml => @account.errors, :status => :unprocessable_entity }
+        format.fxml  { render :fxml => @activity.errors }
       end
     end
   end
@@ -113,17 +117,23 @@ class AccountsController < ApplicationController
 
     respond_to do |format|
       if @account.update_with_permissions(params[:account], params[:users])
-        format.js
+        format.js        
         format.xml  { head :ok }
+        format.fxml  { render :fxml => @account }
+        
+        ## format.fxml  { head :ok }
       else
         @users = User.except(@current_user).all # Need it to redraw [Edit Account] form.
         format.js
         format.xml  { render :xml => @account.errors, :status => :unprocessable_entity }
+        format.fxml  { render :fxml => @activity.errors }
+        
+        ## format.fxml  { render :xml => @account.errors, :status => :unprocessable_entity }
       end
     end
 
   rescue ActiveRecord::RecordNotFound
-    respond_to_not_found(:js, :xml)
+    respond_to_not_found(:js, :xml, :fxml)
   end
 
   # DELETE /accounts/1
@@ -137,6 +147,8 @@ class AccountsController < ApplicationController
       format.html { respond_to_destroy(:html) }
       format.js   { respond_to_destroy(:ajax) }
       format.xml  { head :ok }
+      format.fxml  { render :fxml => @account }
+      
     end
 
   rescue ActiveRecord::RecordNotFound

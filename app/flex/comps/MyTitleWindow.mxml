@@ -105,10 +105,10 @@
 		<s:RadioButtonGroup id="permissionType" />
 	</fx:Declarations>
 
-	<!--Task CRUD form-->
 	<s:Label id="instructionLabel" y="15" text="Basic" paddingLeft="20" paddingTop="5" fontSize="18"/>
-	<crud:TaskForm id="taskForm"  visible="false" includeInLayout="false" paddingLeft="20" paddingRight="20" paddingTop="20" />
-<!--	<s:VGroup id="taskForm" visible="false" includeInLayout="false" paddingLeft="20" paddingRight="20" paddingTop="20">
+	<!--Task CRUD form-->
+	<!--<crud:TaskForm id="taskForm"  visible="false" includeInLayout="false" paddingLeft="20" paddingRight="20" paddingTop="20" />-->
+	<s:VGroup id="taskFormOld" visible="false" includeInLayout="false" paddingLeft="20" paddingRight="20" paddingTop="20">
 		<s:Label id="taskName" width="100%" text="Name"/>
 		<s:TextInput width="350"  />
 		<s:HGroup width="100%" paddingTop="10">
@@ -147,11 +147,13 @@
 			</s:VGroup>
 		</s:HGroup>
 
-	</s:VGroup>-->
+	</s:VGroup>
 
 	
 	<!--Campaign CRUD form-->
-	<s:VGroup id="campaignForm" visible="false" includeInLayout="false" paddingLeft="20" paddingRight="20" paddingTop="20">
+	<crud:CampaignForm id="campaignForm"  visible="false" includeInLayout="false" paddingLeft="20" paddingRight="20" paddingTop="20" />
+
+	<s:VGroup id="campaignFormOld" visible="false" includeInLayout="false" paddingLeft="20" paddingRight="20" paddingTop="20">
 		<s:Label id="campaignName" width="100%" text="Name"/>
 		<s:TextInput width="350" id="campaignNameInput" />
 		<s:HGroup width="100%" paddingTop="10">

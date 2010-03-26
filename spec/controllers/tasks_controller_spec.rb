@@ -20,7 +20,7 @@ describe TasksController do
       when "pending"
         Factory(:task, :user => user, :bucket => due.to_s)
       when "assigned"
-        Factory(:task, :user => user, :bucket => due.to_s, :assigned_to => 1)
+        Factory(:task, :user => user, :bucket => due.to_s, :assignee_id => 1)
       when "completed"
         completed_at = case due
           when :completed_today

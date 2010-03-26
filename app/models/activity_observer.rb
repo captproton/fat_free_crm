@@ -43,7 +43,7 @@ class ActivityObserver < ActiveRecord::Observer
       original = @@tasks.delete(subject.id)
       if original
         return log_activity(subject, :completed)   if subject.completed_at && original.completed_at.nil?
-        return log_activity(subject, :reassigned)  if subject.assigned_to != original.assigned_to
+        return log_activity(subject, :reassigned)  if subject.assignee_id != original.assignee_id
         return log_activity(subject, :rescheduled) if subject.bucket != original.bucket
       end
     elsif subject.is_a?(Lead)

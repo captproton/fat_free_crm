@@ -1,179 +1,145 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Form
-  xmlns:fx="http://ns.adobe.com/mxml/2009"
-  xmlns:s="library://ns.adobe.com/flex/spark"
-  xmlns:mx="library://ns.adobe.com/flex/halo"
-  width="400">
-<fx:Script><![CDATA[
-  import mx.collections.ArrayCollection;
-  import mx.events.ValidationResultEvent;
-  import mx.validators.Validator;
-  import model.Address;
-  
-  private var _address:Address = new Address();
-
-  public function validateAndSave():Boolean {
-    if (isFormValid()) {
-      address.lineOne = addressOneTI.text;
-      address.lineTwo = addressTwoTI.text;
-      address.city = cityTI.text;
-      address.country = countryDDL.selectedItem;
-      if (stateDDL.dataProvider.length == 0) {
-        address.state = "";
-      } else {
-        address.state = stateDDL.selectedItem;
-      }
-      address.zipCode = zipTI.text;
-      return true;
-    } else {
-      return false;
-    }
-  }
-  private function isFormValid():Boolean {
-    var validators:Array = [addressValidator, cityValidator,
-      countryValidator, stateValidator];
-    var zipCodeValid:Boolean = validateAndFormatZipCode();
-    var results:Array = Validator.validateAll(validators);
-    return results.length == 0 && zipCodeValid;
-  }
-  private function setFormFromAddress():void {
-    addressOneTI.text = address.lineOne;
-    addressTwoTI.text = address.lineTwo;
-    cityTI.text = address.city;
-    countryDDL.selectedItem = address.country;
-    var states:ArrayCollection = getStates(address.country);
-    stateDDL.dataProvider = states;
-    stateDDL.selectedIndex = states.source.indexOf(address.state);
-    zipTI.text = address.zipCode;
-  }
-   
-  public function set address(value:Address):void {
-    if (value == null) {
-      _address = new Address();
-      setFormFromAddress();
-    } else {
-      _address = value;
-      setFormFromAddress();
-      callLater(isFormValid);
-    }
-  }
-  [Bindable]
-  public function get address():Address {
-    return _address;
-  }
-
-  private static const EMPTY:ArrayCollection =
-    new ArrayCollection([]);
-  private static const COUNTRIES:ArrayCollection =
-    new ArrayCollection(["USA", "Canada", "UK", "France"]);
-  private static const STATES:ArrayCollection =
-    new ArrayCollection(["CA", "OR", "WA"]);
-  private static const PROVINCES:ArrayCollection =
-    new ArrayCollection(["BC", "AB", "SK"]);
-  
-  private function getStates(country:String):ArrayCollection {
-    if (isUSA(country)) {
-      return STATES;
-    } else if (isCanada(country)) {
-      return PROVINCES;
-    } else {
-      return EMPTY;
-    }
-  }
-  private function usaOrCanada(country:String):Boolean {
-    return isUSA(country) || isCanada(country);
-  }
-  private function isUSA(country:String):Boolean {
-    return country == "USA";
-  }  
-  private function isCanada(country:String):Boolean {
-    return country == "Canada";
-  }
-  private function getStateMsg(country:String):String {
-    return isUSA(country) ? "Please choose a state." :
-      "Please choose a province.";
-  }
-  
-  private function validateAndFormatZipCode():Boolean {
-    var unformattedText:String =
-      zipTI.text.toUpperCase().replace(/\W/g, "");
-    var country:String = countryDDL.selectedItem;
-    var result:ValidationResultEvent;
-    var usa:Boolean = isUSA(country);
-    var canada:Boolean = isCanada(country);
-    zipCodeValidator.required = usa;
-    postalCodeValidator.required = canada;
-    if (usa) {
-      postalCodeValidator.validate("");
-      result = zipCodeValidator.validate(unformattedText);
-    } else if (canada) {
-      zipCodeValidator.validate("");
-      result = postalCodeValidator.validate(unformattedText);
-    } else {
-      postalCodeValidator.validate("");
-      zipCodeValidator.validate("");
-      return true;
-    }
-    if (result.type == ValidationResultEvent.VALID) {
-      if (usa) {
-        zipTI.text = zipCodeFormatter.format(unformattedText);
-      } else {
-        zipTI.text = postalCodeFormatter.format(unformattedText);
-      }
-      return true;
-    } else {
-      return false;
-    }
-  }
-]]></fx:Script>
-  <fx:Declarations>
-    <mx:StringValidator id="addressValidator" minLength="5"
-      source="{addressOneTI}" property="text" required="true"/>
-    <mx:StringValidator id="cityValidator" minLength="2"
-      source="{cityTI}" property="text" required="true"/>
-    <mx:NumberValidator id="countryValidator"
-      lowerThanMinError="Please choose a country."
-      source="{countryDDL}" property="selectedIndex" minValue="0"/>
-    <mx:NumberValidator id="stateValidator"
-      lowerThanMinError="{getStateMsg(countryDDL.selectedItem)}"
-      source="{stateDDL}" property="selectedIndex"
-      enabled="{usaOrCanada(countryDDL.selectedItem)}"
-      minValue="0"/>
-    <mx:ZipCodeFormatter id="zipCodeFormatter"
-      formatString="#####-####"/>
-    <mx:ZipCodeFormatter id="postalCodeFormatter"
-      formatString="### ###"/>
-    <mx:ZipCodeValidator id="zipCodeValidator"
-      listener="{zipTI}"/>
-    <mx:RegExpValidator id="postalCodeValidator"
-      listener="{zipTI}"
-      expression="^[A-Z]\d[A-Z]\d[A-Z]\d$"
-      noMatchError="The postal code is invalid."/>
-  </fx:Declarations>
-  <mx:FormItem label="Street Address" required="true" width="100%">
-    <s:TextInput id="addressOneTI" width="250"/>
-    <s:TextInput id="addressTwoTI" width="250"/>
-  </mx:FormItem>
-  <mx:FormItem label="City" required="true" width="100%">
-    <s:TextInput id="cityTI" width="100%"/>
-  </mx:FormItem>
-  <mx:FormItem label="Country" required="true">
-    <s:DropDownList id="countryDDL" width="150"
-      dataProvider="{COUNTRIES}" prompt="Select..."
-      change="validateAndFormatZipCode();"/>
-  </mx:FormItem>
-  <mx:FormItem
-    label="{isUSA(countryDDL.selectedItem) ? 'State' : 'Province'}"
-    required="{usaOrCanada(countryDDL.selectedItem)}">
-    <s:DropDownList id="stateDDL" width="150"
-      dataProvider="{getStates(countryDDL.selectedItem)}"
-      prompt="Select..."
-      enabled="{stateDDL.dataProvider.length > 0}"/>
-  </mx:FormItem>
-  <mx:FormItem
-    label="{isUSA(countryDDL.selectedItem) ? 'Zip' : 'Postal'} Code"
-    width="100%" required="{usaOrCanada(countryDDL.selectedItem)}">
-    <s:TextInput id="zipTI" width="150"
-      focusOut="validateAndFormatZipCode()"/>
-  </mx:FormItem>
-</mx:Form>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" label="Campaign"
+		 xmlns:rx="org.restfulx.components.rx.*">
+	<mx:Script><![CDATA[
+		import org.restfulx.Rx;
+		import org.restfulx.utils.RxUtils;
+		import fatfreecrm.models.Campaign;
+		import fatfreecrm.models.User;
+		
+		[Bindable]
+		private var campaign:Campaign = new Campaign();
+		
+		private function newCampaign():void {
+			campaign = new Campaign();
+			campaignsList.selectedIndex = -1;
+		}
+		
+		private function saveCampaign():void {
+			updateModelProperties();
+			if (campaign.id) {
+				campaign.update({onSuccess: onCampaignUpdate});
+			} else {
+				campaign.create({onSuccess: onCampaignCreate});
+			}
+		}
+		
+		private function updateModelProperties():void {
+/* 			campaign.assignedTo = int(assignedToTextInput.text);
+ */			campaign.name = nameTextInput.text;
+			campaign.access = accessTextInput.text;
+			campaign.status = statusTextInput.text;
+			campaign.budget = Number(budgetTextInput.text);
+			campaign.targetLeads = int(targetLeadsTextInput.text);
+			campaign.targetConversion = Number(targetConversionTextInput.text);
+			campaign.targetRevenue = Number(targetRevenueTextInput.text);
+			campaign.leadsCount = int(leadsCountTextInput.text);
+			campaign.opportunitiesCount = int(opportunitiesCountTextInput.text);
+			campaign.revenue = Number(revenueTextInput.text);
+			campaign.startsOn = startsOnDateField.selectedDate;
+			campaign.endsOn = endsOnDateField.selectedDate;
+			campaign.objectives = objectivesTextArea.text;
+			campaign.deletedAt = deletedAtDateTimeTextInput.date;
+			campaign.backgroundInfo = backgroundInfoTextInput.text;
+			
+			campaign.user = User(userComboBox.selectedItem);
+		}
+		
+		private function destroyCampaign():void {
+			campaign.destroy({onSuccess: onCampaignDestroy});
+		}
+		
+		private function onCampaignSelect():void {
+			campaign = RxUtils.clone(campaignsList.selectedItem) as Campaign;
+		}
+		
+		private function onCampaignCreate(result:Campaign):void {
+			campaign = new Campaign;
+		}
+		
+		private function onCampaignUpdate(result:Campaign):void {
+			campaignsList.selectedItem = result;
+			onCampaignSelect();
+		}
+		
+		private function onCampaignDestroy(result:Campaign):void {
+			onCampaignCreate(result);
+		}    
+	]]></mx:Script>
+	<mx:Panel id="campaignsPanel"
+			  title="Campaigns" cornerRadius="0" backgroundColor="#EEEEEE" width="25%" height="100%">
+		<mx:List id="campaignsList"
+				 width="100%" height="100%"
+				 dataProvider="{Rx.models.index(Campaign)}"
+				 change="onCampaignSelect()"/>
+		<mx:ControlBar width="100%">
+			<mx:Button label="New Campaign" width="100%" height="30"
+					   click="newCampaign()"/>
+		</mx:ControlBar>
+	</mx:Panel>
+	<mx:Panel title="Edit Campaign" cornerRadius="0" backgroundColor="#EEEEEE" width="75%" height="100%">
+		<mx:Form width="100%" height="100%">
+			<mx:FormItem label="AssignedTo" width="100%">
+<!--				<mx:TextInput id="assignedToTextInput" width="100%" text="{campaign.assignedTo}"/>-->
+			</mx:FormItem>
+			<mx:FormItem label="Name" width="100%">
+				<mx:TextInput id="nameTextInput" width="100%" text="{campaign.name}"/>
+			</mx:FormItem>
+			<mx:FormItem label="Access" width="100%">
+				<mx:TextInput id="accessTextInput" width="100%" text="{campaign.access}"/>
+			</mx:FormItem>
+			<mx:FormItem label="Status" width="100%">
+				<mx:TextInput id="statusTextInput" width="100%" text="{campaign.status}"/>
+			</mx:FormItem>
+			<mx:FormItem label="Budget" width="100%">
+				<mx:TextInput id="budgetTextInput" width="100%" text="{campaign.budget}"/>
+			</mx:FormItem>
+			<mx:FormItem label="TargetLeads" width="100%">
+				<mx:TextInput id="targetLeadsTextInput" width="100%" text="{campaign.targetLeads}"/>
+			</mx:FormItem>
+			<mx:FormItem label="TargetConversion" width="100%">
+				<mx:TextInput id="targetConversionTextInput" width="100%" text="{campaign.targetConversion}"/>
+			</mx:FormItem>
+			<mx:FormItem label="TargetRevenue" width="100%">
+				<mx:TextInput id="targetRevenueTextInput" width="100%" text="{campaign.targetRevenue}"/>
+			</mx:FormItem>
+			<mx:FormItem label="LeadsCount" width="100%">
+				<mx:TextInput id="leadsCountTextInput" width="100%" text="{campaign.leadsCount}"/>
+			</mx:FormItem>
+			<mx:FormItem label="OpportunitiesCount" width="100%">
+				<mx:TextInput id="opportunitiesCountTextInput" width="100%" text="{campaign.opportunitiesCount}"/>
+			</mx:FormItem>
+			<mx:FormItem label="Revenue" width="100%">
+				<mx:TextInput id="revenueTextInput" width="100%" text="{campaign.revenue}"/>
+			</mx:FormItem>
+			<mx:FormItem label="StartsOn" width="100%">
+				<mx:DateField id="startsOnDateField" selectedDate="{campaign.startsOn}"/>
+			</mx:FormItem>
+			<mx:FormItem label="EndsOn" width="100%">
+				<mx:DateField id="endsOnDateField" selectedDate="{campaign.endsOn}"/>
+			</mx:FormItem>
+			<mx:FormItem label="Objectives" width="100%">
+				<mx:TextArea id="objectivesTextArea" width="100%" height="50" text="{campaign.objectives}"/>
+			</mx:FormItem>
+			<mx:FormItem label="DeletedAt" width="100%">
+				<rx:DateTimeTextInput id="deletedAtDateTimeTextInput" width="200" date="{campaign.deletedAt}"/>
+			</mx:FormItem>
+			<mx:FormItem label="BackgroundInfo" width="100%">
+				<mx:TextInput id="backgroundInfoTextInput" width="100%" text="{campaign.backgroundInfo}"/>
+			</mx:FormItem>
+			<mx:FormItem label="User" width="100%">
+				<mx:ComboBox id="userComboBox" width="200"
+							 labelField="{User.LABEL}"
+							 dataProvider="{Rx.models.index(User)}" prompt="User ..."
+							 selectedItem="{campaign.user}"/>
+			</mx:FormItem>
+		</mx:Form>
+		<mx:ControlBar width="100%">
+			<mx:Button label="Save Campaign" width="50%" height="30"
+					   click="saveCampaign()"/>
+			<mx:Button label="Delete Campaign" width="50%" height="30"
+					   enabled="{RxUtils.canDeleteModel(campaign)}"
+					   click="destroyCampaign()"/>
+		</mx:ControlBar>
+	</mx:Panel>
+</mx:HBox>

@@ -23,7 +23,7 @@ describe "/opportunities/_create.html.haml" do
 
   it "should pick default assignee (Myself)" do
     render "/opportunities/_create.html.haml"
-    response.should have_tag("select[id=opportunity_assigned_to]") do |options|
+    response.should have_tag("select[id=opportunity_assignee_id]") do |options|
       options.to_s.should_not include_text(%Q/selected="selected"/)
     end
   end

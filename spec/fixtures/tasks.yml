@@ -49,7 +49,7 @@
 task<%= i %>:
   id           : <%= i %>
   user_id      : <%= user %>
-  assigned_to  : <%= rand(4) == 0 ? rand(5) + 1 : "" %>
+  assignee_id  : <%= rand(4) == 0 ? rand(5) + 1 : "" %>
   completed_by : <%= completed_by %>
   name         : <%= Faker::Lorem::sentence(rand(2) + 2).sub(".", "") %>
   asset_id     : <%= asset %>

@@ -26,7 +26,7 @@ class TasksController < ApplicationController
   def index
     @view = params[:view] || "pending"
     @flashyView = "assigned"
-    @tasks = Task.find_all_grouped(@current_user, @view)
+    ## @tasks = Task.find_all_grouped(@current_user, @view)
     @flashyTasks = Task.my(@current_user)
 
     respond_to do |format|
@@ -104,9 +104,13 @@ class TasksController < ApplicationController
         update_sidebar if called_from_index_page?
         format.js   # create.js.rjs
         format.xml  { render :xml => @task, :status => :created, :location => @task }
+        format.fxml  { render :fxml => @task }
+        
       else
         format.js   # create.js.rjs
         format.xml  { render :xml => @task.errors, :status => :unprocessable_entity }
+        format.fxml  { render :fxml => @task.errors }
+        
       end
     end
   end
@@ -136,9 +140,12 @@ class TasksController < ApplicationController
         end
         format.js   # update.js.rjs
         format.xml  { head :ok }
+        format.fxml  { render :fxml => @task }
+        
       else
         format.js   # update.js.rjs
         format.xml  { render :xml => @task.errors, :status => :unprocessable_entity }
+        format.fxml  { render :fxml => @task.errors }
       end
     end
 
@@ -163,6 +170,8 @@ class TasksController < ApplicationController
     respond_to do |format|
       format.js   # destroy.js.rjs
       format.xml  { head :ok }
+      format.fxml  { render :fxml => @task }
+      
     end
 
   rescue ActiveRecord::RecordNotFound

@@ -32,6 +32,7 @@ class ContactsController < ApplicationController
       format.js   # index.js.rjs
       format.xml  { render :xml => @contacts }
       format.fxml  { render :fxml => @contacts }
+      
     end
   end
 
@@ -131,6 +132,8 @@ class ContactsController < ApplicationController
       if @contact.update_with_account_and_permissions(params)
         format.js
         format.xml  { head :ok }
+        format.fxml  { render :fxml => @contact }
+        
       else
         @users = User.except(@current_user).all
         @accounts = Account.my(@current_user).all(:order => "name")
@@ -141,6 +144,8 @@ class ContactsController < ApplicationController
         end
         format.js
         format.xml  { render :xml => @contact.errors, :status => :unprocessable_entity }
+        format.fxml  { render :fxml => @contact.errors }
+        
       end
     end
 
@@ -159,6 +164,8 @@ class ContactsController < ApplicationController
       format.html { respond_to_destroy(:html) }
       format.js   { respond_to_destroy(:ajax) }
       format.xml  { head :ok }
+      format.fxml  { render :fxml => @contact }
+      
     end
 
   rescue ActiveRecord::RecordNotFound

@@ -7,7 +7,7 @@ package fatfreecrm.models {
   public class Task extends RxModel {
     public static const LABEL:String = "name";
 
-    public var assignedTo:int = 0;
+    // public var assignedTo:int = 0;
 
     public var completedBy:int = 0;
 
@@ -34,6 +34,9 @@ package fatfreecrm.models {
 
     [BelongsTo]
     public var user:User;
+
+	[BelongsTo]
+	public var assignee:User;
 
     [BelongsTo(polymorphic="true", dependsOn="Model1, Model2")]
     public var asset:Object;
