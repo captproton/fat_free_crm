@@ -1,67 +1,73 @@
+# frozen_string_literal: true
+
+# Copyright (c) 2008-2013 Michael Dvorkin and contributors.
+#
+# Fat Free CRM is freely distributable under the terms of MIT license.
+# See MIT-LICENSE file or http://www.opensource.org/licenses/mit-license.php
+#------------------------------------------------------------------------------
 require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 
-describe "/contacts/edit.html.erb" do
+describe "/contacts/_edit" do
   include ContactsHelper
-  
-  before(:each) do
-    login_and_assign
-    assigns[:account] = @account = Factory(:account)
-    assigns[:accounts] = [ @account ]
+
+  before do
+    login
+    assign(:account, @account = create(:account))
+    assign(:accounts, [@account])
   end
 
   it "should render [edit contact] form" do
-    assigns[:contact] = @contact = Factory(:contact)
-    assigns[:users] = [ @current_user ]
-    template.should_receive(:render).with(hash_including(:partial => "contacts/top_section"))
-    template.should_receive(:render).with(hash_including(:partial => "contacts/extra"))
-    template.should_receive(:render).with(hash_including(:partial => "contacts/web"))
-    template.should_receive(:render).with(hash_including(:partial => "contacts/permissions"))
+    assign(:contact, @contact = create(:contact))
+    assign(:users, [current_user])
 
-    render "/contacts/_edit.html.haml"
-    response.should have_tag("form[class=edit_contact]") do
-      with_tag "input[type=hidden][id=contact_user_id][value=#{@contact.user_id}]"
+    render
+    expect(view).to render_template(partial: "contacts/_top_section")
+    expect(view).to render_template(partial: "contacts/_extra")
+    expect(view).to render_template(partial: "contacts/_web")
+    expect(view).to render_template(partial: "_permissions")
+
+    expect(rendered).to have_tag("form[class=edit_contact]") do
+      with_tag "input[type=hidden][id=contact_user_id][value='#{@contact.user_id}']"
     end
   end
 
   it "should pick default assignee (Myself)" do
-    assigns[:users] = [ @current_user ]
-    assigns[:contact] = Factory(:contact, :assignee => nil)
+    assign(:users, [current_user])
+    assign(:contact, create(:contact, assignee: nil))
 
-    render "/contacts/_edit.html.haml"
-    response.should have_tag("select[id=contact_assigned_to]") do |options|
-      options.to_s.should_not include_text(%Q/selected="selected"/)
+    render
+    expect(rendered).to have_tag("select[id=contact_assigned_to]") do |options|
+      expect(options.to_s).not_to include(%(selected="selected"))
     end
   end
 
   it "should show correct assignee" do
-    @user = Factory(:user)
-    assigns[:users] = [ @current_user, @user ]
-    assigns[:contact] = Factory(:contact, :assignee => @user)
+    @user = create(:user)
+    assign(:users, [current_user, @user])
+    assign(:contact, create(:contact, assignee: @user))
 
-    render "/contacts/_edit.html.haml"
-    response.should have_tag("select[id=contact_assigned_to]") do |options|
+    render
+    expect(rendered).to have_tag("select[id=contact_assigned_to]") do |_options|
       with_tag "option[selected=selected]"
-      with_tag "option[value=#{@user.id}]"
+      with_tag "option[value='#{@user.id}']"
     end
   end
 
   it "should render background info field if settings require so" do
-    assigns[:users] = [ @current_user ]
-    assigns[:contact] = Factory(:contact)
-    Setting.background_info = [ :contact ]
+    assign(:users, [current_user])
+    assign(:contact, create(:contact))
+    Setting.background_info = [:contact]
 
-    render "/contacts/_create.html.haml"
-    response.should have_tag("textarea[id=contact_background_info]")
+    render
+    expect(rendered).to have_tag("textarea[id=contact_background_info]")
   end
 
   it "should not render background info field if settings do not require so" do
-    assigns[:users] = [ @current_user ]
-    assigns[:contact] = Factory(:contact)
+    assign(:users, [current_user])
+    assign(:contact, create(:contact))
     Setting.background_info = []
 
-    render "/contacts/_create.html.haml"
-    response.should_not have_tag("textarea[id=contact_background_info]")
+    render
+    expect(rendered).not_to have_tag("textarea[id=contact_background_info]")
   end
 end
-
-

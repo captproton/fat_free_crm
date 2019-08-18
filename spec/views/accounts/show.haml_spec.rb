@@ -1,25 +1,38 @@
-require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
+# frozen_string_literal: true
 
-describe "/accounts/show.html.haml" do
+# Copyright (c) 2008-2013 Michael Dvorkin and contributors.
+#
+# Fat Free CRM is freely distributable under the terms of MIT license.
+# See MIT-LICENSE file or http://www.opensource.org/licenses/mit-license.php
+#------------------------------------------------------------------------------
+require 'spec_helper'
+
+describe "/accounts/show" do
   include AccountsHelper
 
-  before(:each) do
-    login_and_assign
-    assigns[:account] = Factory(:account, :id => 42)
-    assigns[:users] = [ @current_user ]
-    assigns[:comment] = Comment.new
+  before do
+    login
+    @account = create(:account, id: 42,
+                                contacts: [create(:contact)],
+                                opportunities: [create(:opportunity)])
+    assign(:account, @account)
+    assign(:users, [current_user])
+    assign(:comment, Comment.new)
+    assign(:timeline, [create(:comment, commentable: @account)])
+
+    # controller#controller_name and controller#action_name are not set in view specs
+    allow(view).to receive(:template_for_current_view).and_return(nil)
   end
 
   it "should render account landing page" do
-    template.should_receive(:render).with(hash_including(:partial => "comments/new"))
-    template.should_receive(:render).with(hash_including(:partial => "comments/comment"))
-    template.should_receive(:render).with(hash_including(:partial => "contacts/contact"))
-    template.should_receive(:render).with(hash_including(:partial => "opportunities/opportunity"))
+    render
 
-    render "/accounts/show.html.haml"
+    expect(view).to render_template(partial: "comments/_new")
+    expect(view).to render_template(partial: "shared/_timeline")
+    expect(view).to render_template(partial: "shared/_tasks")
+    expect(view).to render_template(partial: "contacts/_contact")
+    expect(view).to render_template(partial: "opportunities/_opportunity")
 
-    response.should have_tag("div[id=edit_account]")
+    expect(rendered).to have_tag("div[id=edit_account]")
   end
-
 end
-

@@ -1,29 +1,17 @@
-# Fat Free CRM
-# Copyright (C) 2008-2010 by Michael Dvorkin
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-# 
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http:#www.gnu.org/licenses/>.
-#------------------------------------------------------------------------------
+# frozen_string_literal: true
 
+# Copyright (c) 2008-2013 Michael Dvorkin and contributors.
+#
+# Fat Free CRM is freely distributable under the terms of MIT license.
+# See MIT-LICENSE file or http://www.opensource.org/licenses/mit-license.php
+#------------------------------------------------------------------------------
 module FatFreeCRM
   module Sortable
-
     def self.included(base)
       base.extend(ClassMethods)
     end
 
     module ClassMethods
-
       # Model class method to define sort options, for example:
       #   sortable :by => "first_name ASC"
       #   sortable :by => [ "first_name ASC", "last_name ASC" ]
@@ -35,8 +23,8 @@ module FatFreeCRM
                        :sort_by_clauses     # A copy of sortable :by => ... stored as array.
 
         self.sort_by_clauses = [options[:by]].flatten
-        self.sort_by_fields = self.sort_by_clauses.map(&:split).map(&:first)
-        self.sort_by = self.name.tableize + "." + (options[:default] || options[:by].first)
+        self.sort_by_fields = sort_by_clauses.map(&:split).map(&:first)
+        self.sort_by = name.tableize + "." + (options[:default] || options[:by].first)
       end
 
       # Return hash that maps sort options to the actual :order strings, for example:
@@ -44,13 +32,14 @@ module FatFreeCRM
       #   "last_name"  => "leads.last_name ASC"
       #--------------------------------------------------------------------------
       def sort_by_map
-        self.sort_by_fields.zip(self.sort_by_clauses).inject({}) do |hash, (field, clause)|
-          hash[field] = self.name.tableize + "." + clause
-          hash
-        end
+        Hash[
+          sort_by_fields.zip(sort_by_clauses).map do |field, clause|
+            [field, name.tableize + "." + clause]
+          end
+        ]
       end
-
-    end # ClassMethods
-
+    end
   end
 end
+
+ActiveRecord::Base.send(:include, FatFreeCRM::Sortable)

@@ -1,24 +1,35 @@
+# frozen_string_literal: true
+
+# Copyright (c) 2008-2013 Michael Dvorkin and contributors.
+#
+# Fat Free CRM is freely distributable under the terms of MIT license.
+# See MIT-LICENSE file or http://www.opensource.org/licenses/mit-license.php
+#------------------------------------------------------------------------------
 require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 
-describe "/contacts/show.html.haml" do
+describe "/contacts/show" do
   include ContactsHelper
 
-  before(:each) do
-    login_and_assign
-    assigns[:contact] = Factory(:contact, :id => 42)
-    assigns[:users] = [ @current_user ]
-    assigns[:comment] = Comment.new
+  before do
+    login
+    @contact = create(:contact, id: 42,
+                                opportunities: [create(:opportunity)])
+    assign(:contact, @contact)
+    assign(:users, [current_user])
+    assign(:comment, Comment.new)
+    assign(:timeline, [create(:comment, commentable: @contact)])
+
+    # controller#controller_name and controller#action_name are not set in view specs
+    allow(view).to receive(:template_for_current_view).and_return(nil)
   end
 
   it "should render contact landing page" do
-    template.should_receive(:render).with(hash_including(:partial => "comments/new"))
-    template.should_receive(:render).with(hash_including(:partial => "comments/comment"))
-    template.should_receive(:render).with(hash_including(:partial => "opportunities/opportunity"))
+    render
+    expect(view).to render_template(partial: "comments/_new")
+    expect(view).to render_template(partial: "shared/_timeline")
+    expect(view).to render_template(partial: "shared/_tasks")
+    expect(view).to render_template(partial: "opportunities/_opportunity")
 
-    render "/contacts/show.html.haml"
-
-    response.should have_tag("div[id=edit_contact]")
+    expect(rendered).to have_tag("div[id=edit_contact]")
   end
-
 end
-

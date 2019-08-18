@@ -1,26 +1,30 @@
+# frozen_string_literal: true
+
+# Copyright (c) 2008-2013 Michael Dvorkin and contributors.
+#
+# Fat Free CRM is freely distributable under the terms of MIT license.
+# See MIT-LICENSE file or http://www.opensource.org/licenses/mit-license.php
+#------------------------------------------------------------------------------
 require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 
-describe "/leads/convert.html.erb" do
+describe "/leads/_convert" do
   include LeadsHelper
-  
-  before(:each) do
-    login_and_assign
-    @account = Factory(:account)
-    assigns[:lead] = Factory(:lead)
-    assigns[:users] = [ @current_user ]
-    assigns[:account] = @account
-    assigns[:accounts] = [ @account ]
-    assigns[:opportunity] = Factory(:opportunity)
+
+  before do
+    login
+    @account = build_stubbed(:account)
+    assign(:lead, build_stubbed(:lead))
+    assign(:users, [current_user])
+    assign(:account, @account)
+    assign(:accounts, [@account])
+    assign(:opportunity, build_stubbed(:opportunity))
   end
 
   it "should render [convert lead] form" do
-    template.should_receive(:render).with(hash_including(:partial => "leads/opportunity"))
-    template.should_receive(:render).with(hash_including(:partial => "leads/convert_permissions"))
+    render
+    expect(view).to render_template(partial: "leads/_opportunity")
+    expect(view).to render_template(partial: "leads/_convert_permissions")
 
-    render "/leads/_convert.html.haml"
-    response.should have_tag("form[class=edit_lead]")
+    expect(rendered).to have_tag("form[class=edit_lead]")
   end
-
 end
-
-

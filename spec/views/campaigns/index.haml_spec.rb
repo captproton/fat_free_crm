@@ -1,26 +1,37 @@
+# frozen_string_literal: true
+
+# Copyright (c) 2008-2013 Michael Dvorkin and contributors.
+#
+# Fat Free CRM is freely distributable under the terms of MIT license.
+# See MIT-LICENSE file or http://www.opensource.org/licenses/mit-license.php
+#------------------------------------------------------------------------------
 require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 
-describe "/campaigns/index.html.haml" do
+describe "/campaigns/index" do
   include CampaignsHelper
-  
-  before(:each) do
-    login_and_assign
+
+  before do
+    view.lookup_context.prefixes << 'entities'
+    assign :per_page, Campaign.per_page
+    assign :sort_by,  Campaign.sort_by
+    assign :ransack_search, Campaign.ransack
+    login
   end
 
   it "should render list of accounts if list of campaigns is not empty" do
-    assigns[:campaigns] = [ Factory(:campaign) ]
-    template.should_receive(:render).with(hash_including(:partial => "campaign"))
-    template.should_receive(:render).with(:partial => "common/paginate")
-    render "/campaigns/index.html.haml"
+    assign(:campaigns, [build_stubbed(:campaign)].paginate)
+
+    render
+    expect(view).to render_template(partial: "_campaign")
+    expect(view).to render_template(partial: "shared/_paginate_with_per_page")
   end
 
   it "should render a message if there're no campaigns" do
-    assigns[:campaigns] = []
-    template.should_not_receive(:render).with(hash_including(:partial => "campaigns"))
-    template.should_receive(:render).with(:partial => "common/empty")
-    template.should_receive(:render).with(:partial => "common/paginate")
-    render "/campaigns/index.html.haml"
+    assign(:campaigns, [].paginate)
+
+    render
+    expect(view).not_to render_template(partial: "_campaigns")
+    expect(view).to render_template(partial: "shared/_empty")
+    expect(view).to render_template(partial: "shared/_paginate_with_per_page")
   end
-
 end
-

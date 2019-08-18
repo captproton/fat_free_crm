@@ -1,39 +1,58 @@
-# Fat Free CRM
-# Copyright (C) 2008-2010 by Michael Dvorkin
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-# 
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http:#www.gnu.org/licenses/>.
+# frozen_string_literal: true
+
+# Copyright (c) 2008-2013 Michael Dvorkin and contributors.
+#
+# Fat Free CRM is freely distributable under the terms of MIT license.
+# See MIT-LICENSE file or http://www.opensource.org/licenses/mit-license.php
 #------------------------------------------------------------------------------
 
-if RUBY_VERSION.start_with?("1.9") && ActiveRecord::Base.connection.adapter_name.downcase == "mysql"
-  require "fat_free_crm/mysql_utf8.rb"
+module FatFreeCRM
+  class << self
+    # Return either Application or Engine,
+    # depending on how Fat Free CRM has been loaded
+    def application
+      engine? ? Engine : Application
+    end
+
+    delegate :root, to: :application
+
+    # Are we running as an engine?
+    def engine?
+      defined?(FatFreeCRM::Engine).present?
+    end
+
+    def application?
+      !engine?
+    end
+  end
 end
 
+# Load Fat Free CRM as a Rails Engine, unless running as a Rails Application
+require 'fat_free_crm/engine' unless defined?(FatFreeCRM::Application)
+
+require 'fat_free_crm/load_settings' # register load hook for Setting
+
+# Require gem dependencies, monkey patches, and vendored plugins (in lib)
+require "fat_free_crm/gem_dependencies"
+require "fat_free_crm/gem_ext"
+
+require "fat_free_crm/custom_fields" # load hooks for Field
 require "fat_free_crm/version"
 require "fat_free_crm/core_ext"
+require "fat_free_crm/comment_extensions"
 require "fat_free_crm/exceptions"
+require "fat_free_crm/export_csv"
+require "fat_free_crm/errors"
 require "fat_free_crm/i18n"
 require "fat_free_crm/permissions"
+require "fat_free_crm/exportable"
+require "fat_free_crm/renderers"
+require "fat_free_crm/fields"
 require "fat_free_crm/sortable"
 require "fat_free_crm/tabs"
 require "fat_free_crm/callback"
-require "fat_free_crm/plugin"
+require "fat_free_crm/view_factory"
 
-      ActionView::Base.send(:include, FatFreeCRM::I18n)
-ActionController::Base.send(:include, FatFreeCRM::I18n)
-
-      ActionView::Base.send(:include, FatFreeCRM::Callback::Helper)
-ActionController::Base.send(:include, FatFreeCRM::Callback::Helper)
-
-    ActiveRecord::Base.send(:include, FatFreeCRM::Permissions)
-    ActiveRecord::Base.send(:include, FatFreeCRM::Sortable)
+require "activemodel-serializers-xml"
+require "country_select"
+require "gravatar_image_tag"

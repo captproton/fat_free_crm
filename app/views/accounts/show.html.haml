@@ -1,38 +1,26 @@
-= styles_for :task, :contact, :opportunity
+- if (template = template_for_current_view)
+  = render(template, account: @account)
+- else
+  
+  -# default view
 
-#confirm{ hidden }
-.title_tools#menu
-  = link_to_inline(:edit_account, edit_account_path(@account), :text => t(:edit)) + " | "
-  = link_to_function(t(:delete) + '?', confirm_delete(@account))
-.title#edit_account_title= h(@account.name)
+  = styles_for :task, :contact, :opportunity
 
-%div#edit_account{ hidden }
+  = render 'accounts/title_bar', account: @account
 
-= render :partial => "comments/new", :locals => { :commentable => @account }
-= render :partial => "comments/comment", :collection => @account.comments
+  %div#edit_account{ hidden }
 
--#-----------------------------------------------------------------------------
-%br
-= inline :create_task, new_task_path, { :class => "subtitle_tools", :related => dom_id(@account), :text=> t(:create_task) }
-.subtitle#create_task_title #{t :tasks}
-.remote#create_task{ hidden }
-.log#tasks
-  = render :partial => "common/tasks"
+  = render "comments/new", commentable: @account
+  = render partial: "shared/timeline", collection: @timeline
 
--#-----------------------------------------------------------------------------
-%br
-= inline :create_contact, new_contact_path, { :class => "subtitle_tools", :related => dom_id(@account), :text=> t(:create_contact) }
-.subtitle#create_contact_title #{t :contacts}
-.remote#create_contact{ hidden }
-.list#contacts
-  = render :partial => "contacts/contact", :collection => @account.contacts
+  = hook(:show_account_bottom, self, {entity: @account}) do
 
--#-----------------------------------------------------------------------------
-%br
-= inline :create_opportunity, new_opportunity_path, { :class => "subtitle_tools", :related => dom_id(@account), :text=> t(:create_opportunity) }
-.subtitle#create_opportunity_title #{t :opportunities}
-.remote#create_opportunity{ hidden }
-.list#opportunities
-  = render :partial => "opportunities/opportunity", :collection => @account.opportunities
+    = render partial: "tasks/tasks", locals: {object: @account}
 
-= hook(:show_account_bottom, self)
+    = render "contacts/contacts", object: @account
+
+    = render "opportunities/opportunities", object: @account
+
+    = render "versions/versions", object: @account
+
+    = load_select_popups_for(@account, :tasks, :contacts, :opportunities)

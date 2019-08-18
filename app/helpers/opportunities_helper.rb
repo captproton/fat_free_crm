@@ -1,27 +1,100 @@
-# Fat Free CRM
-# Copyright (C) 2008-2010 by Michael Dvorkin
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-# 
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# frozen_string_literal: true
+
+# Copyright (c) 2008-2013 Michael Dvorkin and contributors.
+#
+# Fat Free CRM is freely distributable under the terms of MIT license.
+# See MIT-LICENSE file or http://www.opensource.org/licenses/mit-license.php
 #------------------------------------------------------------------------------
-
 module OpportunitiesHelper
-
   # Sidebar checkbox control for filtering opportunities by stage.
   #----------------------------------------------------------------------------
-  def opportunity_stage_checbox(stage, count)
-    checked = (session[:filter_by_opportunity_stage] ? session[:filter_by_opportunity_stage].split(",").include?(stage.to_s) : count.to_i > 0)
-    check_box_tag("stage[]", stage, checked, :onclick => remote_function(:url => { :action => :filter }, :with => %Q/"stage=" + $$("input[name='stage[]']").findAll(function (el) { return el.checked }).pluck("value")/))
+  def opportunity_stage_checkbox(stage, count)
+    entity_filter_checkbox(:stage, stage, count)
   end
 
+  # Opportunity summary for RSS/ATOM feeds.
+  #----------------------------------------------------------------------------
+  def opportunity_summary(opportunity)
+    summary = []
+    amount = []
+    summary << (opportunity.stage ? t(opportunity.stage) : t(:other))
+    summary << number_to_currency(opportunity.weighted_amount, precision: 0)
+    unless %w[won lost].include?(opportunity.stage)
+      amount << number_to_currency(opportunity.amount.to_f, precision: 0)
+      amount << (opportunity.discount ? t(:discount_number, number_to_currency(opportunity.discount, precision: 0)) : t(:no_discount))
+      amount << t(:probability_number, opportunity.probability.to_i.to_s + '%')
+      summary << amount.join(' ')
+    end
+    summary << if opportunity.closes_on
+                 t(:closing_date, l(opportunity.closes_on, format: :mmddyy))
+               else
+                 t(:no_closing_date)
+               end
+    summary.compact.join(', ')
+  end
+
+  # Generates a select list with the first 25 campaigns
+  # and prepends the currently selected campaign, if any.
+  #----------------------------------------------------------------------------
+  def opportunity_campaign_select(options = {})
+    options[:selected] ||= @opportunity.campaign_id.to_i
+    selected_campaign = Campaign.find_by_id(options[:selected])
+    campaigns = ([selected_campaign] + Campaign.my(current_user).order(:name).limit(25)).compact.uniq
+    collection_select :opportunity, :campaign_id, campaigns, :id, :name,
+                      { selected: options[:selected], prompt: t(:select_a_campaign) },
+                      style: 'width:330px;', class: 'select2'
+  end
+
+  # Generates the inline revenue message for the opportunity list table.
+  #----------------------------------------------------------------------------
+  def opportunity_revenue_message(opportunity, detailed = false)
+    msg = []
+    won_or_lost = %w[won lost].include?(opportunity.stage)
+
+    if opportunity.weighted_amount != 0
+      msg << content_tag(:b, number_to_currency(opportunity.weighted_amount, precision: 0))
+    end
+
+    unless won_or_lost
+      if detailed
+        if opportunity.amount.to_f != 0
+          msg << number_to_currency(opportunity.amount.to_f, precision: 0)
+        end
+
+        if opportunity.discount.to_f != 0
+          msg << t(:discount) + ' ' + number_to_currency(opportunity.discount, precision: 0)
+        end
+      end
+
+      if opportunity.probability.to_i != 0
+        msg << t(:probability) + ' ' + opportunity.probability.to_s + '%'
+      end
+    end
+
+    msg << opportunity_closes_on_message(opportunity, won_or_lost)
+
+    msg.join(' | ').html_safe
+  end
+
+  private
+
+  def opportunity_closes_on_message(opportunity, won_or_lost)
+    if opportunity.closes_on
+      if won_or_lost
+        if opportunity.closes_on >= Date.today
+          t(:closing_date, l(opportunity.closes_on, format: :mmddyy))
+        else
+          t(:closed_ago_on, time_ago: distance_of_time_in_words(opportunity.closes_on, Date.today), date: l(opportunity.closes_on, format: :mmddyy))
+        end
+      elsif opportunity.closes_on > Date.today
+        t(:expected_to_close, time: distance_of_time_in_words(Date.today, opportunity.closes_on), date: l(opportunity.closes_on, format: :mmddyy))
+      elsif opportunity.closes_on == Date.today
+        content_tag(:span, t(:closes_today), class: 'warn')
+      else
+        content_tag(:span, t(:past_due, distance_of_time_in_words(opportunity.closes_on, Date.today)), class: 'warn')
+      end
+    else
+      t(:no_closing_date)
+    end
+  end
 end

@@ -1,44 +1,50 @@
-require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
+# frozen_string_literal: true
 
-describe "/tasks/edit.html.erb" do
+# Copyright (c) 2008-2013 Michael Dvorkin and contributors.
+#
+# Fat Free CRM is freely distributable under the terms of MIT license.
+# See MIT-LICENSE file or http://www.opensource.org/licenses/mit-license.php
+#------------------------------------------------------------------------------
+require 'spec_helper'
+
+describe "/tasks/_edit" do
   include TasksHelper
-  
-  before(:each) do
-    login_and_assign
-    assigns[:task] = Factory(:task, :asset => Factory(:account), :bucket => "due_asap")
-    assigns[:users] = [ @current_user ]
-    assigns[:bucket] = %w(due_asap due_today)
-    assigns[:category] = %w(meeting money)
+
+  before do
+    login
+    assign(:task, build_stubbed(:task, asset: build_stubbed(:account), bucket: "due_asap"))
+    assign(:users, [current_user])
+    assign(:bucket, %w[due_asap due_today])
+    assign(:category, %w[meeting money])
   end
 
   it "should render [edit task] form" do
-    template.should_receive(:render).with(hash_including(:partial => "tasks/top_section"))
-    render "/tasks/_edit.html.haml"
+    render
 
-    response.should have_tag("form[class=edit_task]")
+    expect(view).to render_template(partial: "tasks/_top_section")
+
+    expect(rendered).to have_tag("form[class=edit_task]")
   end
 
-  [ "As Soon As Possible", "Today", "Tomorrow", "This Week", "Next Week", "Sometime Later" ].each do |day|
+  ["As Soon As Possible", "Today", "Tomorrow", "This Week", "Next Week", "Sometime Later"].each do |day|
     it "should render move to [#{day}] link" do
-      render "/tasks/_edit.html.haml"
+      render
 
-      response.should have_tag("a[onclick^=crm.reschedule]", :text => day)
+      expect(rendered).to have_tag("a[onclick^='crm.reschedule']", text: day)
     end
   end
 
   it "should render background info if Settings request so" do
-    Setting.background_info = [ :task ]
-    render "/tasks/_edit.html.haml"
+    Setting.background_info = [:task]
+    render
 
-    response.should have_tag("textarea[id=task_background_info]")
+    expect(rendered).to have_tag("textarea[id=task_background_info]")
   end
 
   it "should not render background info if Settings do not request so" do
     Setting.background_info = []
-    render "/tasks/_edit.html.haml"
+    render
 
-    response.should_not have_tag("textarea[id=task_background_info]")
+    expect(rendered).not_to have_tag("textarea[id=task_background_info]")
   end
 end
-
-

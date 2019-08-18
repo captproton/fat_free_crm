@@ -1,48 +1,111 @@
-# Fat Free CRM
-# Copyright (C) 2008-2010 by Michael Dvorkin
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-# 
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# frozen_string_literal: true
+
+# Copyright (c) 2008-2013 Michael Dvorkin and contributors.
+#
+# Fat Free CRM is freely distributable under the terms of MIT license.
+# See MIT-LICENSE file or http://www.opensource.org/licenses/mit-license.php
 #------------------------------------------------------------------------------
-
 class ApplicationController < ActionController::Base
-  helper(application_helpers)
-  helper_method :current_user_session, :current_user, :can_signup?
+  protect_from_forgery with: :exception
+
+  before_action :configure_devise_parameters, if: :devise_controller?
+  before_action :authenticate_user!
+  before_action :set_paper_trail_whodunnit
+  before_action :set_context
+  before_action :clear_setting_cache
+  before_action :cors_preflight_check
+  before_action { hook(:app_before_filter, self) }
+  after_action { hook(:app_after_filter, self) }
+  after_action :cors_set_access_control_headers
+
   helper_method :called_from_index_page?, :called_from_landing_page?
+  helper_method :klass
 
-  filter_parameter_logging :password, :password_confirmation
-  before_filter :set_context
-  before_filter "hook(:app_before_filter, self)"
-  after_filter "hook(:app_after_filter, self)"
+  respond_to :html, only: %i[index show auto_complete]
+  respond_to :js
+  respond_to :json, :xml, except: :edit
+  respond_to :atom, :csv, :rss, :xls, only: :index
 
-  # See ActionController::RequestForgeryProtection for details
-  # Uncomment the :secret if you're not using the cookie session store
-  # protect_from_forgery # :secret => '165eb65bfdacf95923dad9aea10cc64a'
+  rescue_from ActiveRecord::RecordNotFound, with: :respond_to_not_found
+  rescue_from CanCan::AccessDenied,         with: :respond_to_access_denied
+
+  include ERB::Util # to give us h and j methods
+
+  # Common auto_complete handler for all core controllers.
+  #----------------------------------------------------------------------------
+  def auto_complete
+    @query = params[:term] || ''
+    @auto_complete = hook(:auto_complete, self, query: @query, user: current_user)
+    if @auto_complete.empty?
+      exclude_ids = auto_complete_ids_to_exclude(params[:related])
+      @auto_complete = klass.my(current_user).text_search(@query).ransack(id_not_in: exclude_ids).result.limit(10)
+    else
+      @auto_complete = @auto_complete.last
+    end
+
+    session[:auto_complete] = controller_name.to_sym
+    respond_to do |format|
+      format.any(:js, :html) { render partial: 'auto_complete' }
+      format.json do
+        results = @auto_complete.map do |a|
+          {
+            id: a.id,
+            text: a.respond_to?(:full_name) ? a.full_name : a.name
+          }
+        end
+        render json: {
+          results: results
+        }
+      end
+    end
+  end
 
   private
+
+  #
+  # In rails 3, the default behaviour for handle_unverified_request is to delete the session
+  # and continue executing the request. However, we use cookie based authentication and need
+  # to halt proceedings. In Rails 4, use "protect_from_forgery with: :exception"
+  # See http://blog.nvisium.com/2014/09/understanding-protectfromforgery.html for more details.
+  #----------------------------------------------------------------------------
+  def handle_unverified_request
+    raise ActionController::InvalidAuthenticityToken
+  end
+
+  #
+  # Takes { related: 'campaigns/7' } or { related: '5' }
+  #   and returns array of object ids that should be excluded from search
+  #   assumes controller_name is a method on 'related' class that returns a collection
+  #----------------------------------------------------------------------------
+  def auto_complete_ids_to_exclude(related)
+    return [] if related.blank?
+    return [related.to_i].compact unless related.index('/')
+    related_class, id = related.split('/')
+    obj = related_class.classify.constantize.find_by_id(id)
+    if obj && obj.respond_to?(controller_name)
+      obj.send(controller_name).map(&:id)
+    else
+      []
+    end
+  end
+
+  #----------------------------------------------------------------------------
+  def klass
+    @klass ||= controller_name.classify.constantize
+  end
+
+  #----------------------------------------------------------------------------
+  def clear_setting_cache
+    Setting.clear_cache!
+  end
+
   #----------------------------------------------------------------------------
   def set_context
-    ActiveSupport::TimeZone[session[:timezone_offset]] if session[:timezone_offset]
-    ActionMailer::Base.default_url_options[:host] = request.host_with_port
-    if Setting.locale
+    Time.zone = ActiveSupport::TimeZone[session[:timezone_offset]] if session[:timezone_offset]
+    if current_user.present? && (locale = current_user.preference[:locale]).present?
+      I18n.locale = locale
+    elsif Setting.locale.present?
       I18n.locale = Setting.locale
-    else
-      # Pre-I18n settings that need to be reloaded. Use English message text since the actual locale is unknown.
-      raise FatFreeCRM::ObsoleteSettings, <<-OBSOLETE
-        It looks like you are upgrading from the older version of Fat Free CRM. Please review
-        <b>config/settings.yml</b> file, and re-run<br><b>rake crm:settings:load</b> command
-        in development and production environments.
-      OBSOLETE
     end
   end
 
@@ -52,48 +115,10 @@ class ApplicationController < ActionController::Base
   end
 
   #----------------------------------------------------------------------------
-  def current_user_session
-    @current_user_session ||= Authentication.find
-    if @current_user_session && @current_user_session.record.suspended?
-      @current_user_session = nil
-    end
-    @current_user_session
-  end
-  
-  #----------------------------------------------------------------------------
-  def current_user
-    @current_user ||= (current_user_session && current_user_session.record)
-    if @current_user && @current_user.preference[:locale]
-      I18n.locale = @current_user.preference[:locale]
-    end
-    User.current_user = @current_user
-  end
-  
-  #----------------------------------------------------------------------------
-  def require_user
-    unless current_user
-      store_location
-      flash[:notice] = t(:msg_login_needed) if request.request_uri != "/"
-      redirect_to login_url
-      false
-    end
+  def store_location
+    session[:return_to] = request.fullpath
   end
 
-  #----------------------------------------------------------------------------
-  def require_no_user
-    if current_user
-      store_location
-      flash[:notice] = t(:msg_logout_needed)
-      redirect_to profile_url
-      false
-    end
-  end
-  
-  #----------------------------------------------------------------------------
-  def store_location
-    session[:return_to] = request.request_uri
-  end
-  
   #----------------------------------------------------------------------------
   def redirect_back_or_default(default)
     redirect_to(session[:return_to] || default)
@@ -102,99 +127,134 @@ class ApplicationController < ActionController::Base
 
   #----------------------------------------------------------------------------
   def can_signup?
-    [ :allowed, :needs_approval ].include? Setting.user_signup
+    User.can_signup?
   end
 
   #----------------------------------------------------------------------------
   def called_from_index_page?(controller = controller_name)
-    if controller != "tasks"
-      request.referer =~ %r(/#{controller}$)
-    else
-      request.referer =~ /tasks\?*/
-    end
+    request.referer =~ if controller != "tasks"
+                         %r{/#{controller}$}
+                       else
+                         /tasks\?*/
+                       end
   end
 
   #----------------------------------------------------------------------------
   def called_from_landing_page?(controller = controller_name)
-    request.referer =~ %r(/#{controller}/\w+)
-  end
-
-  #----------------------------------------------------------------------------
-  def update_recently_viewed
-    subject = instance_variable_get("@#{controller_name.singularize}")
-    if subject
-      Activity.log(@current_user, subject, :viewed)
-    end
-  end
-
-  #----------------------------------------------------------------------------
-  def respond_to_not_found(*types)
-    asset = self.controller_name.singularize
-    flick = case self.action_name
-      when "destroy" then "delete"
-      when "promote" then "convert"
-      else self.action_name
-    end
-    if self.action_name == "show"
-      flash[:warning] = t(:msg_asset_not_available, asset)
-    else
-      flash[:warning] = t(:msg_cant_do, :action => flick, :asset => asset)
-    end
-    respond_to do |format|
-      format.html { redirect_to(:action => :index) }                         if types.include?(:html)
-      format.js   { render(:update) { |page| page.reload } }                 if types.include?(:js)
-      format.xml  { render :text => flash[:warning], :status => :not_found } if types.include?(:xml)
-    end
-  end
-
-  #----------------------------------------------------------------------------
-  def respond_to_related_not_found(related, *types)
-    asset = self.controller_name.singularize
-    asset = "note" if asset == "comment"
-    flash[:warning] = t(:msg_cant_create_related, :asset => asset, :related => related)
-    url = send("#{related.pluralize}_path")
-    respond_to do |format|
-      format.html { redirect_to(url) }                                       if types.include?(:html)
-      format.js   { render(:update) { |page| page.redirect_to(url) } }       if types.include?(:js)
-      format.xml  { render :text => flash[:warning], :status => :not_found } if types.include?(:xml)
-    end
-  end
-
-  # Autocomplete handler for all core controllers.
-  #----------------------------------------------------------------------------
-  def auto_complete
-    @query = params[:auto_complete_query]
-    @auto_complete = hook(:auto_complete, self, :query => @query, :user => @current_user)
-    if @auto_complete.empty?
-      @auto_complete = self.controller_name.classify.constantize.my(:user => @current_user, :limit => 10).search(@query)
-    else
-      @auto_complete = @auto_complete.last
-    end
-    session[:auto_complete] = self.controller_name.to_sym
-    render :template => "common/auto_complete", :layout => nil
+    request.referer =~ %r{/#{controller}/\w+}
   end
 
   # Proxy current page for any of the controllers by storing it in a session.
   #----------------------------------------------------------------------------
   def current_page=(page)
-    @current_page = session["#{controller_name}_current_page".to_sym] = page.to_i
+    p = page.to_i
+    @current_page = session[:"#{controller_name}_current_page"] = (p.zero? ? 1 : p)
   end
 
   #----------------------------------------------------------------------------
   def current_page
-    page = params[:page] || session["#{controller_name}_current_page".to_sym] || 1
+    page = params[:page] || session[:"#{controller_name}_current_page"] || 1
     @current_page = page.to_i
   end
 
   # Proxy current search query for any of the controllers by storing it in a session.
   #----------------------------------------------------------------------------
   def current_query=(query)
-    @current_query = session["#{controller_name}_current_query".to_sym] = query
+    if session[:"#{controller_name}_current_query"].to_s != query.to_s # nil.to_s == ""
+      self.current_page = params[:page] # reset paging otherwise results might be hidden, defaults to 1 if nil
+    end
+    @current_query = session[:"#{controller_name}_current_query"] = query
   end
 
   #----------------------------------------------------------------------------
   def current_query
-    @current_query = params[:query] || session["#{controller_name}_current_query".to_sym] || ""
+    @current_query = params[:query] || session[:"#{controller_name}_current_query"] || ''
   end
 
+  #----------------------------------------------------------------------------
+  def asset
+    controller_name.singularize
+  end
+
+  #----------------------------------------------------------------------------
+  def respond_to_not_found(*_types)
+    flash[:warning] = t(:msg_asset_not_available, asset)
+
+    respond_to do |format|
+      format.html { redirect_to(redirection_url) }
+      format.js   { render plain: 'window.location.reload();' }
+      format.json { render plain: flash[:warning], status: :not_found }
+      format.xml  { render xml: [flash[:warning]], status: :not_found }
+    end
+  end
+
+  #----------------------------------------------------------------------------
+  def respond_to_related_not_found(related, *_types)
+    asset = "note" if asset == "comment"
+    flash[:warning] = t(:msg_cant_create_related, asset: asset, related: related)
+
+    url = send("#{related.pluralize}_path")
+    respond_to do |format|
+      format.html { redirect_to(url) }
+      format.js   { render plain: %(window.location.href = "#{url}";) }
+      format.json { render plain: flash[:warning], status: :not_found }
+      format.xml  { render xml: [flash[:warning]], status: :not_found }
+    end
+  end
+
+  #----------------------------------------------------------------------------
+  def respond_to_access_denied
+    flash[:warning] = t(:msg_not_authorized, default: 'You are not authorized to take this action.')
+    respond_to do |format|
+      format.html { redirect_to(redirection_url) }
+      format.js   { render plain: 'window.location.reload();' }
+      format.json { render plain: flash[:warning], status: :unauthorized }
+      format.xml  { render xml: [flash[:warning]], status: :unauthorized }
+    end
+  end
+
+  #----------------------------------------------------------------------------
+  def redirection_url
+    # Try to redirect somewhere sensible. Note: not all controllers have an index action
+    if current_user.present?
+      respond_to?(:index) && action_name != 'index' ? { action: 'index' } : root_url
+    else
+      login_url
+    end
+  end
+
+  def cors_set_access_control_headers
+    headers['Access-Control-Allow-Origin'] = '*'
+    headers['Access-Control-Allow-Methods'] = 'POST, GET, PUT, DELETE, OPTIONS'
+    headers['Access-Control-Allow-Headers'] = 'Origin, Content-Type, Accept, Authorization, Token'
+    headers['Access-Control-Max-Age'] = "1728000"
+  end
+
+  def cors_preflight_check
+    if request.method == 'OPTIONS'
+      headers['Access-Control-Allow-Origin'] = '*'
+      headers['Access-Control-Allow-Methods'] = 'POST, GET, PUT, DELETE, OPTIONS'
+      headers['Access-Control-Allow-Headers'] = 'X-Requested-With, X-Prototype-Version, Token'
+      headers['Access-Control-Max-Age'] = '1728000'
+
+      render plain: ''
+    end
+  end
+
+  def configure_devise_parameters
+    devise_parameter_sanitizer.permit(:sign_up) do |user_params|
+      user_params.permit(:username, :email, :password, :password_confirmation)
+    end
+  end
+
+  def find_class(asset)
+    Rails.application.eager_load! unless Rails.application.config.cache_classes
+    classes = ActiveRecord::Base.descendants.map(&:name)
+    find = classes.find { |m| m == asset.classify }
+    if find
+      find.safe_constantize
+    else
+      raise "Unknown resource"
+    end
+  end
 end

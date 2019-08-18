@@ -1,24 +1,36 @@
+# frozen_string_literal: true
+
+# Copyright (c) 2008-2013 Michael Dvorkin and contributors.
+#
+# Fat Free CRM is freely distributable under the terms of MIT license.
+# See MIT-LICENSE file or http://www.opensource.org/licenses/mit-license.php
+#------------------------------------------------------------------------------
 require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 
-describe "/home/index.html.haml" do
+describe "/home/index" do
   include HomeHelper
-  
-  before(:each) do
-    login_and_assign
+
+  before do
+    login
   end
 
   it "should render list of activities if it's not empty" do
-    assigns[:activities] = [ Factory(:activity, :action => "updated", :subject => Factory(:account)) ]
-    template.should_receive(:render).with(hash_including(:partial => "activity"))
-    render "/home/index.html.haml"
+    assign(:activities, [build_stubbed(:version, event: "update", item: build_stubbed(:account))])
+    assign(:my_tasks, [])
+    assign(:my_opportunities, [])
+    assign(:my_accounts, [])
+    render
+    expect(view).to render_template(partial: "_activity")
   end
 
   it "should render a message if there're no activities" do
-    assigns[:activities] = []
-    template.should_not_receive(:render).with(hash_including(:partial => "activity"))
+    assign(:activities, [])
+    assign(:my_tasks, [])
+    assign(:my_opportunities, [])
+    assign(:my_accounts, [])
+    render
+    expect(view).not_to render_template(partial: "_activity")
 
-    render "/home/index.html.haml"
-    response.body.should include("No activity records found.")
+    expect(rendered).to include("No activity records found.")
   end
 end
-

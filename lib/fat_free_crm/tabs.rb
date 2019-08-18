@@ -1,20 +1,10 @@
-# Fat Free CRM
-# Copyright (C) 2008-2010 by Michael Dvorkin
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-# 
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http:#www.gnu.org/licenses/>.
-#------------------------------------------------------------------------------
+# frozen_string_literal: true
 
+# Copyright (c) 2008-2013 Michael Dvorkin and contributors.
+#
+# Fat Free CRM is freely distributable under the terms of MIT license.
+# See MIT-LICENSE file or http://www.opensource.org/licenses/mit-license.php
+#------------------------------------------------------------------------------
 module FatFreeCRM
   class Tabs
     cattr_accessor :main
@@ -22,23 +12,14 @@ module FatFreeCRM
 
     # Class methods.
     #----------------------------------------------------------------------------
-    def self.main
-      @@main || reload!(:main)
-    end
+    class << self
+      def main
+        @@main ||= (Setting[:tabs] && Setting[:tabs].dup)
+      end
 
-    def self.admin
-      @@admin || reload!(:admin)
-    end
-
-    # Make it possible to reload tabs (:main, :admin, or both).
-    #----------------------------------------------------------------------------
-    def self.reload!(main_or_admin = nil)
-      case main_or_admin
-        when :main  then @@main  = Setting[:tabs]
-        when :admin then @@admin = Setting[:admin_tabs]
-        when nil    then @@main  = Setting[:tabs]; @@admin = Setting[:admin_tabs]
+      def admin
+        @@admin ||= (Setting[:admin_tabs] && Setting[:admin_tabs].dup)
       end
     end
-
   end
 end

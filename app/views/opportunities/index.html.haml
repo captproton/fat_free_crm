@@ -1,18 +1,20 @@
 = styles_for :opportunity
 
-.title_tools
-  = link_to_inline(:create_opportunity, new_opportunity_path, :text => t(:create_opportunity)) << " | "
-  = link_to_inline(:options, options_opportunities_path, :text => t(:options))
+= render 'entities/title_bar'
 
-.title
-  %span#create_opportunity_title #{t :opportunities}
-  = image_tag("loading.gif", :size => "16x16", :id => "loading", :style => "display: none;")
-.remote#options{ hidden }
 .remote#create_opportunity{ hidden }
 
+= render 'search'
+
+.remote#options{ hidden }
+
 .list#opportunities
-  - unless @opportunities.empty?
-    = render :partial => "opportunity", :collection => @opportunities
+  - if @opportunities.any?
+    = render @opportunities
   - else
-    = render :partial => "common/empty"
-#paginate= render :partial => "common/paginate"
+    = render "shared/empty"
+
+#paginate= render "shared/paginate_with_per_page"
+#export= render "shared/export"
+
+= hook(:opportunity_index_after, self)

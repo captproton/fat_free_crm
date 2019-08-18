@@ -1,19 +1,18 @@
 = styles_for :campaign
 
-.title_tools
-  = link_to_inline(:create_campaign, new_campaign_path, :text => t(:create_campaign)) << " | "
-  = link_to_inline(:options, options_campaigns_path, :text => t(:options))
-  =# link_to_inline(:options, "/", :text => "&#8984;", :plain => true)
+= render 'entities/title_bar'
 
-.title
-  %span#create_campaign_title #{t :campaigns}
-  = image_tag("loading.gif", :size => "16x16", :id => "loading", :style => "display: none;")
-.remote#options{ hidden }
 .remote#create_campaign{ hidden }
 
+= render 'search'
+
+.remote#options{ hidden }
+
 .list#campaigns
-  - unless @campaigns.empty?
-    = render :partial => "campaign", :collection => @campaigns
+  - if @campaigns.any?
+    = render @campaigns
   - else
-    = render :partial => "common/empty"
-#paginate= render :partial => "common/paginate"
+    = render "shared/empty"
+
+#paginate= render "shared/paginate_with_per_page"
+#export= render "shared/export"

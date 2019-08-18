@@ -1,32 +1,32 @@
 .panel#summary
   .caption #{t :campaign_summary}
   %li
-    %dt= @campaign.starts_on ? @campaign.starts_on.strftime("%b %e") : t(:n_a)
+    %dt= @campaign.starts_on ? l(@campaign.starts_on, format: :mmdd) : t(:n_a)
     %tt #{t :start_date}:
   %li
-    %dt= @campaign.ends_on ? @campaign.ends_on.strftime("%b %e") : t(:n_a)
+    %dt= @campaign.ends_on ? l(@campaign.ends_on, format: :mmdd) : t(:n_a)
     %tt #{t :end_date}:
   %li
     %dt= @campaign.status ? t(@campaign.status) : t(:n_a)
     %tt #{t :status}:
   %li.last
-    %dt= number_to_currency(@campaign.budget, :precision => 0) || t(:n_a)
+    %dt= number_to_currency(@campaign.budget, precision: 0) || t(:n_a)
     %tt #{t :budget}:
 
   .caption #{t :campaign_targets}
-  
+
   -# Target Leads.
   -#---------------------------------------------------------------------------
   %li
     %dt= @campaign.target_leads || t(:n_a)
     %tt #{t :leads}:
-    
+
   -# Target Conversion Ratio.
   -#---------------------------------------------------------------------------
   %li
-    %dt= number_to_percentage(@campaign.target_conversion, :precision => 1) || t(:n_a)
+    %dt= number_to_percentage(@campaign.target_conversion, precision: 1) || t(:n_a)
     %tt #{t :conversion}:
-    
+
   -# Target Opportunities: calculated based on target number of leads and
   -# expected conversion ratio.
   -#---------------------------------------------------------------------------
@@ -41,7 +41,7 @@
   -# Target Revenue.
   -#---------------------------------------------------------------------------
   %li.last
-    %dt= number_to_currency(@campaign.target_revenue, :precision => 0) || t(:n_a)
+    %dt= number_to_currency(@campaign.target_revenue, precision: 0) || t(:n_a)
     %tt #{t :revenue}:
 
   .caption #{t :actual_performance}
@@ -58,7 +58,7 @@
   %li
     - if @campaign.opportunities_count.to_i > 0 && @campaign.leads_count.to_i > 0
       - conversion = @campaign.opportunities_count * 100 / @campaign.leads_count
-      %dt= number_to_percentage(conversion, :precision => 1)
+      %dt= number_to_percentage(conversion, precision: 1)
       %tt== #{t :conversion}: #{performance(conversion, @campaign.target_conversion)}
     - else
       %dt #{t :n_a}
@@ -75,11 +75,17 @@
   -# Actual Revenue.
   -#---------------------------------------------------------------------------
   %li.last
-    %dt= number_to_currency(@campaign.revenue, :precision => 0) || t(:n_a)
+    %dt= number_to_currency(@campaign.revenue, precision: 0) || t(:n_a)
     %tt== #{t :revenue}: #{performance(@campaign.revenue, @campaign.target_revenue)}
 
   - unless @campaign.background_info.blank?
     .caption #{t :background_info}
-    = auto_link(simple_format h(@campaign.background_info))
+    = auto_link(simple_format @campaign.background_info)
 
-  = hook(:show_campaign_sidebar_bottom, self, :campaign => @campaign)
+  = render "fields/sidebar_show", asset: @campaign
+
+  - if @campaign.tags.present?
+    %dt
+      .tags= tags_for_index(@campaign)
+
+  = hook(:show_campaign_sidebar_bottom, self, campaign: @campaign)

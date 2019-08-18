@@ -1,96 +1,106 @@
+# frozen_string_literal: true
+
+# Copyright (c) 2008-2013 Michael Dvorkin and contributors.
+#
+# Fat Free CRM is freely distributable under the terms of MIT license.
+# See MIT-LICENSE file or http://www.opensource.org/licenses/mit-license.php
+#------------------------------------------------------------------------------
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe UsersController do
-  describe "route generation" do
-    it "maps #index" do
-      route_for(:controller => "users", :action => "index").should == "/users"
-    end
-  
-    it "maps #new" do
-      route_for(:controller => "users", :action => "new").should == "/users/new"
-    end
-  
-    it "maps #show" do
-      route_for(:controller => "users", :action => "show", :id => "1").should == "/users/1"
-    end
-  
-    it "maps #edit" do
-      route_for(:controller => "users", :action => "edit", :id => "1").should == "/users/1/edit"
-    end
-  
-    it "maps #create" do
-      route_for(:controller => "users", :action => "create").should == { :path => "/users", :method => :post }
-    end 
-
-    it "maps #update" do
-      route_for(:controller => "users", :action => "update", :id => "1").should == { :path => "/users/1", :method => :put }
-    end
-  
-    it "maps #destroy" do
-      route_for(:controller => "users", :action => "destroy", :id => "1").should == { :path => "/users/1", :method => :delete }
+  describe "routing" do
+    it "recognizes #index" do
+      expect(get: "/users").to route_to(controller: "users", action: "index")
     end
 
-    it "maps #avatar" do
-      route_for(:controller => "users", :action => "avatar", :id => "1").should == "/users/1/avatar"
+    it "recognizes and generates Devise registrations routes" do
+      expect(get: "/users/sign_up").to route_to(controller: "registrations", action: "new")
+      expect(get: "/users/edit").to route_to(controller: "registrations", action: "edit")
+      expect(get: "/users/cancel").to route_to(controller: "registrations", action: "cancel")
+      expect(post: "/users").to route_to(controller: "registrations", action: "create")
+      expect(put: "/users").to route_to(controller: "registrations", action: "update")
+      expect(patch: "/users").to route_to(controller: "registrations", action: "update")
+      expect(delete: "/users").to route_to(controller: "registrations", action: "destroy")
     end
 
-    it "maps #upload_avatar" do
-      route_for(:controller => "users", :action => "upload_avatar", :id => "1").should == { :path => "/users/1/upload_avatar", :method => :put }
+    it "recognizes and generates Devise sessions routes" do
+      expect(get: "/users/sign_in").to route_to(controller: "sessions", action: "new")
+      expect(post: "/users/sign_in").to route_to(controller: "sessions", action: "create")
+      expect(delete: "/users/sign_out").to route_to(controller: "sessions", action: "destroy")
     end
 
-    it "maps #password" do
-      route_for(:controller => "users", :action => "password", :id => "1").should == "/users/1/password"
+    it "recognizes and generates Devise passwords routes" do
+      expect(get: "/users/password/new").to route_to(controller: "passwords", action: "new")
+      expect(get: "/users/password/edit").to route_to(controller: "passwords", action: "edit")
+      expect(post: "/users/password").to route_to(controller: "passwords", action: "create")
+      expect(put: "/users/password").to route_to(controller: "passwords", action: "update")
+      expect(patch: "/users/password").to route_to(controller: "passwords", action: "update")
     end
 
-    it "maps #change_password" do
-      route_for(:controller => "users", :action => "change_password", :id => "1").should == { :path => "/users/1/change_password", :method => :put }
+    it "recognizes and generates Devise confirmations routes" do
+      expect(get: "/users/confirmation/new").to route_to(controller: "confirmations", action: "new")
+      expect(get: "/users/confirmation").to route_to(controller: "confirmations", action: "show")
+      expect(post: "/users/confirmation").to route_to(controller: "confirmations", action: "create")
     end
 
-  end
+    it "recognizes and generates #show as /profile" do
+      expect(get: "/profile").to route_to(controller: "users", action: "show")
+    end
 
-  describe "route recognition" do
-    it "should generate params for #index" do
-      params_from(:get, "/users").should == {:controller => "users", :action => "index"}
+    it "recognizes and generates #edit" do
+      expect(get: "/users/1/edit").to route_to(controller: "users", action: "edit", id: "1")
     end
-  
-    it "should generate params for #new" do
-      params_from(:get, "/users/new").should == {:controller => "users", :action => "new"}
+
+    it "doesn't recognize #edit with non-numeric id" do
+      expect(get: "/users/aaron/edit").not_to be_routable
     end
-  
-    it "should generate params for #create" do
-      params_from(:post, "/users").should == {:controller => "users", :action => "create"}
+
+    it "recognizes and generates #update" do
+      expect(put: "/users/1").to route_to(controller: "users", action: "update", id: "1")
     end
-  
-    it "should generate params for #show" do
-      params_from(:get, "/users/1").should == {:controller => "users", :action => "show", :id => "1"}
+
+    it "doesn't recognize #update with non-numeric id" do
+      expect(put: "/users/aaron").not_to be_routable
     end
-  
-    it "should generate params for #edit" do
-      params_from(:get, "/users/1/edit").should == {:controller => "users", :action => "edit", :id => "1"}
+
+    it "doesn't recognize #destroy" do
+      expect(delete: "/users/1").not_to be_routable
     end
-  
-    it "should generate params for #update" do
-      params_from(:put, "/users/1").should == {:controller => "users", :action => "update", :id => "1"}
-    end
-  
-    it "should generate params for #destroy" do
-      params_from(:delete, "/users/1").should == {:controller => "users", :action => "destroy", :id => "1"}
+
+    it "doesn't recognize #destroy with non-numeric id" do
+      expect(delete: "/users/aaron").not_to be_routable
     end
 
     it "should generate params for #avatar" do
-      params_from(:get, "/users/1/avatar").should == {:controller => "users", :action => "avatar", :id => "1"}
+      expect(get: "/users/1/avatar").to route_to(controller: "users", action: "avatar", id: "1")
+    end
+
+    it "doesn't recognize #avatar with non-numeric id" do
+      expect(get: "/users/aaron/avatar").not_to be_routable
     end
 
     it "should generate params for #upload_avatar" do
-      params_from(:put, "/users/upload_avatar/1").should == {:controller => "users", :action => "upload_avatar", :id => "1"}
+      expect(put: "/users/1/upload_avatar").to route_to(controller: "users", action: "upload_avatar", id: "1")
+    end
+
+    it "doesn't recognize #upload_avatar with non-numeric id" do
+      expect(put: "/users/aaron/upload_avatar").not_to be_routable
     end
 
     it "should generate params for #password" do
-      params_from(:put, "/users/password/1").should == {:controller => "users", :action => "password", :id => "1"}
+      expect(get: "/users/1/password").to route_to(controller: "users", action: "password", id: "1")
+    end
+
+    it "doesn't recognize #password with non-numeric id" do
+      expect(get: "/users/aaron/password").not_to be_routable
     end
 
     it "should generate params for #change_password" do
-      params_from(:put, "/users/change_password/1").should == {:controller => "users", :action => "change_password", :id => "1"}
+      expect(patch: "/users/1/change_password").to route_to(controller: "users", action: "change_password", id: "1")
+    end
+
+    it "doesn't recognize #change_password with non-numeric id" do
+      expect(patch: "/users/aaron/change_password").not_to be_routable
     end
   end
 end

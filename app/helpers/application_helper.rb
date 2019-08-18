@@ -1,137 +1,207 @@
-# Fat Free CRM
-# Copyright (C) 2008-2010 by Michael Dvorkin
-# 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-# 
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# frozen_string_literal: true
+
+# Copyright (c) 2008-2013 Michael Dvorkin and contributors.
+#
+# Fat Free CRM is freely distributable under the terms of MIT license.
+# See MIT-LICENSE file or http://www.opensource.org/licenses/mit-license.php
 #------------------------------------------------------------------------------
-
 module ApplicationHelper
-
-  def tabs(tabs = FatFreeCRM::Tabs.main)
+  def tabs(tabs = nil)
+    tabs ||= controller_path.match?(/admin/) ? FatFreeCRM::Tabs.admin : FatFreeCRM::Tabs.main
     if tabs
       @current_tab ||= tabs.first[:text] # Select first tab by default.
       tabs.each { |tab| tab[:active] = (@current_tab == tab[:text] || @current_tab == tab[:url][:controller]) }
     else
-      raise FatFreeCRM::MissingSettings, "Tab settings are missing, please run <b>rake crm:setup</b> command."
+      raise FatFreeCRM::MissingSettings, "Tab settings are missing, please run <b>rake ffcrm:setup</b> command."
     end
   end
-  
+
   #----------------------------------------------------------------------------
   def tabless_layout?
-    %w(authentications passwords).include?(controller.controller_name) ||
-    ((controller.controller_name == "users") && (%w(create new).include?(controller.action_name)))
+    %w[sessions passwords registrations confirmations].include?(controller.controller_name) ||
+      ((controller.controller_name == "users") && %w[create new].include?(controller.action_name))
   end
 
   # Show existing flash or embed hidden paragraph ready for flash[:notice]
   #----------------------------------------------------------------------------
-  def show_flash(options = { :sticky => false })
-    [:error, :warning, :info, :notice].each do |type|
-      if flash[type]
-        html = content_tag(:p, h(flash[type]), :id => "flash")
-        return html << content_tag(:script, "crm.flash('#{type}', #{options[:sticky]})", :type => "text/javascript")
-      end
+  def show_flash(options = { sticky: false })
+    %i[error warning info notice alert].each do |type|
+      next unless flash[type]
+      html = content_tag(:div, h(flash[type]), id: "flash")
+      flash[type] = nil
+      return html << content_tag(:script, "crm.flash('#{type}', #{options[:sticky]})".html_safe, type: "text/javascript")
     end
-    content_tag(:p, nil, :id => "flash", :style => "display:none;")
+    content_tag(:p, nil, id: "flash", style: "display:none;")
   end
 
   #----------------------------------------------------------------------------
   def subtitle(id, hidden = true, text = id.to_s.split("_").last.capitalize)
     content_tag("div",
-      link_to_remote("<small>#{ hidden ? "&#9658;" : "&#9660;" }</small> #{text}",
-        :url => url_for(:controller => :home, :action => :toggle, :id => id),
-        :before => "crm.flip_subtitle(this)"
-      ), :class => "subtitle")
+                link_to("<small>#{hidden ? '&#9658;' : '&#9660;'}</small> #{sanitize text}".html_safe,
+                        url_for(controller: :home, action: :toggle, id: id),
+                        remote: true,
+                        onclick: "crm.flip_subtitle(this)"), class: "subtitle")
   end
 
   #----------------------------------------------------------------------------
-  def inline(id, url, options = {})
-    content_tag("div", link_to_inline(id, url, options), :class => options[:class] || "title_tools")
+  def section(related, assets)
+    asset = assets.to_s.singularize
+    create_id  = "create_#{asset}"
+    select_id  = "select_#{asset}"
+    create_url = controller.send(:"new_#{asset}_path")
+
+    html = tag(:br)
+    html << content_tag(:div, link_to(t(select_id), "#", id: select_id), class: "subtitle_tools")
+    html << content_tag(:div, "&nbsp;|&nbsp;".html_safe, class: "subtitle_tools")
+    html << content_tag(:div, link_to_inline(create_id, create_url, related: dom_id(related), text: t(create_id)), class: "subtitle_tools")
+    html << content_tag(:div, t(assets), class: :subtitle, id: "create_#{asset}_title")
+    html << content_tag(:div, "", class: :remote, id: create_id, style: "display:none;")
+  end
+
+  #----------------------------------------------------------------------------
+  def load_select_popups_for(related, *assets)
+    js = generate_js_for_popups(related, *assets)
+    content_for(:javascript_epilogue) do
+      raw "$(function() { #{js} });"
+    end
+  end
+
+  def generate_js_for_popups(related, *assets)
+    assets.map do |asset|
+      render(partial: "shared/select_popup", locals: { related: related, popup: asset })
+    end.join
+  end
+
+  # We need this because standard Rails [select] turns &#9733; into &amp;#9733;
+  #----------------------------------------------------------------------------
+  def rating_select(name, options = {})
+    stars = Hash[(1..5).map { |star| [star, "&#9733;" * star] }].sort
+    options_for_select = %(<option value="0"#{options[:selected].to_i == 0 ? ' selected="selected"' : ''}>#{t :select_none}</option>)
+    options_for_select += stars.map { |star| %(<option value="#{star.first}"#{options[:selected] == star.first ? ' selected="selected"' : ''}>#{star.last}</option>) }.join
+    select_tag name, options_for_select.html_safe, options
   end
 
   #----------------------------------------------------------------------------
   def link_to_inline(id, url, options = {})
-    text = options[:text] || id.to_s.titleize
-    text = (arrow_for(id) << "&nbsp;" << text) unless options[:plain]
-    related = (options[:related] ? ", related: '#{options[:related]}'" : "")
+    text = options[:text] || t(id, default: id.to_s.titleize)
+    text = (arrow_for(id) + text) unless options[:plain]
+    related = (options[:related] ? "&related=#{options[:related]}" : '')
 
-    link_to_remote(text,
-      :url    => url,
-      :method => :get,
-      :with   => "{ cancel: Element.visible('#{id}')#{related} }"
-    )
+    link_to(text,
+            url + "#{url.include?('?') ? '&' : '?'}cancel=false" + related,
+            remote: true,
+            onclick: "this.href = this.href.replace(/cancel=(true|false)/,'cancel='+ ($('##{id}').css('display') != 'none'));",
+            class: options[:class])
   end
 
   #----------------------------------------------------------------------------
   def arrow_for(id)
-    content_tag(:abbr, "&#9658;", :id => "#{id}_arrow")
+    content_tag(:span, "&#9658;".html_safe, id: "#{id}_arrow", class: :arrow)
   end
 
   #----------------------------------------------------------------------------
-  def link_to_edit(model)
-    name = model.class.name.downcase
-    link_to_remote(t(:edit),
-      :method => :get,
-      :url    => send("edit_#{name}_path", model),
-      :with   => "{ previous: crm.find_form('edit_#{name}') }"
-    )
+  def link_to_edit(record, options = {})
+    object = record.is_a?(Array) ? record.last : record
+
+    name = (params[:klass_name] || object.class.name).underscore.downcase
+    link_to(t(:edit),
+            options[:url] || polymorphic_url(record, action: :edit),
+            remote:  true,
+            onclick: "this.href = this.href.split('?')[0] + '?previous='+encodeURI(crm.find_form('edit_#{j name}'));".html_safe)
   end
 
   #----------------------------------------------------------------------------
-  def link_to_delete(model)
-    name = model.class.name.downcase
-    link_to_remote(t(:delete) + "!",
-      :method => :delete,
-      :url    => send("#{name}_path", model),
-      :before => visual_effect(:highlight, dom_id(model), :startcolor => "#ffe4e1")
-    )
+  def link_to_delete(record, options = {})
+    object = record.is_a?(Array) ? record.last : record
+    confirm = options[:confirm] || nil
+
+    link_to(t(:delete) + "!",
+            options[:url] || url_for(record),
+            method: :delete,
+            remote: true,
+            confirm: confirm)
   end
 
   #----------------------------------------------------------------------------
-  def link_to_cancel(url)
-    link_to_remote(t(:cancel), :url => url, :method => :get, :with => "{ cancel: true }")
+  def link_to_discard(object)
+    current_url = (request.xhr? ? request.referer : request.fullpath)
+    parent, parent_id = current_url.scan(%r{/(\w+)/(\d+)}).flatten
+
+    link_to(t(:discard),
+            url_for(controller: parent, action: :discard, id: parent_id, attachment: object.class.name, attachment_id: object.id),
+            method:  :post,
+            remote:  true)
+  end
+
+  #----------------------------------------------------------------------------
+  def link_to_cancel(url, params = {})
+    url = params[:url] if params[:url]
+    link_to(t(:cancel),
+            url + "#{url.include?('?') ? '&' : '?'}cancel=true",
+            remote: true)
   end
 
   #----------------------------------------------------------------------------
   def link_to_close(url)
-    content_tag("div", "x",
-      :class => "close", :title => t(:close_form),
-      :onmouseover => "this.style.background='lightsalmon'",
-      :onmouseout => "this.style.background='lightblue'",
-      :onclick => remote_function(:url => url, :method => :get, :with => "{ cancel: true }")
-    )
+    link_to("x", url + "#{url.include?('?') ? '&' : '?'}cancel=true",
+            remote: true,
+            class: "close",
+            title: t(:close_form))
+  end
+
+  # Bcc: to dropbox address if the dropbox has been set up.
+  #----------------------------------------------------------------------------
+  def link_to_email(email, length = nil, &_block)
+    name = (length ? truncate(email, length: length) : email)
+    bcc = Setting&.email_dropbox
+    mailto = if bcc && bcc[:address].present?
+               "#{email}?bcc=#{bcc[:address]}"
+             else
+               email
+             end
+    if block_given?
+      link_to("mailto:#{mailto}", title: email) do
+        yield
+      end
+    else
+      link_to(h(name), "mailto:#{mailto}", title: email)
+    end
   end
 
   #----------------------------------------------------------------------------
   def jumpbox(current)
-    [ :campaigns, :accounts, :leads, :contacts, :opportunities ].inject([]) do |html, controller|
-      html << link_to_function(controller.to_s.capitalize, "crm.jumper('#{controller}')", :class => (controller == current ? "selected" : ""))
-    end.join(" | ")
+    tabs = %i[campaigns accounts leads contacts opportunities]
+    current = tabs.first unless tabs.include?(current)
+    tabs.map do |tab|
+      link_to_function(t("tab_#{tab}"), "crm.jumper('#{tab}')", "html-data" => tab, class: (tab == current ? 'selected' : ''))
+    end.join(" | ").html_safe
   end
 
   #----------------------------------------------------------------------------
   def styles_for(*models)
-    render :partial => "common/inline_styles", :locals => { :models => models }
+    render partial: "shared/inline_styles", locals: { models: models }
   end
 
   #----------------------------------------------------------------------------
-  def hidden;    { :style => "display:none;"       }; end
-  def exposed;   { :style => "display:block;"      }; end
-  def invisible; { :style => "visibility:hidden;"  }; end
-  def visible;   { :style => "visibility:visible;" }; end
+  def hidden
+    { style: "display:none;"       }
+  end
+
+  def exposed
+    { style: "display:block;"      }
+  end
+
+  def invisible
+    { style: "visibility:hidden;"  }
+  end
+
+  def visible
+    { style: "visibility:visible;" }
+  end
 
   #----------------------------------------------------------------------------
-  def one_submit_only(form)
-    { :onsubmit => "$('#{form}_submit').disabled = true" }
+  def one_submit_only(_form = '')
+    { onsubmit: "$('#'+this.id+' input[type=submit]').prop('disabled', true)".html_safe }
   end
 
   #----------------------------------------------------------------------------
@@ -145,29 +215,18 @@ module ApplicationHelper
   end
 
   #----------------------------------------------------------------------------
-  def highlightable(id = nil, color = {})
-    color = { :on => "seashell", :off => "white" }.merge(color)
-    show = (id ? "$('#{id}').style.visibility='visible'" : "")
-    hide = (id ? "$('#{id}').style.visibility='hidden'" : "")
-    { :onmouseover => "this.style.background='#{color[:on]}'; #{show}",
-      :onmouseout  => "this.style.background='#{color[:off]}'; #{hide}"
-    }
-  end
-
-  #----------------------------------------------------------------------------
-  def confirm_delete(model)
+  def confirm_delete(model, params = {})
     question = %(<span class="warn">#{t(:confirm_delete, model.class.to_s.downcase)}</span>)
-    yes = link_to(t(:yes_button), model, :method => :delete)
-    no = link_to_function(t(:no_button), "$('menu').update($('confirm').innerHTML)")
-    update_page do |page|
-      page << "$('confirm').update($('menu').innerHTML)"
-      page[:menu].replace_html "#{question} #{yes} : #{no}"
-    end
+    yes = link_to(t(:yes_button), params[:url] || model, method: :delete)
+    no = link_to_function(t(:no_button), "$('#menu').html($('#confirm').html());")
+    text = "$('#confirm').html( $('#menu').html() );\n"
+    text += "$('#menu').html('#{question} #{yes} : #{no}');"
+    text.html_safe
   end
 
   #----------------------------------------------------------------------------
   def spacer(width = 10)
-    image_tag "1x1.gif", :width => width, :height => 1, :alt => nil
+    image_tag "1x1.gif", width: width, height: 1, alt: nil
   end
 
   # Reresh sidebar using the action view within the current controller.
@@ -179,145 +238,285 @@ module ApplicationHelper
   # Refresh sidebar using the action view within an arbitrary controller.
   #----------------------------------------------------------------------------
   def refresh_sidebar_for(view, action = nil, shake = nil)
-    update_page do |page|
-      page[:sidebar].replace_html :partial => "layouts/sidebar", :locals => { :view => view, :action => action }
-      page[shake].visual_effect(:shake, :duration => 0.4, :distance => 3) if shake
-    end
+    text = ""
+    text += "$('#sidebar').html('#{j render(partial: 'layouts/sidebar', locals: { view: view, action: action })}');"
+    text += "$('##{j shake.to_s}').effect('shake', { duration:200, distance: 3 });" if shake
+    text.html_safe
   end
 
   # Display web presence mini-icons for Contact or Lead.
   #----------------------------------------------------------------------------
   def web_presence_icons(person)
-    [ :blog, :linkedin, :facebook, :twitter ].inject([]) do |links, site|
+    %i[blog linkedin facebook twitter skype].map do |site|
       url = person.send(site)
-      unless url.blank?
-        url = "http://" << url unless url.match(/^https?:\/\//)
-        links << link_to(image_tag("#{site}.gif", :size => "15x15"), url, :popup => true, :title => t(:open_in_window, url))
+      next if url.blank?
+
+      if site == :skype
+        url = "callto:" + url
+      else
+        url = "http://" + url unless url.match?(/^https?:\/\//)
       end
-      links
-    end.join("\n")
+      link_to(image_tag("#{site}.gif", size: "15x15"), h(url), "data-popup": true, title: t(:open_in_window, h(url)))
+    end.compact.join("\n").html_safe
   end
 
   # Ajax helper to refresh current index page once the user selects an option.
   #----------------------------------------------------------------------------
-  def redraw(option, value, url = nil)
+  def redraw(option, value, url = send("redraw_#{controller.controller_name}_path"))
     if value.is_a?(Array)
-      param, value = value.first, value.last
+      param = value.first
+      value = value.last
     end
-    remote_function(
-      :url       => url || send("redraw_#{controller.controller_name}_path"),
-      :with      => "{ #{option}: '#{param || value}' }",
-      :condition => "$('#{option}').innerHTML != '#{value}'",
-      :loading   => "$('#{option}').update('#{value}'); $('loading').show()",
-      :complete  => "$('loading').hide()"
-    )
+    %{
+      if ($('##{option}').html() != '#{j value}') {
+        $('##{option}').html('#{j value}');
+        $('#loading').show();
+        $.post('#{url}', {#{option}: '#{j(param || value)}'}, function () {
+          $('#loading').hide();
+        });
+      }
+    }
   end
 
   #----------------------------------------------------------------------------
-  def options_menu_item(option, key, url = nil)
+  def options_menu_item(option, key, url = send("redraw_#{controller.controller_name}_path"))
     name = t("option_#{key}")
-    "{ name: \"#{name.titleize}\", on_select: function() {" +
-    remote_function(
-      :url       => url || send("redraw_#{controller.controller_name}_path"),
-      :with      => "{ #{option}: '#{key}' }",
-      :condition => "$('#{option}').innerHTML != '#{name}'",
-      :loading   => "$('#{option}').update('#{name}'); $('loading').show()",
-      :complete  => "$('loading').hide()"
-    ) + "}}"
+    "{ name: \"#{j name.titleize}\", on_select: function() {" +
+      %{
+        if ($('##{option}').html() != '#{j name}') {
+          $('##{option}').html('#{j name}');
+          $('#loading').show();
+          $.get('#{url}', {#{option}: '#{key}', query: $('#query').val()}, function () {
+            $('#loading').hide();
+          });
+        }
+      } + "}}"
   end
 
   # Ajax helper to pass browser timezone offset to the server.
   #----------------------------------------------------------------------------
   def get_browser_timezone_offset
     unless session[:timezone_offset]
-      remote_function(
-        :url  => url_for(:controller => :home, :action => :timezone),
-        :with => "{ offset: (new Date()).getTimezoneOffset() }"
-      )
+      raw "$.get('#{timezone_path}', {offset: (new Date()).getTimezoneOffset()});"
     end
   end
 
-  #----------------------------------------------------------------------------
-  def activate_facebox
-    %Q/document.observe("dom:loaded", function() { new Facebox('#{Setting.base_url}'); });/
-  end
-
-  #----------------------------------------------------------------------------
-  def localize_calendar_date_select
-    update_page_tag do |page|
-      page.assign '_translations', { 'OK' => t('calendar_date_select.ok'), 'Now' => t('calendar_date_select.now'), 'Today' => t('calendar_date_select.today'), 'Clear' => t('calendar_date_select.clear') }
-      page.assign 'Date.weekdays', t('date.abbr_day_names')
-      page.assign 'Date.months', t('date.month_names')[1..-1]
-    end
-  end
-
-  # Users can upload their avatar, and if it's missing we're going to use
-  # gravatar. For leads and contacts we always use gravatars.
+  # Entities can have associated avatars or gravatars. Only calls Gravatar
+  # in production env. Gravatar won't serve default images if they are not
+  # publically available: https://en.gravatar.com/site/implement/images
   #----------------------------------------------------------------------------
   def avatar_for(model, args = {})
-    args[:size]  ||= "75x75"
-    args[:class] ||= "gravatar"
-    if model.avatar
-      image_tag(model.avatar.image.url(Avatar.styles[args[:size]]), args)
-    elsif model.email
-      gravatar(model.email, { :default => default_avatar_url }.merge(args))
+    args = { class: 'gravatar', size: :large }.merge(args)
+    if model.respond_to?(:avatar) && model.avatar.present?
+      image_tag(model.avatar.image.url(args.delete(:size)), args)
     else
-      image_tag("avatar.jpg", args)
+      args = Avatar.size_from_style!(args) # convert size format :large => '75x75'
+      gravatar_image_tag(model.email, args)
     end
-  end
-
-  # Add default avatar image and invoke original :gravatar_for defined by the
-  # gravatar plugin (see vendor/plugins/gravatar/lib/gravatar.rb)
-  #----------------------------------------------------------------------------
-  def gravatar_for(model, args = {})
-    super(model, { :default => default_avatar_url }.merge(args))
-  end
-
-  #----------------------------------------------------------------------------
-  def default_avatar_url
-    "#{request.protocol + request.host_with_port}" + Setting.base_url.to_s + "/images/avatar.jpg"
   end
 
   # Returns default permissions intro.
   #----------------------------------------------------------------------------
   def get_default_permissions_intro(access, text)
     case access
-      when "Private" then t(:permissions_intro_private, text)
-      when "Public"  then t(:permissions_intro_public,  text)
-      when "Shared"  then t(:permissions_intro_shared,  text)
+    when "Private" then t(:permissions_intro_private, text)
+    when "Public"  then t(:permissions_intro_public,  text)
+    when "Shared"  then t(:permissions_intro_shared,  text)
     end
   end
-  
-  # Returns default permissions intro
-  #----------------------------------------------------------------------------
-  def get_default_permissions_intro(access, text)
-    case access
-      when "Private" then t(:permissions_intro_private, text)
-      when "Public" then t(:permissions_intro_public, text)
-      when "Shared" then t(:permissions_intro_shared, text)
-    end
-  end  
 
   # Render a text field that is part of compound address.
   #----------------------------------------------------------------------------
   def address_field(form, object, attribute, extra_styles)
     hint = "#{t(attribute)}..."
     if object.send(attribute).blank?
-      object.send("#{attribute}=", hint)
       form.text_field(attribute,
-        :hint    => true,
-        :style   => "margin-top: 6px; color:silver; #{extra_styles}",
-        :onfocus => "crm.hide_hint(this)",
-        :onblur  => "crm.show_hint(this, '#{hint}')"
-      )
+                      style:   "margin-top: 6px; #{extra_styles}",
+                      placeholder: hint)
     else
       form.text_field(attribute,
-        :hint    => false,
-        :style   => "margin-top: 6px; #{extra_styles}",
-        :onfocus => "crm.hide_hint(this, '#{escape_javascript(object.send(attribute))}')",
-        :onblur  => "crm.show_hint(this, '#{hint}')"
-      )
+                      style:   "margin-top: 6px; #{extra_styles}",
+                      placeholder: hint)
     end
   end
 
+  # Return true if:
+  #   - it's an Ajax request made from the asset landing page (i.e. create opportunity
+  #     from a contact landing page) OR
+  #   - we're actually showing asset landing page.
+  #----------------------------------------------------------------------------
+  def shown_on_landing_page?
+    !!((request.xhr? && request.referer =~ %r{/\w+/\d+}) ||
+       (!request.xhr? && request.fullpath =~ %r{/\w+/\d+}))
+  end
+
+  # Helper to display links to supported data export formats.
+  #----------------------------------------------------------------------------
+  def links_to_export(action = :index)
+    token = current_user.authentication_token
+    url_params = { action: action }
+    url_params[:id] = params[:id] unless params[:id].blank?
+    url_params[:query] = params[:query] unless params[:query].blank?
+    url_params[:q] = params[:q] unless params[:q].blank?
+    url_params[:view] = @view unless @view.blank? # tasks
+    url_params[:id] = params[:id] unless params[:id].blank?
+
+    exports = %w[xls csv].map do |format|
+      link_to(format.upcase, url_params.merge(format: format), title: I18n.t(:"to_#{format}")) unless action.to_s == "show"
+    end
+
+    feeds = %w[rss atom].map do |format|
+      link_to(format.upcase, url_params.merge(format: format, authentication_credentials: token), title: I18n.t(:"to_#{format}"))
+    end
+
+    links = ['perm'].map do |format|
+      link_to(format.upcase, url_params, title: I18n.t(:"to_#{format}"))
+    end
+
+    (exports + feeds + links).compact.join(' | ')
+  end
+
+  def user_options
+    User.all.map { |u| [u.full_name, u.id] }
+  end
+
+  def group_options
+    Group.all.map { |g| [g.name, g.id] }
+  end
+
+  def list_of_entities
+    ENTITIES
+  end
+
+  def entity_filter_checkbox(name, value, count)
+    checked = (session["#{controller_name}_filter"].present? ? session["#{controller_name}_filter"].split(",").include?(value.to_s) : count.to_i > 0)
+    url = url_for(action: :filter)
+    onclick = %{
+      var query = $('#query').val(),
+          values = [];
+      $('input[name=&quot;#{h name}[]&quot;]').filter(':checked').each(function () {
+        values.push(this.value);
+      });
+      $('#loading').show();
+      $.post('#{url}', {#{h name}: values.join(','), query: query}, function () {
+        $('#loading').hide();
+      });
+    }.html_safe
+    check_box_tag("#{name}[]", value, checked, id: value, onclick: onclick)
+  end
+
+  # Create a column in the 'asset_attributes' table.
+  # If a block is given, render it inside the td
+  #----------------------------------------------------------------------------
+  def col(title, value = nil, last = false, email = false, &_block)
+    last_class = (last ? 'last' : nil)
+    out = content_tag(:th, title, class: last_class)
+    if block_given?
+      out << content_tag(:td, class: last_class) do
+        yield
+      end
+    else
+      # Parse and format urls as links.
+      fmt_value = (value.to_s || "").gsub("\n", "<br />")
+      fmt_value = if email
+                    link_to_email(fmt_value)
+                  else
+                    fmt_value.gsub(/((http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:\/\+#]*[\w\-\@?^=%&amp;\/\+#])?)/, "<a href=\"\\1\">\\1</a>")
+      end
+      out << content_tag(:td, fmt_value, class: last_class)
+    end
+    out
+  end
+
+  #----------------------------------------------------------------------------
+  # Combines the 'subtitle' helper with the small info text on the same line.
+  def section_title(id, hidden = true, text = nil, info_text = nil)
+    text = id.to_s.split("_").last.capitalize if text.nil?
+    content_tag("div", class: "subtitle show_attributes") do
+      content = link_to("<small>#{hidden ? '&#9658;' : '&#9660;'}</small> #{sanitize text}".html_safe,
+                        url_for(controller: :home, action: :toggle, id: id),
+                        remote:  true,
+                        onclick: "crm.flip_subtitle(this)")
+      content << content_tag("small", info_text.to_s, class: "subtitle_inline_info", id: "#{id}_intro", style: hidden ? "" : "display:none;")
+    end
+  end
+
+  #----------------------------------------------------------------------------
+  # Get template in current context with current view name
+  def template_for_current_view
+    FatFreeCRM::ViewFactory.template_for_current_view(controller: controller.controller_name,
+                                                      action: show_or_index_action,
+                                                      name: current_view_name)
+  end
+
+  #----------------------------------------------------------------------------
+  # Generate buttons for available views given the current context
+  def view_buttons
+    views = FatFreeCRM::ViewFactory.views_for(controller: controller.controller_name,
+                                              action: show_or_index_action)
+    return nil unless views.size > 1
+    lis = ''.html_safe
+    content_tag :ul, class: 'format-buttons' do
+      views.collect do |view|
+        classes = if (current_view_name == view.name) || (current_view_name.nil? && view.template.nil?) # nil indicates default template.
+                    "#{h view.name}-button active"
+                  else
+                    "#{h view.name}-button"
+          end
+        lis << content_tag(:li) do
+          url = show_or_index_action == "index" ? send("redraw_#{controller.controller_name}_path") : send("#{controller.controller_name.singularize}_path")
+          link_to('#', title: t(view.name, default: h(view.title)), "data-view": h(view.name), "data-url": h(url), "data-context": show_or_index_action, class: classes) do
+            icon = view.icon || 'fa-bars'
+            content_tag(:i, nil, class: "fa #{h icon}")
+          end
+        end
+      end
+      lis
+    end
+  end
+
+  #----------------------------------------------------------------------------
+  # Generate the html for $.timeago function
+  # <span class="timeago" datetime="2008-07-17T09:24:17Z">July 17, 2008</span>
+  def timeago(time, options = {})
+    return unless time
+    options[:class] ||= "timeago"
+    options[:title] = time.getutc.iso8601
+    content_tag(:span, I18n.l(time), options)
+  end
+
+  #----------------------------------------------------------------------------
+  # Translate List name to FontAwesome icon text
+  def get_icon(name)
+    case name
+    when "tasks" then "fa-check-square-o"
+    when "campaigns" then "fa-bar-chart-o"
+    when "leads" then "fa-tasks"
+    when "accounts" then "fa-users"
+    when "contacts" then "fa-user"
+    when "opportunities" then "fa-money"
+    when "team" then "fa-globe"
+    end
+  end
+
+  #----------------------------------------------------------------------------
+  # Ajaxification FTW!
+  # e.g. collection = Opportunity.my(current_user).scope
+  #         options = { renderer: {...} , params: {...}
+  def paginate(options = {})
+    collection = options.delete(:collection)
+    options = { params: { action: 'index' } }.merge(options) if controller.action_name == 'filter'
+    options = { renderer: RemoteLinkPaginationHelper::LinkRenderer }.merge(options)
+    will_paginate(collection, options)
+  end
+
+  private
+
+  def show_or_index_action
+    controller.action_name == 'show' ? 'show' : 'index'
+  end
+
+  def current_view_name
+    current_user.pref[:"#{controller.controller_name}_#{show_or_index_action}_view"]
+  end
 end

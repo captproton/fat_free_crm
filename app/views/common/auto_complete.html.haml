@@ -1,7 +1,0 @@
-%ul
-  - unless @auto_complete.blank?
-    - @auto_complete.each do |item|
-      - name = item.name << (item.is_a?(Lead) ? " (#{item.company})" : "")
-      %li{ :id => item.to_param }= highlight(truncate(name, :length => 45), @query)
-  - else
-    %li== #{t(:no_match, t(controller.controller_name + '_small'))} <font color="yellow">#{@query}</font>

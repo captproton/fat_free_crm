@@ -1,13 +1,5 @@
-%li[campaign]{ highlightable(dom_id(campaign, :tools)) }
-  .strip{:class => campaign.status}= t(campaign.status)
-
-  .tools{ invisible, :id => dom_id(campaign, :tools) }
-    = link_to_edit(campaign) + " | "
-    = link_to_delete(campaign) + "&nbsp;"
-
-  .indent
-    = link_to(h(campaign.name), campaign)
-    = render :partial => "campaigns/status", :locals => { :campaign => campaign }
-    - unless @current_user.preference[:campaigns_outline] == "brief"
-      = render :partial => "campaigns/metrics", :locals => { :campaign => campaign }
-      = hook(:campaign_bottom, self, :campaign => campaign)
+- if (controller.controller_name == 'campaigns') and (template = template_for_current_view).present?
+  = render(template, campaign: campaign)
+- else
+  -# default view
+  = render 'campaigns/index_brief', campaign: campaign

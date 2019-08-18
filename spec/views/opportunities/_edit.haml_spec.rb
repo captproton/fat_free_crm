@@ -1,63 +1,70 @@
+# frozen_string_literal: true
+
+# Copyright (c) 2008-2013 Michael Dvorkin and contributors.
+#
+# Fat Free CRM is freely distributable under the terms of MIT license.
+# See MIT-LICENSE file or http://www.opensource.org/licenses/mit-license.php
+#------------------------------------------------------------------------------
 require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 
-describe "/opportunities/_edit.html.haml" do
+describe "/opportunities/_edit" do
   include OpportunitiesHelper
-  
-  before(:each) do
-    login_and_assign
-    assigns[:account] = @account = Factory(:account)
-    assigns[:accounts] = [ @account ]
-    assigns[:stage] = Setting.unroll(:opportunity_stage)
+
+  before do
+    login
+    assign(:account, @account = build_stubbed(:account))
+    assign(:accounts, [@account])
+    assign(:stage, Setting.unroll(:opportunity_stage))
   end
 
   it "should render [edit opportunity] form" do
-    assigns[:users] = [ @current_user ]
-    assigns[:opportunity] = @opportunity = Factory(:opportunity, :campaign => @campaign = Factory(:campaign))
-    render "/opportunities/_edit.html.haml"
+    assign(:users, [current_user])
+    assign(:opportunity, @opportunity = build_stubbed(:opportunity, campaign: @campaign = build_stubbed(:campaign)))
+    render
 
-    response.should have_tag("form[class=edit_opportunity]") do
-      with_tag "input[type=hidden][id=opportunity_user_id][value=#{@opportunity.user_id}]"
-      with_tag "input[type=hidden][id=opportunity_campaign_id][value=#{@opportunity.campaign_id}]"
+    expect(rendered).to have_tag("form[class=edit_opportunity]") do
+      with_tag "input[type=hidden][id=opportunity_user_id][value='#{@opportunity.user_id}']"
+      with_tag "input[type=hidden][id=opportunity_campaign_id][value='#{@opportunity.campaign_id}']"
     end
   end
 
   it "should pick default assignee (Myself)" do
-    assigns[:users] = [ @current_user ]
-    assigns[:opportunity] = Factory(:opportunity, :assignee => nil)
-    render "/opportunities/_edit.html.haml"
+    assign(:users, [current_user])
+    assign(:opportunity, build_stubbed(:opportunity, assignee: nil))
+    render
 
-    response.should have_tag("select[id=opportunity_assigned_to]") do |options|
-      options.to_s.should_not include_text(%Q/selected="selected"/)
+    expect(rendered).to have_tag("select[id=opportunity_assigned_to]") do |options|
+      expect(options.to_s).not_to include(%(selected="selected"))
     end
   end
 
   it "should show correct assignee" do
-    @user = Factory(:user)
-    assigns[:users] = [ @current_user, @user ]
-    assigns[:opportunity] = Factory(:opportunity, :assignee => @user)
-    render "/opportunities/_edit.html.haml"
+    @user = create(:user)
+    assign(:users, [current_user, @user])
+    assign(:opportunity, create(:opportunity, assignee: @user))
+    render
 
-    response.should have_tag("select[id=opportunity_assigned_to]") do |options|
+    expect(rendered).to have_tag("select[id=opportunity_assigned_to]") do |_options|
       with_tag "option[selected=selected]"
-      with_tag "option[value=#{@user.id}]"
+      with_tag "option[value='#{@user.id}']"
     end
   end
 
   it "should render background info field if settings require so" do
-    assigns[:users] = [ @current_user ]
-    assigns[:opportunity] = Factory(:opportunity)
-    Setting.background_info = [ :opportunity ]
+    assign(:users, [current_user])
+    assign(:opportunity, build_stubbed(:opportunity))
+    Setting.background_info = [:opportunity]
 
-    render "/opportunities/_create.html.haml"
-    response.should have_tag("textarea[id=opportunity_background_info]")
+    render
+    expect(rendered).to have_tag("textarea[id=opportunity_background_info]")
   end
 
   it "should not render background info field if settings do not require so" do
-    assigns[:users] = [ @current_user ]
-    assigns[:opportunity] = Factory(:opportunity)
+    assign(:users, [current_user])
+    assign(:opportunity, build_stubbed(:opportunity))
     Setting.background_info = []
 
-    render "/opportunities/_create.html.haml"
-    response.should_not have_tag("textarea[id=opportunity_background_info]")
+    render
+    expect(rendered).not_to have_tag("textarea[id=opportunity_background_info]")
   end
 end

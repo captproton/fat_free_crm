@@ -1,62 +1,212 @@
-ActionController::Routing::Routes.draw do |map|
+# frozen_string_literal: true
 
-  # The priority is based upon order of creation: first created -> highest priority.
-  map.root      :controller => "home", :action => "index"
-  map.resource  :authentication
-  map.resources :users, :member => { :avatar => :get, :upload_avatar => :put, :password => :get, :change_password => :put }
-  map.resources :passwords
-  map.resources :comments
-  map.resources :tasks,         :has_many => :comments, :member => { :complete => :put }
-  map.resources :accounts,      :has_many => :comments, :collection => { :search => :get, :auto_complete => :post, :options => :get, :redraw => :post }
-  map.resources :campaigns,     :has_many => :comments, :collection => { :search => :get, :auto_complete => :post, :options => :get, :redraw => :post }
-  map.resources :leads,         :has_many => :comments, :collection => { :search => :get, :auto_complete => :post, :options => :get, :redraw => :post }, :member => { :convert => :get, :promote => :put, :reject => :put }
-  map.resources :contacts,      :has_many => :comments, :collection => { :search => :get, :auto_complete => :post, :options => :get, :redraw => :post }
-  map.resources :opportunities, :has_many => :comments, :collection => { :search => :get, :auto_complete => :post, :options => :get, :redraw => :post }
+# Copyright (c) 2008-2013 Michael Dvorkin and contributors.
+#
+# Fat Free CRM is freely distributable under the terms of MIT license.
+# See MIT-LICENSE file or http://www.opensource.org/licenses/mit-license.php
+#------------------------------------------------------------------------------
+Rails.application.routes.draw do
+  resources :lists
 
-  map.signup  "signup",  :controller => "users",           :action => "new"
-  map.profile "profile", :controller => "users",           :action => "show"
-  map.login   "login",   :controller => "authentications", :action => "new"
-  map.logout  "logout",  :controller => "authentications", :action => "destroy"
-  map.admin   "admin",   :controller => "admin/users",     :action => "index"
+  root to: 'home#index'
 
-  map.namespace :admin do |admin|
-    admin.resources :users, :collection => { :search => :get, :auto_complete => :post }, :member => { :suspend => :put, :reactivate => :put, :confirm => :get }
-    admin.resources :settings
-    admin.resources :plugins
+  # Deprecated: Compatibility with legacy Authlogic routes
+  get '/login',  to: redirect('/users/sign_in')
+  get '/signup', to: redirect('/users/sign_up')
+
+  devise_for :users, controllers: { registrations: 'registrations',
+                                    sessions: 'sessions',
+                                    passwords: 'passwords',
+                                    confirmations: 'confirmations' }
+
+  devise_scope :user do
+    resources :users, only: %i[index show] do
+      collection do
+        get :opportunities_overview
+      end
+    end
   end
 
-  # Sample of regular route:
-  #   map.connect 'products/:id', :controller => 'catalog', :action => 'view'
-  # Keep in mind you can assign values other than :controller and :action
+  get 'activities' => 'home#index'
+  get 'admin'      => 'admin/users#index',       as: :admin
+  get 'profile'    => 'users#show',              as: :profile
 
-  # Sample of named route:
-  #   map.purchase 'products/:id/purchase', :controller => 'catalog', :action => 'purchase'
-  # This route can be invoked with purchase_url(:id => product.id)
+  get '/home/options',  as: :options
+  get '/home/toggle',   as: :toggle
+  match '/home/timeline', as: :timeline, via: %i[get put post]
+  match '/home/timezone', as: :timezone, via: %i[get put post]
+  post '/home/redraw', as: :redraw
 
-  # Sample resource route (maps HTTP verbs to controller actions automatically):
-  #   map.resources :products
+  resources :comments,       except: %i[new show]
+  resources :emails,         only: [:destroy]
 
-  # Sample resource route with options:
-  #   map.resources :products, :member => { :short => :get, :toggle => :post }, :collection => { :sold => :get }
+  resources :accounts, id: /\d+/ do
+    collection do
+      get :advanced_search
+      post :filter
+      get :options
+      get :field_group
+      match :auto_complete, via: %i[get post]
+      get :redraw
+      get :versions
+    end
+    member do
+      put :attach
+      post :discard
+      post :subscribe
+      post :unsubscribe
+      get :contacts
+      get :opportunities
+    end
+  end
 
-  # Sample resource route with sub-resources:
-  #   map.resources :products, :has_many => [ :comments, :sales ], :has_one => :seller
-  
-  # Sample resource route with more complex sub-resources
-  #   map.resources :products do |products|
-  #     products.resources :comments
-  #     products.resources :sales, :collection => { :recent => :get }
-  #   end
+  resources :campaigns, id: /\d+/ do
+    collection do
+      get :advanced_search
+      post :filter
+      get :options
+      get :field_group
+      match :auto_complete, via: %i[get post]
+      get :redraw
+      get :versions
+    end
+    member do
+      put :attach
+      post :discard
+      post :subscribe
+      post :unsubscribe
+      get :leads
+      get :opportunities
+    end
+  end
 
-  # You can have the root of your site routed with map.root -- just remember to delete public/index.html.
-  # map.root :controller => "welcome"
+  resources :contacts, id: /\d+/ do
+    collection do
+      get :advanced_search
+      post :filter
+      get :options
+      get :field_group
+      match :auto_complete, via: %i[get post]
+      get :redraw
+      get :versions
+    end
+    member do
+      put :attach
+      post :discard
+      post :subscribe
+      post :unsubscribe
+      get :opportunities
+    end
+  end
 
-  # See how all your routes lay out with "rake routes"
+  resources :leads, id: /\d+/ do
+    collection do
+      get :advanced_search
+      post :filter
+      get :options
+      get :field_group
+      match :auto_complete, via: %i[get post]
+      get :redraw
+      get :versions
+      get :autocomplete_account_name
+    end
+    member do
+      get :convert
+      post :discard
+      post :subscribe
+      post :unsubscribe
+      put :attach
+      match :promote, via: %i[patch put]
+      put :reject
+    end
+  end
 
-  # Install the default routes as the lowest priority.
-  # Note: These default routes make all actions in every controller accessible via GET requests. You should
-  # consider removing the them or commenting them out if you're using named routes and resources.
-  
-  map.connect ":controller/:action/:id"
-  map.connect ":controller/:action/:id.:format"
+  resources :opportunities, id: /\d+/ do
+    collection do
+      get :advanced_search
+      post :filter
+      get :options
+      get :field_group
+      match :auto_complete, via: %i[get post]
+      get :redraw
+      get :versions
+    end
+    member do
+      put :attach
+      post :discard
+      post :subscribe
+      post :unsubscribe
+      get :contacts
+    end
+  end
+
+  resources :tasks, id: /\d+/ do
+    collection do
+      post :filter
+      match :auto_complete, via: %i[get post]
+    end
+    member do
+      put :complete
+      put :uncomplete
+    end
+  end
+
+  resources :users, id: /\d+/, except: %i[index destroy create] do
+    member do
+      get :avatar
+      get :password
+      match :upload_avatar, via: %i[put patch]
+      patch :change_password
+      post :redraw
+    end
+    collection do
+      match :auto_complete, via: %i[get post]
+    end
+  end
+
+  namespace :admin do
+    resources :groups
+
+    resources :users do
+      collection do
+        match :auto_complete, via: %i[get post]
+      end
+      member do
+        get :confirm
+        put :suspend
+        put :reactivate
+      end
+    end
+
+    resources :field_groups, except: %i[index show] do
+      collection do
+        post :sort
+      end
+      member do
+        get :confirm
+      end
+    end
+
+    resources :fields do
+      collection do
+        match :auto_complete, via: %i[get post]
+        get :options
+        get :redraw
+        post :sort
+        get :subform
+      end
+    end
+
+    resources :tags, except: [:show] do
+      member do
+        get :confirm
+      end
+    end
+
+    resources :fields, as: :custom_fields
+    resources :fields, as: :core_fields
+
+    resources :settings, only: :index
+    resources :plugins,  only: :index
+  end
 end

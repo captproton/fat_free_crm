@@ -1,38 +1,26 @@
-= styles_for :task, :lead, :opportunity
+- if (template = template_for_current_view)
+  = render(template, campaign: @campaign)
+- else
 
-#confirm{ hidden }
-.title_tools#menu
-  = link_to_inline(:edit_campaign, edit_campaign_path(@campaign), :text => t(:edit)) + " | "
-  = link_to_function(t(:delete) + '?', confirm_delete(@campaign))
-.title#edit_campaign_title= h(@campaign.name)
+  -# default view
 
-%div#edit_campaign{ hidden }
+  = styles_for :task, :lead, :opportunity
 
-= render :partial => "comments/new", :locals => { :commentable => @campaign }
-= render :partial => "comments/comment", :collection => @campaign.comments
+  = render 'campaigns/title_bar', campaign: @campaign
 
--#-----------------------------------------------------------------------------
-%br
-= inline :create_task, new_task_path, { :class => "subtitle_tools", :related => dom_id(@campaign), :text => t(:create_task) }
-.subtitle#create_task_title #{t :tasks}
-.remote#create_task{ hidden }
-.log#tasks
-  = render :partial => "common/tasks"
+  = render "comments/new", commentable: @campaign
+  = render partial: "shared/timeline", collection: @timeline
 
--#-----------------------------------------------------------------------------
-%br
-= inline :create_lead, new_lead_path, { :class => "subtitle_tools", :related => dom_id(@campaign), :text => t(:create_lead) }
-.subtitle#create_lead_title #{t :leads}
-.remote#create_lead{ hidden }
-.list#leads
-  = render :partial => "leads/lead", :collection => @campaign.leads
+  = hook(:show_campaign_bottom, self, {entity: @campaign}) do
 
--#-----------------------------------------------------------------------------
-%br
-= inline :create_opportunity, new_opportunity_path, { :class => "subtitle_tools", :related => dom_id(@campaign), :text => t(:create_opportunity) }
-.subtitle#create_opportunity_title #{t :opportunities}
-.remote#create_opportunity{ hidden }
-.list#opportunities
-  = render :partial => "opportunities/opportunity", :collection => @campaign.opportunities
+    = render "tasks/tasks", object: @campaign
 
-= hook(:show_campaign_bottom, self)
+    = render "leads/leads", object: @campaign
+
+    = render "opportunities/opportunities", object: @campaign
+
+    = render "versions/versions", object: @campaign
+
+    = load_select_popups_for(@campaign, :tasks, :leads, :opportunities)
+
+  #export= render "shared/export", action: :show

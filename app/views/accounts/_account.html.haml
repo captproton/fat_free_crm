@@ -1,24 +1,5 @@
-- amount = account.opportunities.sum(:amount)
-%li[account]{ highlightable(dom_id(account, :tools)) }
-  - if amount != 0.0
-    .strip.some= number_to_currency(amount, :precision => 0)
-  - else
-    .strip.none None
-
-  .tools{ invisible, :id => dom_id(account, :tools) }
-    = link_to_edit(account) + " | "
-    = link_to_delete(account) + "&nbsp;"
-
-  .indent
-    = link_to(h(account.name), account) << " &ndash; "
-    %tt
-      = account.location << ", " unless account.location.blank?
-      = t(:added_by, :time_ago => time_ago_in_words(account.created_at), :user => (account.user.id == @current_user.id ? t(:me) : h(account.user.full_name)))
-    - unless @current_user.preference[:accounts_outline] == "brief"
-      %dt
-        = link_to(account.website, account.website.to_url) << " | " if account.website?
-        = link_to(account.email, "mailto:" << account.email.to_s) << " | " if account.email?
-        = t(:phone_small) << ": " << (account.toll_free_phone || account.phone) << " | " if account.toll_free_phone? || account.phone?
-        = t('pluralize.contact', account.contacts.count) << " | "
-        = t('pluralize.opportunity', account.opportunities.count)
-      = hook(:account_bottom, self, :account => account)
+- if (controller.controller_name == 'accounts') and (template = template_for_current_view).present?
+  = render(template, account: account)
+- else
+  -# default view
+  = render 'accounts/index_brief', account: account

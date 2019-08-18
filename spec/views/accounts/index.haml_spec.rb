@@ -1,31 +1,43 @@
+# frozen_string_literal: true
+
+# Copyright (c) 2008-2013 Michael Dvorkin and contributors.
+#
+# Fat Free CRM is freely distributable under the terms of MIT license.
+# See MIT-LICENSE file or http://www.opensource.org/licenses/mit-license.php
+#------------------------------------------------------------------------------
 require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 
-describe "/accounts/index.html.haml" do
+describe "/accounts/index" do
   include AccountsHelper
-  
-  before(:each) do
-    login_and_assign
+
+  before do
+    view.lookup_context.prefixes << 'entities'
+    assign :per_page, Account.per_page
+    assign :sort_by,  Account.sort_by
+    assign :ransack_search, Account.ransack
+    login
   end
 
-  it "should render a proper account website link if an account is provided" do
-    assigns[:accounts] = [ Factory(:account, :website => 'www.fatfreecrm.com'), Factory(:account) ].paginate
-    render "/accounts/index.html.haml"
-    response.should have_tag("a[href=http://www.fatfreecrm.com]")
+  it "should render account name" do
+    assign(:accounts, [build_stubbed(:account, name: 'New Media Inc'), build_stubbed(:account)].paginate)
+    render
+    expect(rendered).to have_tag('a', text: "New Media Inc")
   end
 
   it "should render list of accounts if list of accounts is not empty" do
-    assigns[:accounts] = [ Factory(:account), Factory(:account) ].paginate
-    template.should_receive(:render).with(hash_including(:partial => "account"))
-    template.should_receive(:render).with(:partial => "common/paginate")
-    render "/accounts/index.html.haml"
+    assign(:accounts, [build_stubbed(:account), build_stubbed(:account)].paginate)
+
+    render
+    expect(view).to render_template(partial: "_account")
+    expect(view).to render_template(partial: "shared/_paginate_with_per_page")
   end
 
   it "should render a message if there're no accounts" do
-    assigns[:accounts] = [].paginate
-    template.should_not_receive(:render).with(hash_including(:partial => "account"))
-    template.should_receive(:render).with(:partial => "common/empty")
-    template.should_receive(:render).with(:partial => "common/paginate")
-    render "/accounts/index.html.haml"
+    assign(:accounts, [].paginate)
+
+    render
+    expect(view).not_to render_template(partial: "_account")
+    expect(view).to render_template(partial: "shared/_empty")
+    expect(view).to render_template(partial: "shared/_paginate_with_per_page")
   end
 end
-

@@ -1,13 +1,6 @@
-# Rack Dispatcher
+# frozen_string_literal: true
 
-# Require your environment file to bootstrap Rails
-# NOTE: use ::File.dirname instead of File.dirname for Ruby 1.9.1 compatibility.
-require ::File.dirname(__FILE__) + '/config/environment'
+# This file is used by Rack-based servers to start the application.
 
-# See http://www.themomorohoax.com/2009/11/22/how-to-fix-issue-where-heroku-doesnt-serve-css-images-and-static-files
-# and http://guides.rubyonrails.org/rails_on_rack.html
-use Rails::Rack::LogTailer
-use Rails::Rack::Static
-
-# Dispatch the request
-run ActionController::Dispatcher.new
+require ::File.expand_path('../config/environment', __FILE__)
+run FatFreeCRM::Application

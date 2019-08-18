@@ -1,18 +1,18 @@
 = styles_for :account
 
-.title_tools
-  = link_to_inline(:create_account, new_account_path, :text => t(:create_account)) << " | "
-  = link_to_inline(:options, options_accounts_path, :text=> t(:options))
+= render 'entities/title_bar'
 
-.title
-  %span#create_account_title #{t :accounts}
-  = image_tag("loading.gif", :size => "16x16", :id => "loading", :style => "display: none;")
-.remote#options{ hidden }
 .remote#create_account{ hidden }
 
+= render 'search'
+
+.remote#options{ hidden }
+
 .list#accounts
-  - unless @accounts.empty?
-    = render :partial => "account", :collection => @accounts
+  - if @accounts.any?
+    = render @accounts
   - else
-    = render :partial => "common/empty"
-#paginate= render :partial => "common/paginate"
+    = render "shared/empty"
+
+#paginate= render "shared/paginate_with_per_page"
+#export= render "shared/export"

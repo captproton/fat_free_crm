@@ -1,130 +1,117 @@
-# Fat Free CRM
-# Copyright (C) 2008-2010 by Michael Dvorkin
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <http:#www.gnu.org/licenses/>.
-#------------------------------------------------------------------------------
+# frozen_string_literal: true
 
-# This file is copied to ~/spec when you run 'ruby script/generate rspec'
-# from the project root directory.
-ENV["RAILS_ENV"] ||= 'test'
-require File.dirname(__FILE__) + "/../config/environment" unless defined?(RAILS_ROOT)
-require 'spec/autorun'
-require 'spec/rails'
-require "factory_girl"
-require RAILS_ROOT + "/spec/factories"
+# Copyright (c) 2008-2013 Michael Dvorkin and contributors.
+#
+# Fat Free CRM is freely distributable under the terms of MIT license.
+# See MIT-LICENSE file or http://www.opensource.org/licenses/mit-license.php
+#------------------------------------------------------------------------------
+require 'rubygems'
+
+ENV["RAILS_ENV"] = 'test'
+require File.expand_path("../../config/environment", __FILE__)
+require 'rspec/rails'
+require 'capybara/rails'
+require 'paper_trail/frameworks/rspec'
+
+require 'acts_as_fu'
+require 'factory_bot_rails'
+require 'ffaker'
+require 'timecop'
+
+# Requires supporting ruby files with custom matchers and macros, etc,
+# in spec/support/ and its subdirectories.
+Dir["./spec/support/**/*.rb"].sort.each { |f| require f }
 
 # Load shared behavior modules to be included by Runner config.
-Dir[File.dirname(__FILE__) + "/shared/*.rb"].map do |file|
-  require file
+Dir["./spec/shared/**/*.rb"].sort.each { |f| require f }
+
+TASK_STATUSES = %w[pending assigned completed].freeze
+
+I18n.locale = 'en-US'
+
+Paperclip.options[:log] = false
+
+RSpec.configure do |config|
+  config.infer_spec_type_from_file_location!
+
+  config.mock_with :rspec
+
+  config.fixture_path = "#{Rails.root}/spec/fixtures"
+
+  # RSpec configuration options for Fat Free CRM.
+  config.include RSpec::Rails::Matchers
+  config.include FactoryBot::Syntax::Methods
+  config.include Devise::Test::ControllerHelpers, type: :controller
+  config.include Devise::Test::ControllerHelpers, type: :view
+  config.include Devise::Test::IntegrationHelpers, type: :features
+  config.include Warden::Test::Helpers
+  config.include DeviseHelpers
+  config.include FeatureHelpers
+
+  Warden.test_mode!
+
+  config.before(:each) do
+    # Overwrite locale settings within "config/settings.yml" if necessary.
+    # In order to ensure that test still pass if "Setting.locale" is not set to "en-US".
+    I18n.locale = 'en-US'
+    Setting.locale = 'en-US' unless Setting.locale == 'en-US'
+  end
+
+  # If you're not using ActiveRecord, or you'd prefer not to run each of your
+  # examples within a transaction, remove the following line or assign false
+  # instead of true.
+  config.use_transactional_fixtures = false
+
+  config.before(:suite) do
+    DatabaseCleaner.clean_with(:truncation)
+  end
+
+  config.before(:each) do
+    DatabaseCleaner.strategy = :transaction
+  end
+
+  config.before(:each, :js) do
+    DatabaseCleaner.strategy = :truncation
+  end
+
+  config.before(:each, :truncate) do
+    DatabaseCleaner.strategy = :truncation
+  end
+
+  config.before(:each) do
+    DatabaseCleaner.start
+  end
+
+  config.append_after(:each) do
+    DatabaseCleaner.clean
+  end
+
+  # If true, the base class of anonymous controllers will be inferred
+  # automatically. This will be the default behavior in future versions of
+  # rspec-rails.
+  config.infer_base_class_for_anonymous_controllers = false
 end
 
-VIEWS = %w(pending assigned completed).freeze
-
-Spec::Runner.configure do |config|
-  # If you're not using ActiveRecord you should remove these
-  # lines, delete config/database.yml and disable :active_record
-  # in your config/boot.rb
-  config.use_transactional_fixtures = true
-  config.use_instantiated_fixtures  = false
-  config.fixture_path = RAILS_ROOT + '/spec/fixtures/'
-
-  config.include(SharedControllerSpecs, :type => :controller)
-  #
-  # == Notes
-  #
-  # For more information take a look at Spec::Runner::Configuration and Spec::Runner
-end
-
-# Load default settings from config/settings.yml
-Factory(:default_settings)
-
-# See vendor/plugins/authlogic/lib/authlogic/test_case.rb
-#----------------------------------------------------------------------------
-def activate_authlogic
-  Authlogic::Session::Base.controller = (@request && Authlogic::TestCase::RailsRequestAdapter.new(@request)) || controller
-end
-
-# Note: Authentication is NOT ActiveRecord model, so we mock and stub it using RSpec.
-#----------------------------------------------------------------------------
-def login(user_stubs = {}, session_stubs = {})
-  User.current_user = @current_user = Factory(:user, user_stubs)
-  @current_user_session = mock_model(Authentication, {:record => @current_user}.merge(session_stubs))
-  Authentication.stub!(:find).and_return(@current_user_session)
-  set_timezone
-end
-alias :require_user :login
-
-#----------------------------------------------------------------------------
-def login_and_assign(user_stubs = {}, session_stubs = {})
-  login(user_stubs, session_stubs)
-  assigns[:current_user] = @current_user
-end
-
-#----------------------------------------------------------------------------
-def logout
-  @current_user = nil
-  @current_user_session = nil
-  Authentication.stub!(:find).and_return(nil)
-end
-alias :require_no_user :logout
-
-#----------------------------------------------------------------------------
-def current_user
-  @current_user
-end
-
-#----------------------------------------------------------------------------
-def current_user_session
-  @current_user_session
-end
-
-#----------------------------------------------------------------------------
-def set_current_tab(tab)
-  controller.session[:current_tab] = tab
-end
-
-#----------------------------------------------------------------------------
-def stub_task(view)
-  if view == "completed"
-    assigns[:task] = Factory(:task, :completed_at => Time.now - 1.minute)
-  elsif view == "assigned"
-    assigns[:task] = Factory(:task, :assignee => Factory(:user))
-  else
-    assigns[:task] = Factory(:task)
+ActionView::TestCase::TestController.class_eval do
+  def controller_name
+    HashWithIndifferentAccess.new(request.path_parameters)["controller"].split('/').last
   end
 end
 
-#----------------------------------------------------------------------------
-def stub_task_total(view = "pending")
-  settings = (view == "completed" ? Setting.task_completed : Setting.task_bucket)
-  settings.inject({ :all => 0 }) { |hash, key| hash[key] = 1; hash }
-end
+ActionView::Base.class_eval do
+  def controller_name
+    HashWithIndifferentAccess.new(request.path_parameters)["controller"].split('/').last
+  end
 
-# Get current server timezone and set it (see rake time:zones:local for details).
-#----------------------------------------------------------------------------
-def set_timezone
-  offset = [ Time.now.beginning_of_year.utc_offset, Time.now.beginning_of_year.change(:month => 7).utc_offset ].min
-  offset *= 3600 if offset.abs < 13
-  Time.zone = ActiveSupport::TimeZone.all.select { |zone| zone.utc_offset == offset }.first
-end
+  def called_from_index_page?(controller = controller_name)
+    request.referer =~ if controller != "tasks"
+                         %r{/#{controller}$}
+                       else
+                         /tasks\?*/
+                       end
+  end
 
-# Adjusts current timezone by given offset (in seconds).
-#----------------------------------------------------------------------------
-def adjust_timezone(offset)
-  if offset
-    ActiveSupport::TimeZone[offset]
-    adjusted_time = Time.now + offset.seconds
-    Time.stub(:now).and_return(adjusted_time)
+  def called_from_landing_page?(controller = controller_name)
+    request.referer =~ %r{/#{controller}/\w+}
   end
 end
