@@ -1,3 +1,4 @@
+# fat_free_crm.gemspec
 # frozen_string_literal: true
 
 $LOAD_PATH.push File.expand_path('../vendor/gems/globby-0.1.2/lib', __FILE__)
@@ -9,7 +10,7 @@ files = Globby.reject(rules)
 $LOAD_PATH.push File.expand_path('../lib', __FILE__)
 require 'fat_free_crm/version'
 
-Gem::Specification.new do |gem|
+spec = Gem::Specification.new do |gem|
   gem.name = 'fat_free_crm'
   gem.authors = ['Michael Dvorkin', 'Stephen Kenworthy', "Daniel O'Connor"]
   gem.summary = 'Fat Free CRM'
@@ -21,7 +22,13 @@ Gem::Specification.new do |gem|
   gem.required_ruby_version = '>= 2.4.0'
   gem.license = 'MIT'
 
-  gem.add_dependency 'rails', '~> 5.1.0'
+  # Default dependencies
+  rails_version = ENV['FFCRM_RAILS7'] ? ['>= 5.1', '< 7.1'] : ['~> 5.1.0']
+  paper_trail_version = ENV['FFCRM_RAILS7'] ? '>= 6.0' : '~> 6.0.0'
+  pg_version = ENV['FFCRM_RAILS7'] ? '>= 1.1' : '~> 0.21.0'  # Added pg version condition
+  
+  gem.add_dependency 'rails', *rails_version
+  gem.add_dependency 'pg', pg_version  # Updated pg version handling
   gem.add_dependency 'rails-i18n'
   gem.add_dependency 'rails-observers'
   gem.add_dependency 'activemodel-serializers-xml'
@@ -34,7 +41,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'simple_form'
   gem.add_dependency 'will_paginate'
   gem.add_dependency 'paperclip'
-  gem.add_dependency 'paper_trail',         '~> 6.0.0'
+  gem.add_dependency 'paper_trail',         paper_trail_version
   gem.add_dependency 'devise',              '~> 4.6'
   gem.add_dependency 'devise-encryptable',  '~> 0.2.0'
   gem.add_dependency 'acts_as_commentable'
@@ -61,3 +68,5 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'ransack',             '~> 1.7', '>= 1.6.2'
   gem.add_dependency 'email_reply_parser_ffcrm'
 end
+
+spec
